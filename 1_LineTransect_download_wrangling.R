@@ -23,7 +23,14 @@ endpoint_url <- dataset[[1]]$url
 download.file(endpoint_url, destfile="data/temp.zip", mode="wb")
 unzip ("data/temp.zip", exdir = "data")
 
+############################################################
 ## Data is now located in ../data - folder. 
+## The procedure could be started from here once data are in ../data forlder
+############################################################
+############################################################
+############################################################
+
+## Preparing the line transct data for further analyses; 
 
 # Reading data; 
 Eve2 <- as_tibble(read.csv("data/event.txt", sep="\t", stringsAsFactors = TRUE, encoding = "UTF-8")) %>% 
@@ -38,7 +45,7 @@ Occ <- as_tibble(read.csv("data/occurrence.txt", sep="\t", stringsAsFactors = TR
 Eve <- Eve2 %>% 
   mutate(Year=year(eventDate)) %>%
   filter(locality=="Lierne Fjellst. Vest") %>%
-  filter(between(Year, 2010, 2020))
+  filter(between(Year, 2015, 2020))
 
 
 ## Transect level info; 
@@ -157,7 +164,8 @@ N_line_year <- TaksObs %>% select(-locationID) %>% as.matrix()
 colnames(N_line_year) <- NULL
 
 
-
+### The objects created here will form the different list-elements in the 
+### jags-data under "6_RunningModels.R"
 
 
 
