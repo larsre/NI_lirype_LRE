@@ -1,0 +1,321 @@
+<eml:eml xmlns:eml="eml://ecoinformatics.org/eml-2.1.1"
+         xmlns:dc="http://purl.org/dc/terms/"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="eml://ecoinformatics.org/eml-2.1.1 http://rs.gbif.org/schema/eml-gbif-profile/1.1/eml.xsd"
+         packageId="b49a2978-0e30-4748-a99f-9301d17ae119/v1.6" system="http://gbif.org" scope="system"
+         xml:lang="eng">
+
+<dataset>
+  <alternateIdentifier>b49a2978-0e30-4748-a99f-9301d17ae119</alternateIdentifier>
+  <alternateIdentifier>https://ipt.nina.no/resource?r=ptarmigan_line_transect_data_fjellstyrene</alternateIdentifier>
+  <title xml:lang="eng">Tetraonid line transect surveys from Norway: Data from Fjellstyrene</title>
+      <creator>
+    <individualName>
+        <givenName>Erlend B.</givenName>
+      <surName>Nilsen</surName>
+    </individualName>
+    <organizationName>Norwegian Institute for Nature Research</organizationName>
+    <positionName>Senior Research Scientist</positionName>
+    <address>
+        <deliveryPoint>Postboks 5685 Torgarden,</deliveryPoint>
+        <city>TRONDHEIM</city>
+        <postalCode>7485</postalCode>
+        <country>NO</country>
+    </address>
+    <phone>+4741425684</phone>
+    <electronicMailAddress>erlend.nilsen@nina.no</electronicMailAddress>
+          <userId directory="http://orcid.org/">0000-0002-5119-8331</userId>
+      </creator>
+      <creator>
+    <individualName>
+        <givenName>Roald</givenName>
+      <surName>Vang</surName>
+    </individualName>
+    <organizationName>Norwegian Institute for Nature Research</organizationName>
+    <positionName>Data Manager</positionName>
+    <address>
+        <deliveryPoint>Postboks 5685 Torgarden,</deliveryPoint>
+        <city>TRONDHEIM</city>
+        <postalCode>7485</postalCode>
+        <country>NO</country>
+    </address>
+    <electronicMailAddress>roald.vang@nina.no</electronicMailAddress>
+          <userId directory="http://orcid.org/">0000-0002-4006-8689</userId>
+      </creator>
+      <creator>
+    <individualName>
+        <givenName>Marius</givenName>
+      <surName>Kjønsberg</surName>
+    </individualName>
+    <organizationName>Inland Norway University of Applied Sciences</organizationName>
+    <positionName>Research Manager</positionName>
+    <address>
+        <deliveryPoint>P.O. 400</deliveryPoint>
+        <city>Elverum</city>
+        <postalCode>2418</postalCode>
+    </address>
+    <electronicMailAddress>marius.kjonsberg@inn.no</electronicMailAddress>
+      </creator>
+      <metadataProvider>
+    <individualName>
+        <givenName>Erlend B.</givenName>
+      <surName>Nilsen</surName>
+    </individualName>
+    <organizationName>Norwegian Institute for Nature Research</organizationName>
+    <positionName>Senior Research Scientist</positionName>
+    <address>
+        <deliveryPoint>Postboks 5685 Torgarden,</deliveryPoint>
+        <city>TRONDHEIM</city>
+        <postalCode>7485</postalCode>
+        <country>NO</country>
+    </address>
+    <phone>+4741425684</phone>
+    <electronicMailAddress>erlend.nilsen@nina.no</electronicMailAddress>
+          <userId directory="http://orcid.org/">0000-0002-5119-8331</userId>
+      </metadataProvider>
+      <metadataProvider>
+    <individualName>
+        <givenName>Roald</givenName>
+      <surName>Vang</surName>
+    </individualName>
+    <organizationName>Norwegian Institute for Nature Research</organizationName>
+    <positionName>Data Manager</positionName>
+    <address>
+        <deliveryPoint>Postboks 5685 Torgarden,</deliveryPoint>
+        <city>TRONDHEIM</city>
+        <postalCode>7485</postalCode>
+        <country>NO</country>
+    </address>
+    <electronicMailAddress>roald.vang@nina.no</electronicMailAddress>
+          <userId directory="http://orcid.org/">0000-0002-4006-8689</userId>
+      </metadataProvider>
+      <metadataProvider>
+    <individualName>
+        <givenName>Mikkel Andreas Jønsøn</givenName>
+      <surName>Kvasnes</surName>
+    </individualName>
+    <organizationName>Norwegian Institute for Nature Research</organizationName>
+    <positionName>Research Scientist</positionName>
+    <address>
+        <deliveryPoint>Postboks 5685 Torgarden,</deliveryPoint>
+        <city>TRONDHEIM</city>
+        <postalCode>7485</postalCode>
+        <country>NO</country>
+    </address>
+    <phone>+4799400705</phone>
+    <electronicMailAddress>mikkel.kvasnes@nina.no</electronicMailAddress>
+          <userId directory="http://orcid.org/">0000-0002-6603-337X</userId>
+      </metadataProvider>
+      <associatedParty>
+    <individualName>
+        <givenName>Erlend B.</givenName>
+      <surName>Nilsen</surName>
+    </individualName>
+    <organizationName>Norwegian Institute for Nature Research</organizationName>
+    <positionName>Senior Research Scientist</positionName>
+    <address>
+        <deliveryPoint>Postboks 5685 Torgarden,</deliveryPoint>
+        <city>TRONDHEIM</city>
+        <postalCode>7485</postalCode>
+        <country>NO</country>
+    </address>
+    <phone>+4741425684</phone>
+    <electronicMailAddress>erlend.nilsen@nina.no</electronicMailAddress>
+          <userId directory="http://orcid.org/">0000-0002-5119-8331</userId>
+    <role>principalInvestigator</role>
+      </associatedParty>
+  <pubDate>
+      2021-06-01
+  </pubDate>
+  <language>eng</language>
+  <abstract>
+    <para>The dataset originates from a line transect survey program on the land managed by Fjellstyrene (Mountain boards) carried out from 2000- and onward. The surveys are part of a national program - Hønsefuglportalen (http://honsefugl.nina.no), operated in close collaboration among NINA (www.nina.no), Nord University (www.nord.no), Inland Norway University of Applied Sciences (www.inn.no) as well as landowners responsible for grouse management on their properties (state-owned land on Finnmarkseiendommen (FeFo), Statskog, and Fjellstyrene, as well as several private landowners).
+
+In general, NINA offers common e-infrastructure for data entry, data curation, management of users and communication from the project (http://honsefugl.nina.no). NINA together with the involved universities are offering advice regarding sampling design, and has developed a standard field protocol used by all participating stakeholders. The specific part of the program carried out on the land managed by Fjellstyrene is operated in collaboration between the Inland Norway University of Applied Sciences and each manager in Fjellstyrene, with clear and distinct allocation of tasks and responsibilities between the parties. Managers are responsible for conducting field work, as well as final decisions regarding allocation of transect lines among study areas.
+
+Surveys are carried out mainly by volunteer personnel instructed to follow standardized field protocols. Field work is carried out annually in August, with a team of two persons following pre-defined transect lines, using trained pointing dogs to search both sides of the transect line. When birds are observed, species, cluster size (separated into age- and sex classes), perpendicular distances from the transect line to the observed cluster of birds, GPS coordinates of the clusters and time of day are recorded. In addition, length (and geographical position) of the transect line is recorded, as well as some other auxiliary data.</para>
+  </abstract>
+      <keywordSet>
+            <keyword>Samplingevent</keyword>
+        <keywordThesaurus>GBIF Dataset Type Vocabulary: http://rs.gbif.org/vocabulary/gbif/dataset_type.xml</keywordThesaurus>
+      </keywordSet>
+      <keywordSet>
+            <keyword>Samplingevent</keyword>
+        <keywordThesaurus>GBIF Dataset Type Vocabulary: http://rs.gbif.org/vocabulary/gbif/dataset_type_2015-07-10.xml</keywordThesaurus>
+      </keywordSet>
+  <intellectualRights>
+    <para>This work is licensed under a <ulink url="http://creativecommons.org/licenses/by/4.0/legalcode"><citetitle>Creative Commons Attribution (CC-BY) 4.0 License</citetitle></ulink>.</para>
+  </intellectualRights>
+  <coverage>
+      <geographicCoverage>
+          <geographicDescription>Cover land managed by Fjellstyrene (https://www.fjellstyrene.no/finn-fjellstyre) in Norway south of Nordland county.</geographicDescription>
+        <boundingCoordinates>
+          <westBoundingCoordinate>4.395</westBoundingCoordinate>
+          <eastBoundingCoordinate>15.117</eastBoundingCoordinate>
+          <northBoundingCoordinate>65.694</northBoundingCoordinate>
+          <southBoundingCoordinate>57.61</southBoundingCoordinate>
+        </boundingCoordinates>
+      </geographicCoverage>
+          <taxonomicCoverage>
+              <generalTaxonomicCoverage>This line transect program focus on tetraonid gamebirds (subfamiliy: Tetraoninae - family: Phasianidae), which in Norway include willow ptarmigan (Lagopus lagopus), rock ptarmigan (Lagopus muta), black grouse (Tetrao tetrix), capercaillie (Tetrao urogallus) and hazel grouse (Bonasa bonasia). Not all species are found all of the areas where the line transect surveys in this program are performed. Most of the surveys target willow ptarmigan monitoring, which is also reflected in the spatial distribution of survey lines.</generalTaxonomicCoverage>
+              <taxonomicClassification>
+                <taxonRankValue>Lagopus lagopus</taxonRankValue>
+                  <commonName>Willow Ptarmigan</commonName>
+              </taxonomicClassification>
+              <taxonomicClassification>
+                <taxonRankValue>Lagopus muta</taxonRankValue>
+                  <commonName>Rock ptarmigan</commonName>
+              </taxonomicClassification>
+              <taxonomicClassification>
+                <taxonRankValue>Tetrao tetrix</taxonRankValue>
+                  <commonName>Black grouse</commonName>
+              </taxonomicClassification>
+              <taxonomicClassification>
+                <taxonRankValue>Tetrao urogallus</taxonRankValue>
+                  <commonName>Capercaillie</commonName>
+              </taxonomicClassification>
+              <taxonomicClassification>
+                <taxonRankValue>Bonasa bonasia</taxonRankValue>
+                  <commonName>Hazel Grouse</commonName>
+              </taxonomicClassification>
+          </taxonomicCoverage>
+  </coverage>
+  <maintenance>
+    <description>
+      <para></para>
+    </description>
+    <maintenanceUpdateFrequency>unkown</maintenanceUpdateFrequency>
+  </maintenance>
+
+      <contact>
+    <individualName>
+        <givenName>Erlend B.</givenName>
+      <surName>Nilsen</surName>
+    </individualName>
+    <organizationName>Norwegian Institute for Nature Research</organizationName>
+    <positionName>Senior Research Scientist</positionName>
+    <address>
+        <deliveryPoint>Postboks 5685 Torgarden,</deliveryPoint>
+        <city>TRONDHEIM</city>
+        <postalCode>7485</postalCode>
+        <country>NO</country>
+    </address>
+    <phone>+4741425684</phone>
+    <electronicMailAddress>erlend.nilsen@nina.no</electronicMailAddress>
+          <userId directory="http://orcid.org/">0000-0002-5119-8331</userId>
+      </contact>
+      <contact>
+    <individualName>
+        <givenName>Roald</givenName>
+      <surName>Vang</surName>
+    </individualName>
+    <organizationName>Norwegian Institute for Nature Research</organizationName>
+    <positionName>Data Manager</positionName>
+    <address>
+        <deliveryPoint>Postboks 5685 Torgarden,</deliveryPoint>
+        <city>TRONDHEIM</city>
+        <postalCode>7485</postalCode>
+        <country>NO</country>
+    </address>
+    <electronicMailAddress>roald.vang@nina.no</electronicMailAddress>
+          <userId directory="http://orcid.org/">0000-0002-4006-8689</userId>
+      </contact>
+  <methods>
+        <methodStep>
+          <description>
+            <para>Additional information could be found at “http://honsefugl.nina.no” or in Eriksen, L. F., P. F. Moa, and E. B. Nilsen. 2018. Quantifying risk of overharvest when implementation is uncertain. Journal of Applied Ecology 55:482-493. doi 10.1111/1365-2664.12992.
+Contacts</para>
+          </description>
+        </methodStep>
+      <sampling>
+        <studyExtent>
+          <description>
+            <para>Surveys are carried out annually in August, mainly in the period of 5th - 20th August. Specific locations of surveys have changed over the time period. A study site consist of a collection of two or more transect lines.</para>
+          </description>
+        </studyExtent>
+        <samplingDescription>
+          <para>In August each year, field work is carried out by volunteer personnel instructed to follow standardized field protocols. A team of two persons follow pre-defined transect lines, using trained pointing dogs to search both sides of the transect line. When birds are observed, species, cluster size (separated into age- and sex classes), perpendicular distances from the transect line to the observed cluster of birds, GPS coordinates and time of day is recorded. In addition, length (and position) of the transect line is recorded, as well as some other auxillary data.</para>
+        </samplingDescription>
+      </sampling>
+      <qualityControl>
+        <description>
+          <para>Since the establishment of the common e-infrastrucure Hønsefuglportalen in 2013, quality control has been included at several stages of the process. First, the data entry forms are designed such that impossible or unlikely values are not allowed, and all data fields must be completed. Second, for each study site, a local administrator is responsible for quality control just after the annual field work period in August. Last, participating research institutions conduct additional quality control when analyzing data for management or scientific purposes.</para>
+        </description>
+      </qualityControl>
+  </methods>
+  <project >
+    <title>Hønsefuglportalen: Common e-infrastructure, field protocols and coordination of tetraonid line transect sampling in Norway</title>
+      <personnel>
+        <individualName>
+            <givenName>Erlend B.</givenName>
+          <surName>Nilsen</surName>
+        </individualName>
+              <userId directory="http://orcid.org/">0000-0002-5119-8331</userId>
+        <role>principalInvestigator</role>
+      </personnel>
+      <personnel>
+        <individualName>
+            <givenName>Hans Christian</givenName>
+          <surName>Pedersen</surName>
+        </individualName>
+              <userId directory="http://orcid.org/">0000-0003-4086-4535</userId>
+        <role>contentProvider</role>
+      </personnel>
+      <personnel>
+        <individualName>
+            <givenName>Lars Røed</givenName>
+          <surName>Eriksen</surName>
+        </individualName>
+        <role>contentProvider</role>
+      </personnel>
+      <personnel>
+        <individualName>
+            <givenName>Marius</givenName>
+          <surName>Kjønsberg</surName>
+        </individualName>
+        <role>contentProvider</role>
+      </personnel>
+      <personnel>
+        <individualName>
+            <givenName>Pål Fossland</givenName>
+          <surName>Moa</surName>
+        </individualName>
+        <role>contentProvider</role>
+      </personnel>
+      <personnel>
+        <individualName>
+            <givenName>Mikkel Andreas Jørnsøn</givenName>
+          <surName>Kvasnes</surName>
+        </individualName>
+              <userId directory="http://orcid.org/">0000-0002-6603-337X</userId>
+        <role>contentProvider</role>
+      </personnel>
+      <abstract>
+        <para>These data are collected as part of an ongoing line transect survey program targeting tetraonids (gamebirds of subfamily Tetraoninae), in particular willow ptarmigan (Lagopus lagopus).
+
+Hønsefuglportalen was launched in 2013 to 1) coordinate local and regional tetraonid line transect survey initiatives to ensure implementation of common field protocols, analytical approaches and study designs, 2) to provide common e-infrastructure for data management and curation, 3) serve as a meeting point for further improvements of the line transect survey program as well as to provide a common meeting place for researchers and natural resource managers. Currently, field protocols are standardized among all participants of the program, and the parties are working to ensure all field workers have gone through adequate training programs. However, Hønsefuglportalen is facilitating collaboration among local and regional programs and was not initially designed as national monitoring program for grouse species. Thus, both effort and study design (in terms of line length and placement) may vary among study sites and regions. In addition, this resulted in considerable changes in local and regional study designs across the monitoring period. In general, Hønsefuglportalen (and the associated activities) could be regarded a structured citizen science program, intermediate to an unstructured citizen science program and a regular monitoring program. The main motivation for establishing the local and regional line transect survey programs was to obtain updated information about trends in abundance, in relation to harvest management. Later, including data collection of other main drivers of tetraonid dynamics (such as small rodents) along the transect lines have expanded the range of ecological questions that could be addressed with these data. The data from the program has formed the basis of a range of student theses and scientific papers.</para>
+      </abstract>
+      <funding>
+        <para>The program has been funded by several sources, following annual or multiyear contracts. In general, the landowners carry all the cost related to organization and actual performance of field work. In addition, the Environmental Agency of Norway (http://www.miljodirektoratet.no/en/) have supported the work through a series of contracts to NINA for the years 2012-2018. In addition, involved landowners are funding parts of the operating costs associated with running the infrastructure. Involved research institutions are using strategic funding to support the program.</para>
+      </funding>
+      <studyAreaDescription>
+        <descriptor name="generic"
+                    citableClassificationSystem="false">
+          <descriptorValue>The project &quot;Hønsefuglportalen&quot; is covering relevant ecosystems across mainland Norway, and currently line transect surveys are carried out in 13 counties and more than 80 municipalities. Total effort recorded in 2018 was more than 8000km of line transect surveys, with more than 49.000 ptarmigans (willow and rock ptarmigan) and 2500 forest grouse (Capercaillie and Black grouse) recorded along the transect lines. Most of the surveys are carried out in willow ptarmigan habitat (i.e. sub-alpine birch forest habitat), but forest grouse and rock ptarmigan habitat are also surveyed to a lesser extent.</descriptorValue>
+        </descriptor>
+      </studyAreaDescription>
+  </project>
+</dataset>
+  <additionalMetadata>
+    <metadata>
+      <gbif>
+          <dateStamp>2019-03-14T00:27:15.872+00:00</dateStamp>
+          <hierarchyLevel>dataset</hierarchyLevel>
+            <citation>Nilsen E B, Vang R, Kjønsberg M (2021): Tetraonid line transect surveys from Norway: Data from Fjellstyrene. v1.6. Norwegian Institute for Nature Research. Dataset/Samplingevent. https://ipt.nina.no/resource?r=ptarmigan_line_transect_data_fjellstyrene&amp;v=1.6</citation>
+          <resourceLogoUrl>https://honsefugl.nina.no/Innsyn/Content/images/logoweb_liten.png</resourceLogoUrl>
+            <formationPeriod>2006-current. New data published within 2 years after collection</formationPeriod>
+          <dc:replaces>b49a2978-0e30-4748-a99f-9301d17ae119/v1.6.xml</dc:replaces>
+      </gbif>
+    </metadata>
+  </additionalMetadata>
+</eml:eml>
