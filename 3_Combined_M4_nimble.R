@@ -18,11 +18,10 @@ modM4.code <- nimbleCode({
   #random year effect for distance sampling model; 
   ## Priors for hyper-parameters
   mu.dd ~ dunif(-10, 100)
-  tau.dd <- pow(sigma.dd, -2)
   sigma.dd ~ dunif(0, 20)
   
   for(t in 1:N_years){
-    eps.dd[t] ~ dnorm(0, tau.dd) 
+    eps.dd[t] ~ dnorm(0, sd = sigma.dd) 
   }
   
   
@@ -61,11 +60,10 @@ modM4.code <- nimbleCode({
   
   ## Priors; 
   for (t in 1:N_years){
-    eps.R[t] ~ dnorm(0, tau.R)
+    eps.R[t] ~ dnorm(0, sd = sigma.R)
   }
   
   mu.R  ~ dunif(-5, 5)
-  tau.R <- pow(sigma.R, -2)
   sigma.R ~ dunif(0, 15)
   
   ## Likelihood;
@@ -96,11 +94,10 @@ modM4.code <- nimbleCode({
   ## Priors; 
   
   for(j in 1:N_sites){
-    eps.D1[j] ~ dnorm(0, tau.D1)
+    eps.D1[j] ~ dnorm(0, sd = sigma.D)
   }
   
   mu.D1 ~ dunif(-3, 30)
-  tau.D1 <- pow(sigma.D, -2)
   sigma.D ~ dunif(0, 20)
   
   # State model
