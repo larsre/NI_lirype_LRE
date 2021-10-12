@@ -1,4 +1,15 @@
 
+library(RJSONIO)
+library(xml2)
+library(tidyverse)
+library(here)
+library(lubridate)
+
+# Set switch for (re-)downloading data
+downloadData <- FALSE
+#downloadData <- TRUE
+
+
 ##########################################################
 #### Getting line transect data from 
 #### GBIF, and preparing for distance sampling model
@@ -6,22 +17,20 @@
 
 #########################################################
 
-library(RJSONIO)
-library(xml2)
-library(tidyverse)
-library(here)
-library(lubridate)
-
-# First - locate the data set ID from GBIF
-# Could be retreived also through data set search via
-# rgif 
-datasetID <- "b49a2978-0e30-4748-a99f-9301d17ae119"
-dataset <- RJSONIO::fromJSON(paste0("http://api.gbif.org/v1/dataset/",datasetID,"/endpoint"))
-# The data set is available as a Darwin COre Archive zip file
-# from the "endpoint"; 
-endpoint_url <- dataset[[1]]$url 
-download.file(endpoint_url, destfile="data/temp.zip", mode="wb")
-unzip ("data/temp.zip", exdir = "data")
+if(downloadData){
+  
+  # First - locate the data set ID from GBIF
+  # Could be retreived also through data set search via
+  # rgif 
+  datasetID <- "b49a2978-0e30-4748-a99f-9301d17ae119"
+  dataset <- RJSONIO::fromJSON(paste0("http://api.gbif.org/v1/dataset/",datasetID,"/endpoint"))
+  # The data set is available as a Darwin COre Archive zip file
+  # from the "endpoint"; 
+  endpoint_url <- dataset[[1]]$url 
+  download.file(endpoint_url, destfile="data/temp.zip", mode="wb")
+  unzip ("data/temp.zip", exdir = "data")
+  
+}
 
 ############################################################
 ## Data is now located in ../data - folder. 
@@ -43,6 +52,7 @@ Occ <- as_tibble(read.csv("data/occurrence.txt", sep="\t", stringsAsFactors = TR
 # We use data from Lierne Fjellstyre - West. 
 
 Eve <- Eve2 %>% 
+  mutate(eventDate=as.Date(eventDate)) %>%
   mutate(Year=year(eventDate)) %>%
   filter(locality=="Lierne Fjellst. Vest") %>%
   filter(between(Year, 2015, 2020))
