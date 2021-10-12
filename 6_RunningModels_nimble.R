@@ -1,14 +1,21 @@
+library(nimble)
 
-
-library(R2jags)
+# Set seed
+mySeed <- 0
+set.seed(mySeed)
 
 ##### Running the models; 
-# MCMC settings
-niter <- 2500
-nthin <- 2
-nburn <- 1000
-nchains <- 3    
+# MCMC settings - run
+# niter <- 2500
+# nthin <- 2
+# nburn <- 1000
+# nchains <- 3    
 
+# MCMC settings - test run
+niter <- 2
+nthin <- 1
+nburn <- 0
+nchains <- 3 
 
 
 ################################################################################
@@ -18,19 +25,36 @@ nchains <- 3
 # Setting parameters to monitor            
 params <- c("esw", "R_year", "p", "S", "D")
 
-
-jags.dat2 <- list(R_obs=R_obs, y=y, N_years=N_years, W=W, scale1=1000,
-                  N_obs=N_obs, Year_obs=Year_obs, 
+# Assembling data and constants
+nim.data2 <- list(R_obs=R_obs, y=y, 
                   zeros.dist=zeros_dist, L=L, 
-                  N_sites=N_sites, N_line_year=N_line_year, A=A, 
-                  R_obs_year=R_obs_year, N_R_obs=N_R_obs)
+                  N_line_year=N_line_year, A=A)
 
-inits2 <- function() {list(mu.dd=runif(1, 4,5), mu.D1=runif(1, 3,4), S=runif(N_years, 0.4, 0.5))}
+nim.constants2 <- list(N_years=N_years, W=W, scale1=1000,
+                       N_obs=N_obs, Year_obs=Year_obs,
+                       N_sites=N_sites, 
+                       R_obs_year=R_obs_year, N_R_obs=N_R_obs)
 
-out_real2 <- jagsUI::jags(jags.dat2, inits=inits2, params, model.file="Combined_M2.bugs",
-                          n.chain=nchains, n.iter=niter, 
-                          n.burnin=nburn, parallel = TRUE, DIC=FALSE, 
-                          codaOnly=c("Deviance", "Density"))
+# Function for setting initial values
+inits2 <- function(){list(
+  mu.dd=runif(1, 4,5), 
+  mu.D1=runif(1, 3,4), 
+  S=runif(N_years, 0.4, 0.5)
+)}
+
+# Sample initial values
+initVals2 <- list(inits2(), inits2(), inits2())
+
+# Run code file
+source('3_Combined_M2_nimble.R')
+
+# Test run
+out_real2 <- nimbleMCMC(code = modM2.code, 
+                        data = nim.data2, constants = nim.constants2,
+                        inits = initVals2, monitors = params,
+                        nchains = nchains, niter = niter, 
+                        nburnin = nburn, thin = nthin, 
+                        samplesAsCodaMCMC = TRUE, setSeed = mySeed)
 
 ################################################################################
 ################################################################################
@@ -39,18 +63,36 @@ out_real2 <- jagsUI::jags(jags.dat2, inits=inits2, params, model.file="Combined_
 # Setting parameters to monitor            
 params <- c("esw", "R_year", "p", "S", "D")
 
-jags.dat3 <- list(R_obs=R_obs, y=y, N_years=N_years, W=W, scale1=1000,
-                  N_obs=N_obs, Year_obs=Year_obs, 
+# Assembling data and constants
+nim.data3 <- list(R_obs=R_obs, y=y, 
                   zeros.dist=zeros_dist, L=L, 
-                  N_sites=N_sites, N_line_year=N_line_year, A=A, 
-                  R_obs_year=R_obs_year, N_R_obs=N_R_obs)
+                  N_line_year=N_line_year, A=A)
 
-inits3 <- function() {list(mu.dd=runif(1, 4,5), mu.D1=runif(1, 2,3), S=runif(1, 0.4, 0.5))}
+nim.constants3 <- list(N_years=N_years, W=W, scale1=1000,
+                       N_obs=N_obs, Year_obs=Year_obs,
+                       N_sites=N_sites, 
+                       R_obs_year=R_obs_year, N_R_obs=N_R_obs)
 
-out_real3 <- jagsUI::jags(jags.dat3, inits=inits3, params, model.file="Combined_M3.bugs",
-                          n.chain=nchains, n.iter=niter, 
-                          n.burnin=nburn, parallel = TRUE, DIC=FALSE, 
-                          codaOnly=c("Deviance", "Density"))
+# Function for setting initial values
+inits3 <- function(){list(
+  mu.dd=runif(1, 4,5), 
+  mu.D1=runif(1, 2,3), 
+  S=runif(1, 0.4, 0.5)
+)}
+
+# Sample initial values
+initVals3 <- list(inits3(), inits3(), inits3())
+
+# Run code file
+source('3_Combined_M3_nimble.R')
+
+# Test run
+out_real3 <- nimbleMCMC(code = modM3.code, 
+                        data = nim.data3, constants = nim.constants3,
+                        inits = initVals3, monitors = params,
+                        nchains = nchains, niter = niter, 
+                        nburnin = nburn, thin = nthin, 
+                        samplesAsCodaMCMC = TRUE, setSeed = mySeed)
 
 
 ################################################################################
@@ -66,28 +108,41 @@ shape_from_stats <- function(mu , sigma ){
 
 S_priors <- shape_from_stats(0.425, 0.035)
 
-## Plott - to see if this works; 
-
+## Plot - to see if this works; 
 x=seq(0,1,.001)
 w=dbeta(x,S_priors[1],S_priors[2])
 plot(x,w,typ="l")
 
-
-
-jags.dat4 <- list(R_obs=R_obs, y=y, N_years=N_years, W=W, scale1=1000,
-                  N_obs=N_obs, Year_obs=Year_obs, 
+# Assembling data and constants
+nim.data4 <- list(R_obs=R_obs, y=y, 
                   zeros.dist=zeros_dist, L=L, 
-                  N_sites=N_sites, N_line_year=N_line_year, A=A, 
-                  R_obs_year=R_obs_year, N_R_obs=N_R_obs, a=S_priors[1], b=S_priors[2])
+                  N_line_year=N_line_year, A=A)
 
-inits4 <- function() {list(mu.dd=runif(1, 4,5), mu.D1=runif(1, 2,3))}
+nim.constants4 <- list(N_years=N_years, W=W, scale1=1000,
+                       N_obs=N_obs, Year_obs=Year_obs,
+                       N_sites=N_sites, 
+                       R_obs_year=R_obs_year, N_R_obs=N_R_obs,
+                       a=S_priors[1], b=S_priors[2])
 
-out_real4 <- jagsUI::jags(jags.dat4, inits=inits4, params, model.file="Combined_M4.bugs",
-                          n.chain=nchains, n.iter=niter, 
-                          n.burnin=nburn, parallel = TRUE, DIC=FALSE, 
-                          codaOnly=c("Deviance", "Density"))
+# Function for setting initial values
+inits4 <- function(){list(
+  mu.dd=runif(1, 4,5), 
+  mu.D1=runif(1, 2,3)
+)}
 
+# Sample initial values
+initVals4 <- list(inits4(), inits4(), inits4())
 
+# Run code file
+source('3_Combined_M4_nimble.R')
+
+# Test run
+out_real4 <- nimbleMCMC(code = modM4.code, 
+                        data = nim.data4, constants = nim.constants4,
+                        inits = initVals4, monitors = params,
+                        nchains = nchains, niter = niter, 
+                        nburnin = nburn, thin = nthin, 
+                        samplesAsCodaMCMC = TRUE, setSeed = mySeed)
 
 
 ##########################################################################################
@@ -108,19 +163,39 @@ Survs1 <- cbind(c(16, 28, 29, 29, 36), c(6, 19, 16, 13, 26))
 Survs2 <- cbind(c(47, 53, 54, 50, 52), c(34, 32, 35, 42, 33))
 
 ## Known fate model for S - common S across years (S)
-jags.dat3b <- list(R_obs=R_obs, y=y, N_years=N_years, W=W, scale1=1000,
-                   N_obs=N_obs, Year_obs=Year_obs, 
-                   zeros.dist=zeros_dist, L=L, 
-                   N_sites=N_sites, N_line_year=N_line_year, A=A, 
-                   R_obs_year=R_obs_year, N_R_obs=N_R_obs, 
-                   Survs1=Survs1, Survs2=Survs2)
 
-inits3b <- function() {list(mu.dd=runif(1, 4,5), mu.D1=runif(1, 2,3), S1=runif(1, 0.6, 0.7), S2=runif(1, 0.6, 0.7))}
+# Assembling data and constants
+nim.data3 <- list(R_obs=R_obs, y=y, 
+                  zeros.dist=zeros_dist, L=L, 
+                  N_line_year=N_line_year, A=A,
+                  Survs1=Survs1, Survs2=Survs2)
 
-out_real3b <- jagsUI::jags(jags.dat3b, inits=inits3b, params3b, model.file="Combined_M3b_KnowFate.bugs",
-                           n.chain=nchains, n.iter=niter, 
-                           n.burnin=nburn, parallel = TRUE, DIC=FALSE, 
-                           codaOnly=c("Deviance", "Density"))
+nim.constants3 <- list(N_years=N_years, W=W, scale1=1000,
+                       N_obs=N_obs, Year_obs=Year_obs,
+                       N_sites=N_sites, 
+                       R_obs_year=R_obs_year, N_R_obs=N_R_obs)
+
+# Function for setting initial values
+inits3b <- function(){list(
+  mu.dd=runif(1, 4,5), 
+  mu.D1=runif(1, 2,3), 
+  S1=runif(1, 0.6, 0.7), 
+  S2=runif(1, 0.6, 0.7)
+)}
+
+# Sample initial values
+initVals3b <- list(inits3b(), inits3b(), inits3b())
+
+# Run code file
+source('3_Combined_M3b_nimble.R')
+
+# Test run
+out_real3b <- nimbleMCMC(code = modM3b.code, 
+                        data = nim.data3b, constants = nim.constants3b,
+                        inits = initVals3b, monitors = params,
+                        nchains = nchains, niter = niter, 
+                        nburnin = nburn, thin = nthin, 
+                        samplesAsCodaMCMC = TRUE, setSeed = mySeed)
 
 
 
