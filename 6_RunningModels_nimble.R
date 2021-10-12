@@ -36,11 +36,23 @@ nim.constants2 <- list(N_years=N_years, W=W, scale1=1000,
                        R_obs_year=R_obs_year, N_R_obs=N_R_obs)
 
 # Function for setting initial values
-inits2 <- function(){list(
-  mu.dd=runif(1, 4,5), 
-  mu.D1=runif(1, 3,4), 
-  S=runif(N_years, 0.4, 0.5)
-)}
+inits2 <- function(){
+  
+  mu.D1 <- runif(1, 3, 4)
+  N_exp <- matrix(NA, nrow = N_sites, ncol = N_years)
+  for(j in 1:N_sites){
+    N_exp[j, 1] <- rpois(1, mu.D1*L[j, 1]*(W/nim.constants2$scale1)*2)      ## Expected number of birds
+  }
+  
+  list(
+  mu.dd=runif(1, 4, 5), sigma.dd=runif(1, 0.05, 2),
+  mu.D1=mu.D1, sigma.D=runif(1, 0.05, 2),
+  mu.R=runif(1, -2, 2), sigma.R=runif(1, 0.05, 2),
+  eps.dd=rep(0, N_years), eps.R=rep(0, N_years), eps.D1=rep(0, N_sites),
+  S=runif(N_years, 0.4, 0.5),
+  N_exp=N_exp
+  )
+}
 
 # Sample initial values
 initVals2 <- list(inits2(), inits2(), inits2())
@@ -74,11 +86,23 @@ nim.constants3 <- list(N_years=N_years, W=W, scale1=1000,
                        R_obs_year=R_obs_year, N_R_obs=N_R_obs)
 
 # Function for setting initial values
-inits3 <- function(){list(
-  mu.dd=runif(1, 4,5), 
-  mu.D1=runif(1, 2,3), 
-  S=runif(1, 0.4, 0.5)
-)}
+inits3 <- function(){
+  
+  mu.D1 <- runif(1, 3, 4)
+  N_exp <- matrix(NA, nrow = N_sites, ncol = N_years)
+  for(j in 1:N_sites){
+    N_exp[j, 1] <- rpois(1, mu.D1*L[j, 1]*(W/nim.constants2$scale1)*2)      ## Expected number of birds
+  }
+  
+  list(
+    mu.dd=runif(1, 4, 5), sigma.dd=runif(1, 0.05, 2),
+    mu.D1=mu.D1, sigma.D=runif(1, 0.05, 2),
+    mu.R=runif(1, -2, 2), sigma.R=runif(1, 0.05, 2),
+    eps.dd=rep(0, N_years), eps.R=rep(0, N_years), eps.D1=rep(0, N_sites),
+    S=runif(1, 0.4, 0.5),
+    N_exp=N_exp
+  )
+}
 
 # Sample initial values
 initVals3 <- list(inits3(), inits3(), inits3())
@@ -125,10 +149,23 @@ nim.constants4 <- list(N_years=N_years, W=W, scale1=1000,
                        a=S_priors[1], b=S_priors[2])
 
 # Function for setting initial values
-inits4 <- function(){list(
-  mu.dd=runif(1, 4,5), 
-  mu.D1=runif(1, 2,3)
-)}
+inits4 <- function(){
+  
+  mu.D1 <- runif(1, 3, 4)
+  N_exp <- matrix(NA, nrow = N_sites, ncol = N_years)
+  for(j in 1:N_sites){
+    N_exp[j, 1] <- rpois(1, mu.D1*L[j, 1]*(W/nim.constants2$scale1)*2)      ## Expected number of birds
+  }
+  
+  list(
+    mu.dd=runif(1, 4, 5), sigma.dd=runif(1, 0.05, 2),
+    mu.D1=mu.D1, sigma.D=runif(1, 0.05, 2),
+    mu.R=runif(1, -2, 2), sigma.R=runif(1, 0.05, 2),
+    eps.dd=rep(0, N_years), eps.R=rep(0, N_years), eps.D1=rep(0, N_sites),
+    S=rbeta(1, S_priors[1], S_priors[2]),
+    N_exp=N_exp
+  )
+}
 
 # Sample initial values
 initVals4 <- list(inits4(), inits4(), inits4())
@@ -149,11 +186,6 @@ out_real4 <- nimbleMCMC(code = modM4.code,
 ##########################################################################################
 ### Running the integrated distance sampling model where we include a known-fate formulation 
 ### for the survival process. 
-# MCMC settings
-niter <- 5000
-nthin <- 2
-nburn <- 2500
-nchains <- 3
 
 params3b <- c("esw", "R_year", "p", "S", "D", "S1", "S2")
 
@@ -165,29 +197,40 @@ Survs2 <- cbind(c(47, 53, 54, 50, 52), c(34, 32, 35, 42, 33))
 ## Known fate model for S - common S across years (S)
 
 # Assembling data and constants
-nim.data3 <- list(R_obs=R_obs, y=y, 
+nim.data3b <- list(R_obs=R_obs, y=y, 
                   zeros.dist=zeros_dist, L=L, 
                   N_line_year=N_line_year, A=A,
                   Survs1=Survs1, Survs2=Survs2)
 
-nim.constants3 <- list(N_years=N_years, W=W, scale1=1000,
+nim.constants3b <- list(N_years=N_years, W=W, scale1=1000,
                        N_obs=N_obs, Year_obs=Year_obs,
                        N_sites=N_sites, 
                        R_obs_year=R_obs_year, N_R_obs=N_R_obs)
 
 # Function for setting initial values
-inits3b <- function(){list(
-  mu.dd=runif(1, 4,5), 
-  mu.D1=runif(1, 2,3), 
-  S1=runif(1, 0.6, 0.7), 
-  S2=runif(1, 0.6, 0.7)
-)}
+inits3b <- function(){
+  
+  mu.D1 <- runif(1, 3, 4)
+  N_exp <- matrix(NA, nrow = N_sites, ncol = N_years)
+  for(j in 1:N_sites){
+    N_exp[j, 1] <- rpois(1, mu.D1*L[j, 1]*(W/nim.constants2$scale1)*2)      ## Expected number of birds
+  }
+  
+  list(
+    mu.dd=runif(1, 4, 5), sigma.dd=runif(1, 0.05, 2),
+    mu.D1=mu.D1, sigma.D=runif(1, 0.05, 2),
+    mu.R=runif(1, -2, 2), sigma.R=runif(1, 0.05, 2),
+    eps.dd=rep(0, N_years), eps.R=rep(0, N_years), eps.D1=rep(0, N_sites),
+    S1=runif(1, 0.6, 0.7), S2=runif(1, 0.6, 0.7),
+    N_exp=N_exp
+  )
+}
 
 # Sample initial values
 initVals3b <- list(inits3b(), inits3b(), inits3b())
 
 # Run code file
-source('3_Combined_M3b_nimble.R')
+source('3_Combined_M3b_KnownFate_nimble.R')
 
 # Test run
 out_real3b <- nimbleMCMC(code = modM3b.code, 
