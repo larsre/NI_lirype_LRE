@@ -41,13 +41,16 @@ plot(x, w, type = "l")
 
 nim.data <- list(R_obs = rype.data$R_obs, y = rype.data$y, 
                  zeros.dist = rype.data$zeros_dist, L = rype.data$L, 
-                 N_line_year = rype.data$N_line_year, A = rype.data$A)
+                 N_line_year = rype.data$N_line_year, 
+                 N_a_line_year = rype.data$N_a_line_year, 
+                 A = rype.data$A)
 
 nim.constants <- list(N_years = rype.data$N_years, W = rype.data$W, scale1 = 1000,
                      N_obs = rype.data$N_obs, Year_obs = rype.data$Year_obs,
                      N_sites = rype.data$N_sites, 
                      R_obs_year = rype.data$R_obs_year, N_R_obs = rype.data$N_R_obs,
-                     a = S_priors[1], b = S_priors[2])
+                     a = S_priors[1], b = S_priors[2],
+                     N_ageC = 2)
 
 
 ################################################################################
@@ -100,7 +103,7 @@ out_real2 <- nimbleMCMC(code = modM2.code,
 ## No prior on S - common S across years (S)
 
 # Setting parameters to monitor            
-params <- c("esw", "R_year", "p", "S", "D")
+params <- c("esw", "R_year", "p", "S", "D", "N_exp", "Density")
 
 # Function for setting initial values
 inits3 <- function(){
@@ -127,7 +130,8 @@ inits3 <- function(){
 }
 
 # Sample initial values
-initVals3 <- list(inits3(), inits3(), inits3())
+#initVals3 <- list(inits3(), inits3(), inits3())
+initVals3 <- inits3()
 
 # Run code file
 source('3_Combined_M3_nimble.R')
@@ -197,7 +201,8 @@ nim.data$Survs1 <- Survs1
 nim.data$Survs2 <- Survs2
 
 ## Set parameters
-params3b <- c("esw", "R_year", "p", "S", "D", "S1", "S2")
+params3b <- c("esw", "R_year", "p", "S", "D", "S1", "S2", 
+              "Density", "N_exp", "mu.D1")
 
 
 ## Known fate model for S - common S across years (S)
@@ -206,9 +211,15 @@ params3b <- c("esw", "R_year", "p", "S", "D", "S1", "S2")
 inits3b <- function(){
   
   mu.D1 <- runif(1, 3, 4)
-  N_exp <- matrix(NA, nrow = N_sites, ncol = N_years)
-  for(j in 1:N_sites){
-    N_exp[j, 1] <- rpois(1, mu.D1*L[j, 1]*(W/nim.constants$scale1)*2)      ## Expected number of birds
+  ratio.JA1 <- runif(1, 0.2, 0.6)
+  
+  N_exp <- array(NA, dim = c(nim.constants$N_ageC, nim.constants$N_sites, nim.constants$N_years))
+  
+  for(j in 1:nim.constants$N_sites){
+    N_exp1 <- rpois(1, mu.D1*nim.data$L[j, 1]*(nim.constants$W/nim.constants$scale1)*2) ## Expected number of birds
+    
+    N_exp[1, j, 1] <- round(N_exp1*ratio.JA1)     
+    N_exp[2, j, 1] <- N_exp1 - N_exp[2, j, 1]
   }
   
   list(
@@ -218,12 +229,13 @@ inits3b <- function(){
     sigma.D = runif(1, 0.05, 2),
     mu.R = runif(1, -2, 2), 
     sigma.R = runif(1, 0.05, 2),
-    eps.dd = rep(0, N_years), 
-    eps.R = rep(0, N_years), 
-    eps.D1 = rep(0, N_sites),
-    S1 = runif(1, 0.6, 0.7), 
-    S2 = runif(1, 0.6, 0.7),
-    N_exp = N_exp
+    eps.dd = rep(0, nim.constants$N_years), 
+    eps.R = rep(0, nim.constants$N_years), 
+    eps.D1 = rep(0, nim.constants$N_sites),
+    Mu.S1 = runif(1, 0.6, 0.7), 
+    Mu.S2 = runif(1, 0.6, 0.7),
+    N_exp = N_exp,
+    ratio.JA1 = ratio.JA1
   )
 }
 
@@ -231,12 +243,13 @@ inits3b <- function(){
 initVals3b <- list(inits3b(), inits3b(), inits3b())
 
 # Run code file
-source('3_Combined_M3b_KnownFate_nimble.R')
+#source('3_Combined_M3b_KnownFate_nimble.R')
+source('3_Combined_M3b_KnownFate_nimble_Alt.R')
 
 # Test run
 out_real3b <- nimbleMCMC(code = modM3b.code, 
                         data = nim.data, constants = nim.constants,
-                        inits = initVals3b, monitors = params,
+                        inits = initVals3b, monitors = params3b,
                         nchains = nchains, niter = niter, 
                         nburnin = nburn, thin = nthin, 
                         samplesAsCodaMCMC = TRUE, setSeed = mySeed)

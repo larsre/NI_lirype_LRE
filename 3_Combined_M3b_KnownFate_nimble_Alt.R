@@ -112,9 +112,10 @@ modM3b.code <- nimbleCode({
     Density[2, j, 1] <- exp(mu.D1 + eps.D1[j])*(1-ratio.JA1)
     
     ## Detection model year 1
-    #N_line_year[a, j, 1] ~ dpois(p[1]* N_exp[a, j, 1])
+    for(x in 1:N_ageC){
+      N_a_line_year[x, j, 1] ~ dpois(p[1]*N_exp[x, j, 1])
+    }
     
-    ## Detection model year 1
     #N_line_year[j, 1] ~ dpois(p[1]* sum(N_exp[1:N_ageC, j, 1]))
   }
   
@@ -154,10 +155,11 @@ modM3b.code <- nimbleCode({
       N_exp[1:N_ageC, j, t] <- Density[1:N_ageC, j, t]*L[j, t]*(W*scale1)*2
       
       ## Detection model year 2 - T
-      #for(a in 1:N_ageC){
-      #  N_line_year[a, j, t] ~ dpois(p[t]*N_exp[a, j, t])
-      #}
-      N_line_year[j, t] ~ dpois(p[t]*sum(N_exp[1:N_ageC, j, t]))
+      for(x in 1:N_ageC){
+        N_a_line_year[x, j, t] ~ dpois(p[t]*N_exp[x, j, t])
+      }
+      
+      #N_line_year[j, t] ~ dpois(p[t]*sum(N_exp[1:N_ageC, j, t]))
       
     }
   }
