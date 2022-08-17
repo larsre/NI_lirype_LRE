@@ -1,0 +1,10 @@
+# Folders
+.Rproj.user/
+
+
+# History files
+.Rhistory
+.Rapp.history
+
+# RDS files
+*.rds

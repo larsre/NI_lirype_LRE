@@ -1,4 +1,15 @@
 
+library(RJSONIO)
+library(xml2)
+library(tidyverse)
+library(here)
+library(lubridate)
+
+# Set switch for (re-)downloading data
+downloadData <- FALSE
+#downloadData <- TRUE
+
+
 ##########################################################
 #### Getting line transect data from 
 #### GBIF, and preparing for distance sampling model
@@ -6,22 +17,20 @@
 
 #########################################################
 
-library(RJSONIO)
-library(xml2)
-library(tidyverse)
-library(here)
-library(lubridate)
-
-# First - locate the data set ID from GBIF
-# Could be retreived also through data set search via
-# rgif 
-datasetID <- "b49a2978-0e30-4748-a99f-9301d17ae119"
-dataset <- RJSONIO::fromJSON(paste0("http://api.gbif.org/v1/dataset/",datasetID,"/endpoint"))
-# The data set is available as a Darwin COre Archive zip file
-# from the "endpoint"; 
-endpoint_url <- dataset[[1]]$url 
-download.file(endpoint_url, destfile="data/temp.zip", mode="wb")
-unzip ("data/temp.zip", exdir = "data")
+if(downloadData){
+  
+  # First - locate the data set ID from GBIF
+  # Could be retreived also through data set search via
+  # rgif 
+  datasetID <- "b49a2978-0e30-4748-a99f-9301d17ae119"
+  dataset <- RJSONIO::fromJSON(paste0("http://api.gbif.org/v1/dataset/",datasetID,"/endpoint"))
+  # The data set is available as a Darwin COre Archive zip file
+  # from the "endpoint"; 
+  endpoint_url <- dataset[[1]]$url 
+  download.file(endpoint_url, destfile="data/temp.zip", mode="wb")
+  unzip ("data/temp.zip", exdir = "data")
+  
+}
 
 ############################################################
 ## Data is now located in ../data - folder. 
@@ -43,6 +52,7 @@ Occ <- as_tibble(read.csv("data/occurrence.txt", sep="\t", stringsAsFactors = TR
 # We use data from Lierne Fjellstyre - West. 
 
 Eve <- Eve2 %>% 
+  mutate(eventDate=as.Date(eventDate)) %>%
   mutate(Year=year(eventDate)) %>%
   filter(locality=="Lierne Fjellst. Vest") %>%
   filter(between(Year, 2015, 2020))
@@ -119,7 +129,7 @@ temp_Rec <- d_obs %>% filter(between(DistanceToTransectLine, -0.1, W)) %>%
   mutate(Maletemp=unknownJuvenile+unknownunknown+FemaleAdult, MaleIndeks=if_else(Maletemp==0, 1,0)) %>%
   select(Year, R, MaleIndeks) %>%
   mutate(Year2=Year-(min(Year))+1) %>%
-  filter(MaleIndeks==0)
+  filter(MaleIndeks==0) # --> drop all observations of only males
 
 R_obs <- temp_Rec$R
 R_obs_year <- temp_Rec$Year2
@@ -168,5 +178,28 @@ colnames(N_line_year) <- NULL
 ### jags-data under "6_RunningModels.R"
 
 
+##############################################
+##############################################
+### Saving data for analysis
 
+rype.data <- list(
+  R_obs = R_obs, # Observed numbers of recruits
+  R_obs_year = R_obs_year, # Year of observed numbers of recruits
+  N_R_obs = N_R_obs, # Total number of observations of numbers of recruits
+  
+  y = y, # Distance to transect line for each individual observation
+  zeros_dist = zeros_dist, # Vector of 0's of same length as y
+  Year_obs = Year_obs, # Year of each observation
+  N_obs = N_obs, # Total number of obsercations
+  
+  N_line_year = N_line_year, # Number of birds observed per site per year
+  L = L, # Transect length per site and year
+ 
+  N_years = N_years, # Number of years with data
+  N_sites = N_sites, # Total number of monitored sites
+  
+  A = A, # Total covered area per year
+  W = W # Truncation distance
+)
 
+saveRDS(rype.data, file = "RypeData_forIM.rds")
