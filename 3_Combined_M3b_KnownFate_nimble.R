@@ -43,11 +43,11 @@ modM3b.code <- nimbleCode({
     # using zeros trick
     y[i] ~ dunif(0,W) 
     L.f0[i] <- exp(-y[i]*y[i] / (2*sigma2[Year_obs[i]])) * 1/esw[Year_obs[i]] #y are the distances
-    nlogL.f0[i] <-  -log(L.f0[i])
+    nlogL.f0[i] <- -log(L.f0[i])
     zeros.dist[i] ~ dpois(nlogL.f0[i])
   }
   
-  ## Hierarchicla node: esw[t]; 
+  ## Hierarchical node: esw[t]; 
   ##
   ###################################################
   ## Random effects model for R (i.e. )
@@ -110,20 +110,23 @@ modM3b.code <- nimbleCode({
   #####################################################
   ## Model for survival; 
   
-  S1 ~ dunif(0.25, 0.9)
-  S2 ~ dunif(0.25, 0.9)
+  ## Priors
+  Mu.S1 ~ dunif(0.25, 0.9)
+  Mu.S2 ~ dunif(0.25, 0.9)
   
+  ## Constraints
+  S1[1:N_years] <- Mu.S1
+  S2[1:N_years] <- Mu.S2
   
+  S[1:N_years] <- S1[1:N_years] * S2[1:N_years]
+  
+  ## Data likelihoods
   for (t in 1:4){
     
-    Survs1[t, 2] ~ dbinom(S1, Survs1[t, 1])
-    Survs2[t, 2] ~ dbinom(S2, Survs2[t, 1])
+    Survs1[t, 2] ~ dbinom(S1[t], Survs1[t, 1])
+    Survs2[t, 2] ~ dbinom(S2[t], Survs2[t, 1])
     
   }
-  
-  ### Derived parameter; 
-  
-  S <- S1 * S2
   
   
   #####################################################    
@@ -134,15 +137,15 @@ modM3b.code <- nimbleCode({
     for(t in 2:N_years){
       
       ## Process model
-      Density[j, t] <- (Density[j, t-1] * (S1*S2)) + (Density[j, t-1]*(S1*S2)*R_year[t]/2) 
+      Density[j, t] <- (Density[j, t-1] * S[t-1]) + (Density[j, t-1]*S[t-1]*R_year[t]/2) 
       N_exp[j, t] <- Density[j, t]*L[j, t]*(W*scale1)*2
       
       ## Detection model year 2 - T
       N_line_year[j, t] ~ dpois(p[t]*N_exp[j, t])
       
       ## Pop structure - derived
-      D1[j, t] <- Density[j, t-1] * (S1*S2)
-      D2[j, t] <- Density[j, t-1] * ((S1*S2)*R_year[t]/2)
+      D1[j, t] <- Density[j, t-1] * S[t-1]
+      D2[j, t] <- Density[j, t-1] * (S[t-1]*R_year[t]/2)
       
     }}
   
