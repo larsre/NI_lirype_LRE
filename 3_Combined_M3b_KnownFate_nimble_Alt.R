@@ -66,20 +66,16 @@ modM3b.code <- nimbleCode({
   mu.R  ~ dunif(-5, 5)
   sigma.R ~ dunif(0, 15)
   
+  ## Constraints;
+  R_year[1:N_years] <- exp(mu.R + eps.R[1:N_years])
+  
   ## Likelihood;
   for (i in 1:N_R_obs){
     
-    R_obs[i] ~ dpois(R_exp[i])
-    # Linear predictor
-    R_exp[i] <- exp(mu.R + eps.R[R_obs_year[i]])   
+    R_obs[i] ~ dpois(R_year[R_obs_year[i]])
   }
   
-  ### Derive parameter: annual predictions for R
-  for (t in 1:N_years){
-    R_year[t] <- exp(mu.R + eps.R[t])
-  }
-  
-  ## Hierarchical node: R_year
+
   
   ########################################################################
   ### MODEL FOR Density in year 1:
@@ -100,13 +96,28 @@ modM3b.code <- nimbleCode({
   mu.D1 ~ dunif(-3, 30)
   sigma.D ~ dunif(0, 20)
   
-  # State model
+  ratio.JA1 ~ dunif(0, 1)
+  
+  ## State model
   for (j in 1:N_sites){
-    N_exp[j, 1] ~ dpois(Density[j, 1]*L[j, 1]*(W/scale1)*2)      ## Expected number of birds
-    Density[j, 1] <- exp(mu.D1 + eps.D1[j])             ## random effects model for spatial variation in density for year 1
+    
+    #for(a in 1:N_ageC){
+    #  N_exp[a, j, 1] ~ dpois(Density[a, j, 1]*L[j, 1]*(W/scale1)*2)      ## Expected number of birds
+    #}  
+    
+    N_exp[1, j, 1] ~ dpois(Density[1, j, 1]*L[j, 1]*(W/scale1)*2) 
+    N_exp[2, j, 1] ~ dpois(Density[2, j, 1]*L[j, 1]*(W/scale1)*2) 
+    
+    Density[1, j, 1] <- exp(mu.D1 + eps.D1[j])*ratio.JA1             ## random effects model for spatial variation in density for year 1
+    Density[2, j, 1] <- exp(mu.D1 + eps.D1[j])*(1-ratio.JA1)
+    
     ## Detection model year 1
-    N_line_year[j, 1] ~ dpois(p[1]* N_exp[j, 1])
+    #N_line_year[a, j, 1] ~ dpois(p[1]* N_exp[a, j, 1])
+    
+    ## Detection model year 1
+    #N_line_year[j, 1] ~ dpois(p[1]* sum(N_exp[1:N_ageC, j, 1]))
   }
+  
   #####################################################
   ## Model for survival; 
   
@@ -118,7 +129,7 @@ modM3b.code <- nimbleCode({
   S1[1:N_years] <- Mu.S1
   S2[1:N_years] <- Mu.S2
   
-  S[1:N_years] <- S1[1:N_years] * S2[1:N_years]
+  S[1:N_years] <- S1[1:N_years]*S2[1:N_years]
   
   ## Data likelihoods
   for (t in 1:4){
@@ -135,19 +146,21 @@ modM3b.code <- nimbleCode({
   
   for(j in 1:N_sites){
     for(t in 2:N_years){
-      
+        
       ## Process model
-      Density[j, t] <- (Density[j, t-1] * S[t-1]) + (Density[j, t-1]*S[t-1]*R_year[t]/2) 
-      N_exp[j, t] <- Density[j, t]*L[j, t]*(W*scale1)*2
+      Density[2, j, t] <- sum(Density[1:N_ageC, j, t-1])*S[t-1] # Juveniles
+      Density[1, j, t] <- Density[2, j, t]*R_year[t]/2 # Adults
+
+      N_exp[1:N_ageC, j, t] <- Density[1:N_ageC, j, t]*L[j, t]*(W*scale1)*2
       
       ## Detection model year 2 - T
-      N_line_year[j, t] ~ dpois(p[t]*N_exp[j, t])
+      #for(a in 1:N_ageC){
+      #  N_line_year[a, j, t] ~ dpois(p[t]*N_exp[a, j, t])
+      #}
+      N_line_year[j, t] ~ dpois(p[t]*sum(N_exp[1:N_ageC, j, t]))
       
-      ## Pop structure - derived
-      D1[j, t] <- Density[j, t-1] * S[t-1]
-      D2[j, t] <- Density[j, t-1] * (S[t-1]*R_year[t]/2)
-      
-    }}
+    }
+  }
   
   ####################################################
   ## Observation model
@@ -158,7 +171,7 @@ modM3b.code <- nimbleCode({
   ### Derived parameters; Nt and Dt
   
   for (t in 1:N_years){
-    N_tot_exp[t] <- sum(N_exp[1:N_sites, t])    ## Summing up expected number of birds in covered area; 
+    N_tot_exp[t] <- sum(N_exp[1, 1:N_sites, t] + N_exp[2, 1:N_sites, t])    ## Summing up expected number of birds in covered area; 
     D[t] <- N_tot_exp[t] / A[t]       ## Deriving density as N/A     
   }
   
