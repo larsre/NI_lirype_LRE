@@ -5,3 +5,6 @@
 # History files
 .Rhistory
 .Rapp.history
+
+# RDS files
+*.rds
