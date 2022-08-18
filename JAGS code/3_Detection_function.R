@@ -29,7 +29,7 @@ for(t in 1:N_years){
 ########################################################   
 for (i in 1:N_obs){ 
   # LIKELIHOOD
-  # using zeros trick
+  # using zeros trick - to estimate the sigma from the half normal distribution
   y[i] ~ dunif(0,W) 
   L.f0[i] <- exp(-y[i]*y[i] / (2*sigma2[Year_obs[i]])) * 1/esw[Year_obs[i]] #y are the distances
   nlogL.f0[i] <-  -log(L.f0[i])
