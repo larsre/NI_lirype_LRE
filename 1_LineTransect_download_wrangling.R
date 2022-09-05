@@ -162,7 +162,7 @@ A <- colSums(A)*(W/1000)*2
 temp <- TransLen %>% select(locationID)
 
 TaksObs <- d_obs %>% filter(between(DistanceToTransectLine, -0.1, W)) %>%
-  mutate(cs=unknownJuvenile+unknownunknown+FemaleAdult+MaleAdult) %>%
+  mutate(cs = unknownJuvenile+unknownunknown+FemaleAdult+MaleAdult) %>%
   reshape2::dcast(locationID~Year, value.var="cs", sum) %>%
   right_join(., temp, by=c("locationID"="locationID")) %>%
   #as_tibble() %>%
@@ -173,6 +173,43 @@ TaksObs <- d_obs %>% filter(between(DistanceToTransectLine, -0.1, W)) %>%
 N_line_year <- TaksObs %>% select(-locationID) %>% as.matrix() 
 colnames(N_line_year) <- NULL
 
+
+##############################################
+##############################################
+### preparing array with number of birds/ageclass/line
+
+## Juveniles (& unknowns)
+TaksObs_J <- d_obs %>% filter(between(DistanceToTransectLine, -0.1, W)) %>%
+  mutate(cs = unknownJuvenile+unknownunknown) %>%
+  reshape2::dcast(locationID~Year, value.var="cs", sum) %>%
+  right_join(., temp, by=c("locationID"="locationID")) %>%
+  #as_tibble() %>%
+  replace(., is.na(.), 0) %>%
+  arrange(locationID)
+
+N_J_line_year <- TaksObs_J %>% select(-locationID) %>% as.matrix() 
+colnames(N_J_line_year) <- NULL
+
+
+## Adults 
+TaksObs_A <- d_obs %>% filter(between(DistanceToTransectLine, -0.1, W)) %>%
+  mutate(cs = FemaleAdult+MaleAdult) %>%
+  reshape2::dcast(locationID~Year, value.var="cs", sum) %>%
+  right_join(., temp, by=c("locationID"="locationID")) %>%
+  #as_tibble() %>%
+  replace(., is.na(.), 0) %>%
+  arrange(locationID)
+
+N_A_line_year <- TaksObs_A %>% select(-locationID) %>% as.matrix() 
+colnames(N_A_line_year) <- NULL
+
+
+## Check and combine in array
+all(N_J_line_year + N_A_line_year == N_line_year)
+
+N_a_line_year <- array(NA, dim = c(2, nrow(N_line_year), ncol(N_line_year)))
+N_a_line_year[1,,] <- N_J_line_year
+N_a_line_year[2,,] <- N_A_line_year
 
 ### The objects created here will form the different list-elements in the 
 ### jags-data under "6_RunningModels.R"
@@ -193,6 +230,7 @@ rype.data <- list(
   N_obs = N_obs, # Total number of obsercations
   
   N_line_year = N_line_year, # Number of birds observed per site per year
+  N_a_line_year = N_a_line_year, # Number of birds observed per ageclass per site per year
   L = L, # Transect length per site and year
  
   N_years = N_years, # Number of years with data
