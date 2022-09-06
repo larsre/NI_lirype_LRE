@@ -4,95 +4,101 @@ library(xml2)
 library(tidyverse)
 library(here)
 library(lubridate)
+library(LivingNorwayR)
+library(purr)
+library(jsonlite)
 
 # Set switch for (re-)downloading data
-downloadData <- FALSE
-#downloadData <- TRUE
+#downloadData <- FALSE
+downloadData <- TRUE
 
 
-##########################################################
+################################################################################
 #### Getting line transect data from 
-#### GBIF, and preparing for distance sampling model
+#### Living Norway, and preparing for distance sampling model
+################################################################################
 
-
-#########################################################
 
 if(downloadData){
   
-  # First - locate the data set ID from GBIF
-  # Could be retreived also through data set search via
-  # rgif 
-  datasetID <- "b49a2978-0e30-4748-a99f-9301d17ae119"
-  dataset <- RJSONIO::fromJSON(paste0("http://api.gbif.org/v1/dataset/",datasetID,"/endpoint"))
-  # The data set is available as a Darwin COre Archive zip file
-  # from the "endpoint"; 
-  endpoint_url <- dataset[[1]]$url 
-  download.file(endpoint_url, destfile="data/temp.zip", mode="wb")
-  unzip ("data/temp.zip", exdir = "data")
-  
-}
+  datasetKey <- "b49a2978-0e30-4748-a99f-9301d17ae119"
+  # Downloding data fra Living Norway. To get a specific version, use verion = x
+  Rype_arkiv <- getLNportalData(datasetKey = datasetKey, version = 1.6)
+  # Saving the archive file to ...data/
+  Rype_arkiv$exportAsDwCArchive(file.path("data/Rype_arkiv.zip"))
+                }
+###############################################################
+# To ingest the archive from the local drive (at ..data/)
+## CAREFUL WITH THIS ONE - SOMEHTIHG HAPPENS WITH THE ENCODING; 
+## SUGGEST USING download = TRUE utntil this is fixed
 
-############################################################
-## Data is now located in ../data - folder. 
-## The procedure could be started from here once data are in ../data forlder
-############################################################
-############################################################
-############################################################
-
-## Preparing the line transct data for further analyses; 
-
-# Reading data; 
-Eve2 <- as_tibble(read.csv("data/event.txt", sep="\t", stringsAsFactors = TRUE, encoding = "UTF-8")) %>% 
-     select(-id)
-Occ <- as_tibble(read.csv("data/occurrence.txt", sep="\t", stringsAsFactors = TRUE, encoding = "UTF-8")) %>% 
-       select(-id) 
+#Rype_arkiv <- initializeDwCArchive("data/Rype_arkiv.zip")
 
 ################################################################################
-# Filtering the data - lines from the study area; 
-# We use data from Lierne Fjellstyre - West. 
+## Extracting the line transect data for further analyses, using the 
+## LivingNorwayR package
+
+core <- Rype_arkiv$getCoreTable()
+Eve2 <- as_tibble(core$exportAsDataFrame()) %>%
+  mutate(sampleSizeValue = as.numeric(sampleSizeValue))
+
+extensions <- Rype_arkiv$getExtensionTables()[[1]]
+Occ <- as_tibble(extensions$exportAsDataFrame())
+
+
+################################################################################
+################################################################################
+## Filtering the data - lines from the study area; 
+## We use data from Lierne Fjellstyre - West, as this has best overlap with the
+## known-fate CMR data
 
 Eve <- Eve2 %>% 
   mutate(eventDate=as.Date(eventDate)) %>%
-  mutate(Year=year(eventDate)) %>%
-  filter(locality=="Lierne Fjellst. Vest") %>%
+  mutate(Year = year(eventDate)) %>%
+  filter(locality == "Lierne Fjellst. Vest") %>%
   filter(between(Year, 2015, 2020))
 
-
+################################################################################
 ## Transect level info; 
-d_trans <- Eve %>% select(locationID, eventDate, eventID, modified, samplingProtocol, 
-                          eventRemarks, sampleSizeValue, stateProvince, municipality,
-                          locality, verbatimLocality, locationRemarks, Year) %>%
-  filter(eventRemarks=="Line transect") %>%
-  mutate(locationRemarks=gsub("In the original data this is known as lineID ", '', locationRemarks)) %>%
-  separate(., col=locationRemarks, sep=",", into=c("LineName", "locationRemarks")) %>%
+d_trans <- Eve %>% select(locationID, eventDate, eventID, modified, 
+                          samplingProtocol, eventRemarks, sampleSizeValue, 
+                          stateProvince, municipality, locality, 
+                          verbatimLocality, locationRemarks, Year) %>%
+  filter(eventRemarks == "Line transect") %>%
+  mutate(locationRemarks = gsub("In the original data this is known as lineID ", '', locationRemarks)) %>%
+  separate(., col = locationRemarks, sep = ",", into=c("LineName", "locationRemarks")) %>%
   select(-locationRemarks) 
 
+################################################################################
 ## Observation level info
 ## First - extracting info about distance to transect line from event table; 
 ## Observations; 
 d_obsTemp <- Eve %>% select(locationID, parentEventID, eventID, eventRemarks, dynamicProperties, eventDate) %>%
-  filter(eventRemarks=="Human observation") %>%
-  mutate(dynamicProperties=gsub(" }", '', dynamicProperties)) %>%
-  separate(., col=dynamicProperties, sep=":", into=c("temp1", "DistanceToTransectLine")) %>%
-  mutate(DistanceToTransectLine=as.numeric(DistanceToTransectLine), Year=year(eventDate)) %>%
+  filter(eventRemarks == "Human observation") %>%
+  mutate(dynamicProperties = purrr::map(dynamicProperties, ~ jsonlite::fromJSON(.) %>% as.data.frame())) %>%
+  unnest(dynamicProperties) %>% 
+  rename(DistanceToTransectLine = "perpendicular.distance.in.meters.from.transect.line.as.reported.by.the.field.worker") %>%
+  mutate(DistanceToTransectLine = as.numeric(DistanceToTransectLine), Year = year(eventDate)) %>%
   select(locationID, parentEventID, eventID, DistanceToTransectLine, Year)
 
-### Then - adding obervations from occurrence table - using only willow ptarmigan observations; 
+################################################################################
+### Then - adding obervations from occurrence table - 
+### using only willow ptarmigan observations; 
 
 d_obs <- Occ %>% select(eventID, scientificName, individualCount, sex,
                          lifeStage) %>%
   #mutate(lifeStage=if_else(is.na(lifeStage), "unknown", lifeStage)) %>%
-  mutate(SexStage=str_c(sex, lifeStage, sep = "")) %>%
+  mutate(SexStage = str_c(sex, lifeStage, sep = "")) %>%
   select(-sex, -lifeStage) %>%
   spread(key="SexStage", value= "individualCount", fill=0) %>%
   right_join(., d_obsTemp) %>%
-  filter(scientificName=="Lagopus lagopus")
+  filter(scientificName == "Lagopus lagopus")
   
 ################################################################################
 ################################################################################
-
 ###################################################################################
-## Preparing data for Distance Sampling Analysis using the Open population demographic open distance sampling model; 
+## Preparing data for Distance Sampling Analysis using the 
+## Open population demographic open distance sampling model; 
 
 ## N_sites; Number of unique survey lines
 ## N_year; Number of unique years
@@ -108,7 +114,7 @@ W <- 200
 
 temp_dist <- d_obs %>% filter(between(DistanceToTransectLine, -0.1, W)) %>% 
   select(Year, DistanceToTransectLine) %>%
-  mutate(Year2=Year-(min(Year))+1)
+  mutate(Year2 = Year-(min(Year))+1)
 
 ## Distance to transect line and year
 y <- temp_dist$DistanceToTransectLine
@@ -125,11 +131,11 @@ zeros_dist <- rep(0, length(y))
 
 temp_Rec <- d_obs %>% filter(between(DistanceToTransectLine, -0.1, W)) %>%
   
-  mutate(R=unknownJuvenile+unknownunknown) %>%
-  mutate(Maletemp=unknownJuvenile+unknownunknown+FemaleAdult, MaleIndeks=if_else(Maletemp==0, 1,0)) %>%
+  mutate(R = unknownJuvenile+unknownunknown) %>%
+  mutate(Maletemp = unknownJuvenile+unknownunknown+FemaleAdult, MaleIndeks = if_else(Maletemp==0, 1,0)) %>%
   select(Year, R, MaleIndeks) %>%
-  mutate(Year2=Year-(min(Year))+1) %>%
-  filter(MaleIndeks==0) # --> drop all observations of only males
+  mutate(Year2 = Year-(min(Year))+1) %>%
+  filter(MaleIndeks == 0) # --> drop all observations of only males
 
 R_obs <- temp_Rec$R
 R_obs_year <- temp_Rec$Year2
@@ -142,8 +148,8 @@ N_R_obs <- length(R_obs)
 ### Site on rows, years on columns; 
 
 TransLen <- d_trans %>% select(locationID, Year, sampleSizeValue) %>%
-  mutate(sampleSizeValue=sampleSizeValue/1000) %>%
-  reshape2::dcast(locationID~Year, value.var="sampleSizeValue", sum) %>%
+  mutate(sampleSizeValue = sampleSizeValue/1000) %>%
+  reshape2::dcast(locationID~Year, value.var = "sampleSizeValue", sum) %>%
   arrange(locationID)
 
 L <- TransLen %>% select(-locationID) %>% as.matrix() 
