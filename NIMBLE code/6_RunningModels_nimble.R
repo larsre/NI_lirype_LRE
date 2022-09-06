@@ -1,217 +1,61 @@
 library(nimble)
+library(magrittr)
 
-# Set seed
+#---------------#
+# GENERAL SETUP #
+#---------------#
+
+## Set seed
 mySeed <- 0
 set.seed(mySeed)
 
-##### Running the models; 
-# MCMC settings - run
-# niter <- 2500
-# nthin <- 2
-# nburn <- 1000
-# nchains <- 3    
-
-# MCMC settings - test run
-niter <- 2
-nthin <- 1
-nburn <- 0
-nchains <- 3 
-
-# Load data
+## Load line transect data
 rype.data <- readRDS("RypeData_forIM.rds")
 
-# Make prior for survival based on telemetry study
-shape_from_stats <- function(mu , sigma ){
-  a <-(mu^2-mu^3-mu*sigma^2)/sigma^2
-  b <- (mu-2*mu^2+mu^3-sigma^2+mu*sigma^2)/sigma^2
-  shape_ps <- c(a,b)
-  return(shape_ps)
-}
+## Load and format known fate CMR data
+CMR_data <- tibble::as_tibble(read.csv("Demographic_data/CMR_Data.csv", header=T, sep=",")) 
 
-S_priors <- shape_from_stats(0.425, 0.035)
+Survs1 <- CMR_data %>% dplyr::filter(TimePeriod == 1) %>% dplyr::select(-YearPeriod, -TimePeriod) %>%
+  as.matrix()
+Survs2 <- CMR_data %>% dplyr::filter(TimePeriod == 2) %>% dplyr::select(-YearPeriod, -TimePeriod) %>%
+  as.matrix()
 
-## Plot - to see if this works; 
-x <- seq(0, 1, 0.001)
-w <- dbeta(x, S_priors[1], S_priors[2])
-plot(x, w, type = "l")
-
-
-# Assembling data and constants for all models
-# NOTE: Data/constants not used in any particular model are ignored by nimble
-
+## Assembling data and constants for all models
 nim.data <- list(R_obs = rype.data$R_obs, y = rype.data$y, 
                  zeros.dist = rype.data$zeros_dist, L = rype.data$L, 
                  N_line_year = rype.data$N_line_year, 
                  N_a_line_year = rype.data$N_a_line_year, 
-                 A = rype.data$A)
+                 A = rype.data$A,
+                 Survs1 = Survs1, Survs2 = Survs2)
 
 nim.constants <- list(N_years = rype.data$N_years, W = rype.data$W, scale1 = 1000,
                      N_obs = rype.data$N_obs, Year_obs = rype.data$Year_obs,
                      N_sites = rype.data$N_sites, 
                      R_obs_year = rype.data$R_obs_year, N_R_obs = rype.data$N_R_obs,
-                     a = S_priors[1], b = S_priors[2],
                      N_ageC = 2)
 
 
-################################################################################
-################################################################################
-### No prior on S - variable S between years (S[t])
+#-------------#
+# MODEL CODES #
+#-------------#
 
-# Setting parameters to monitor            
-params <- c("esw", "R_year", "p", "S", "D")
+## Model A - Original process model formulation
+source('NIMBLE code/3_Combined_M3b_KnownFate_nimble.R')
 
-# Function for setting initial values
-inits2 <- function(){
-  
-  mu.D1 <- runif(1, 3, 4)
-  N_exp <- matrix(NA, nrow = N_sites, ncol = N_years)
-  for(j in 1:N_sites){
-    N_exp[j, 1] <- rpois(1, mu.D1*L[j, 1]*(W/nim.constants$scale1)*2)      ## Expected number of birds
-  }
-  
-  list(
-  mu.dd = runif(1, 4, 5), 
-  sigma.dd = runif(1, 0.05, 2),
-  mu.D1 = mu.D1, 
-  sigma.D = runif(1, 0.05, 2),
-  mu.R = runif(1, -2, 2), 
-  sigma.R = runif(1, 0.05, 2),
-  eps.dd = rep(0, N_years), 
-  eps.R = rep(0, N_years), 
-  eps.D1 = rep(0, N_sites),
-  S = runif(N_years, 0.4, 0.5),
-  N_exp = N_exp
-  )
-}
-
-# Sample initial values
-initVals2 <- list(inits2(), inits2(), inits2())
-
-# Run code file
-source('3_Combined_M2_nimble.R')
-
-# Test run
-out_real2 <- nimbleMCMC(code = modM2.code, 
-                        data = nim.data, constants = nim.constants,
-                        inits = initVals2, monitors = params,
-                        nchains = nchains, niter = niter, 
-                        nburnin = nburn, thin = nthin, 
-                        samplesAsCodaMCMC = TRUE, setSeed = mySeed)
-
-################################################################################
-################################################################################
-## No prior on S - common S across years (S)
-
-# Setting parameters to monitor            
-params <- c("esw", "R_year", "p", "S", "D", "N_exp", "Density")
-
-# Function for setting initial values
-inits3 <- function(){
-  
-  mu.D1 <- runif(1, 3, 4)
-  N_exp <- matrix(NA, nrow = N_sites, ncol = N_years)
-  for(j in 1:N_sites){
-    N_exp[j, 1] <- rpois(1, mu.D1*L[j, 1]*(W/nim.constants$scale1)*2)      ## Expected number of birds
-  }
-  
-  list(
-    mu.dd = runif(1, 4, 5), 
-    sigma.dd = runif(1, 0.05, 2),
-    mu.D1 = mu.D1, 
-    sigma.D = runif(1, 0.05, 2),
-    mu.R = runif(1, -2, 2), 
-    sigma.R = runif(1, 0.05, 2),
-    eps.dd = rep(0, N_years), 
-    eps.R = rep(0, N_years), 
-    eps.D1 = rep(0, N_sites),
-    S = runif(1, 0.4, 0.5),
-    N_exp = N_exp
-  )
-}
-
-# Sample initial values
-#initVals3 <- list(inits3(), inits3(), inits3())
-initVals3 <- inits3()
-
-# Run code file
-source('3_Combined_M3_nimble.R')
-
-# Test run
-out_real3 <- nimbleMCMC(code = modM3.code, 
-                        data = nim.data, constants = nim.constants,
-                        inits = initVals3, monitors = params,
-                        nchains = nchains, niter = niter, 
-                        nburnin = nburn, thin = nthin, 
-                        samplesAsCodaMCMC = TRUE, setSeed = mySeed)
+## Model B - Altered process model without additional data
+## Model C - Altered process model + explicit use of age-structure in data
+source('NIMBLE code/3_Combined_M3b_KnownFate_nimble_Alt.R')
 
 
-################################################################################
-################################################################################
-## ## Prior on S based on radiotelemetry study - extracted from Israelsen et al. 2020 [Ecol & Evo]
+#-----------------------------#
+# INITIALIZATION & MCMC SETUP #
+#-----------------------------#
 
-# Function for setting initial values
-inits4 <- function(){
-  
-  mu.D1 <- runif(1, 3, 4)
-  N_exp <- matrix(NA, nrow = N_sites, ncol = N_years)
-  for(j in 1:N_sites){
-    N_exp[j, 1] <- rpois(1, mu.D1*L[j, 1]*(W/nim.constants$scale1)*2)      ## Expected number of birds
-  }
-  
-  list(
-    mu.dd = runif(1, 4, 5), 
-    sigma.dd = runif(1, 0.05, 2),
-    mu.D1 = mu.D1, 
-    sigma.D = runif(1, 0.05, 2),
-    mu.R = runif(1, -2, 2), 
-    sigma.R = runif(1, 0.05, 2),
-    eps.dd = rep(0, N_years), 
-    eps.R = rep(0, N_years), 
-    eps.D1 = rep(0, N_sites),
-    S = rbeta(1, S_priors[1], S_priors[2]),
-    N_exp = N_exp
-  )
-}
-
-# Sample initial values
-initVals4 <- list(inits4(), inits4(), inits4())
-
-# Run code file
-source('3_Combined_M4_nimble.R')
-
-# Test run
-out_real4 <- nimbleMCMC(code = modM4.code, 
-                        data = nim.data, constants = nim.constants,
-                        inits = initVals4, monitors = params,
-                        nchains = nchains, niter = niter, 
-                        nburnin = nburn, thin = nthin, 
-                        samplesAsCodaMCMC = TRUE, setSeed = mySeed)
-
-
-##########################################################################################
-##########################################################################################
-### Running the integrated distance sampling model where we include a known-fate formulation 
-### for the survival process. 
-
-## Add real data for S1 and S2
-CMR_data <- as_tibble(read.csv("Demographic_data/CMR_Data.csv", header=T, sep=",")) 
-
-Surv1 <- CMR_data %>% filter(TimePeriod == 1) %>% select(-YearPeriod, -TimePeriod) %>%
-  as.matrix()
-Surv2 <- CMR_data %>% filter(TimePeriod == 2) %>% select(-YearPeriod, -TimePeriod) %>%
-  as.matrix()
-
-nim.data$Survs1 <- Survs1
-nim.data$Survs2 <- Survs2
-
-## Set parameters
+## Set parameters to monitor
 params3b <- c("esw", "R_year", "p", "S", "D", "S1", "S2", 
               "Density", "N_exp", "mu.D1")
 
-
-## Known fate model for S - common S across years (S)
-
-# Function for setting initial values
+## Function for setting initial values (altered process model)
 inits3b <- function(){
   
   mu.D1 <- runif(1, 3, 4)
@@ -223,7 +67,7 @@ inits3b <- function(){
     N_exp1 <- rpois(1, mu.D1*nim.data$L[j, 1]*(nim.constants$W/nim.constants$scale1)*2) ## Expected number of birds
     
     N_exp[1, j, 1] <- round(N_exp1*ratio.JA1)     
-    N_exp[2, j, 1] <- N_exp1 - N_exp[2, j, 1]
+    N_exp[2, j, 1] <- N_exp1 - N_exp[1, j, 1]
   }
   
   list(
@@ -243,24 +87,67 @@ inits3b <- function(){
   )
 }
 
-# Sample initial values
-initVals3b <- list(inits3b(), inits3b(), inits3b())
+## Sample initial values (altered process model)
+initVals3b.alt <- list(inits3b(), inits3b(), inits3b())
 
-# Run code file
-#source('3_Combined_M3b_KnownFate_nimble.R')
-source('3_Combined_M3b_KnownFate_nimble_Alt.R')
+## Summarize nodes for original process model
+initVals3b.orig <- initVals3b.alt
+for(i in 1:3){
+  initVals3b.orig[[i]]$N_exp <- apply(initVals3b.alt[[i]]$N_exp, c(2,3), sum)
+}
 
-# Test run
-out_real3b <- nimbleMCMC(code = modM3b.code, 
+## Determine if this is a testrun or not
+testRun <- TRUE
+#testRun <- FALSE
+
+## Set MCMC parameters
+if(testRun){
+  niter <- 2
+  nthin <- 1
+  nburn <- 0
+  nchains <- 3  
+}else{
+  niter <- 25000
+  nthin <- 5
+  nburn <- 5000
+  nchains <- 3  
+}
+
+
+#-----------#
+# TEST RUNS #
+#-----------#
+
+## Test run - Model A
+out_modA <- nimbleMCMC(code = modM3b.code.A, 
                         data = nim.data, constants = nim.constants,
-                        inits = initVals3b, monitors = params3b,
+                        inits = initVals3b.orig, monitors = params3b,
                         nchains = nchains, niter = niter, 
                         nburnin = nburn, thin = nthin, 
                         samplesAsCodaMCMC = TRUE, setSeed = mySeed)
 
+saveRDS(out_modA, file = 'mod3b_versionA_realData.rds')
 
 
+## Test run - Model B
+out_modB <- nimbleMCMC(code = modM3b.code.B, 
+                       data = nim.data, constants = nim.constants,
+                       inits = initVals3b.alt, monitors = params3b,
+                       nchains = nchains, niter = niter, 
+                       nburnin = nburn, thin = nthin, 
+                       samplesAsCodaMCMC = TRUE, setSeed = mySeed)
+
+saveRDS(out_modB, file = 'mod3b_versionB_realData.rds')
 
 
+## Test run - Model C
+out_modC <- nimbleMCMC(code = modM3b.code.C, 
+                       data = nim.data, constants = nim.constants,
+                       inits = initVals3b.alt, monitors = params3b,
+                       nchains = nchains, niter = niter, 
+                       nburnin = nburn, thin = nthin, 
+                       samplesAsCodaMCMC = TRUE, setSeed = mySeed)
+
+saveRDS(out_modC, file = 'mod3b_versionC_realData.rds')
 
 
