@@ -193,9 +193,13 @@ out_real4 <- nimbleMCMC(code = modM4.code,
 ### Running the integrated distance sampling model where we include a known-fate formulation 
 ### for the survival process. 
 
-## Add fake data for S1 and S2
-Survs1 <- cbind(c(16, 28, 29, 29, 36), c(6, 19, 16, 13, 26))
-Survs2 <- cbind(c(47, 53, 54, 50, 52), c(34, 32, 35, 42, 33))
+## Add real data for S1 and S2
+CMR_data <- as_tibble(read.csv("Demographic_data/CMR_Data.csv", header=T, sep=",")) 
+
+Surv1 <- CMR_data %>% filter(TimePeriod == 1) %>% select(-YearPeriod, -TimePeriod) %>%
+  as.matrix()
+Surv2 <- CMR_data %>% filter(TimePeriod == 2) %>% select(-YearPeriod, -TimePeriod) %>%
+  as.matrix()
 
 nim.data$Survs1 <- Survs1
 nim.data$Survs2 <- Survs2
