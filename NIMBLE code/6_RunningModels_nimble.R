@@ -52,8 +52,10 @@ source('NIMBLE code/3_Combined_M3b_KnownFate_nimble_Alt.R')
 #-----------------------------#
 
 ## Set parameters to monitor
-params3b <- c("esw", "R_year", "p", "S", "D", "S1", "S2", 
-              "Density", "N_exp", "mu.D1")
+params3b <- c("esw", "R_year", "p", "D",
+              "Density", "N_exp", 
+              "mu.D1", "sigma.D", "mu.R", "sigma.R",
+              "Mu.S1", "Mu.S2", "ratio.JA1")
 
 ## Function for setting initial values (altered process model)
 inits3b <- function(){

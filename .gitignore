@@ -1,10 +1,13 @@
 # Folders
 .Rproj.user/
+
 # History files
 .Rhistory
 .Rapp.history
+
 # RDS files
 *.rds
+
 #
 0_Accessing_Data_from_LierneDB.R
 1b_Data_from_Hønsefuglportalen_wrangling.R
