@@ -30,19 +30,19 @@ for(j in 1:Jmax){
 #-----------------------#
 
 ## Annual survival
-Mu.S <- 0.5 # Average annual survival probability
+Mu.S <- 0.4 # Average annual survival probability
 sigmaT.S <- 0 # SD of random year variation in survival
 sigmaJ.S <- 0 # SD of random site variation in survival
 
 ## Reproduction
-Mu.R <- 5 # Average number of chicks
+Mu.R <- 3 # Average number of chicks in August
 sigmaT.R <- 0.5 # SD of random year variation in number of chicks
 sigmaJ.R <- 0 # SD of random site variation in number of chicks
 
 ## Juvenile summer survival
-Mu.sJ <- 0.2 # Average summer survival of chicks
-sigmaT.sJ <- 0 # SD of random year variation in chick survival
-sigmaJ.sJ <- 0 # SD of random site variation in survival
+#Mu.sJ <- 0.2 # Average summer survival of chicks
+#sigmaT.sJ <- 0 # SD of random year variation in chick survival
+#sigmaJ.sJ <- 0 # SD of random site variation in survival
 
 
 # Data & observation parameters #
@@ -50,7 +50,7 @@ sigmaJ.sJ <- 0 # SD of random site variation in survival
 
 ## Line-transect distance sampling
 min.Tlength <- 1000 # Minimum transect length
-max.Tlength <- 3000  # Maximum transect length
+max.Tlength <- 1000  # Maximum transect length
 
 W <- 200 # Truncation distance (max. distance at which observation is possible)
   
@@ -68,12 +68,12 @@ Tmax.RT <- 10 # Last year for which radio-telemetry data has been collected
 nind.avg.RT <- 30
 
 
-## Nest survey
-Tmin.NS <- 1 # First year for which nest survey data has been collected
-Tmax.NS <- 15 # Last year for which nest survey data has been collected
-
-# Average number of nests monitored each year
-nind.avg.NS <- 40
+# ## Nest survey
+# Tmin.NS <- 1 # First year for which nest survey data has been collected
+# Tmax.NS <- 15 # Last year for which nest survey data has been collected
+# 
+# # Average number of nests monitored each year
+# nind.avg.NS <- 40
 
 
 #########################
@@ -82,19 +82,19 @@ nind.avg.NS <- 40
 
 ## Function to simulate year- and site-specific vital rates
 simulate.VRs <- function(Tmax, Jmax,
-                         Mu.S, Mu.R, Mu.sJ,
-                         sigmaT.S, sigmaT.R, sigmaT.sJ,
-                         sigmaJ.S, sigmaJ.R, sigmaJ.sJ){
+                         Mu.S, Mu.R, 
+                         sigmaT.S, sigmaT.R, 
+                         sigmaJ.S, sigmaJ.R){
   
   # Sample random year effects for all vital rates
   epsilonT.S <- rnorm(Tmax, mean = 0, sd = sigmaT.S)
   epsilonT.R <- rnorm(Tmax, mean = 0, sd = sigmaT.R)
-  epsilonT.sJ <- rnorm(Tmax, mean = 0, sd = sigmaT.sJ)
+  #epsilonT.sJ <- rnorm(Tmax, mean = 0, sd = sigmaT.sJ)
   
   # Sample random site effects for all vital rates
   epsilonJ.S <- rnorm(Jmax, mean = 0, sd = sigmaJ.S)
   epsilonJ.R <- rnorm(Jmax, mean = 0, sd = sigmaJ.R)
-  epsilonJ.sJ <- rnorm(Jmax, mean = 0, sd = sigmaJ.sJ)
+ #epsilonJ.sJ <- rnorm(Jmax, mean = 0, sd = sigmaJ.sJ)
   
   # Calculate year- and site-specific vital rates
   S <- R <- sJ <- matrix(NA, nrow = Jmax, ncol = Tmax)
@@ -103,21 +103,21 @@ simulate.VRs <- function(Tmax, Jmax,
       
       S[j,t] <- plogis(qlogis(Mu.S) + epsilonT.S[t] + epsilonJ.S[j])
       R[j,t] <- exp(log(Mu.R) + epsilonT.R[t] + epsilonJ.R[j])
-      sJ[j,t] <- plogis(qlogis(Mu.sJ) + epsilonT.sJ[t] + epsilonJ.sJ[j])
+      #sJ[j,t] <- plogis(qlogis(Mu.sJ) + epsilonT.sJ[t] + epsilonJ.sJ[j])
       
     }
   }
   
   # Arrange vital rates in a list
-  VR.list <- list(S = S, R = R, sJ = sJ)
+  VR.list <- list(S = S, R = R)
   
 }
 
 ## Simulate vital rates
 VR.list <- simulate.VRs(Tmax, Jmax,
-                        Mu.S, Mu.R, Mu.sJ,
-                        sigmaT.S, sigmaT.R, sigmaT.sJ,
-                        sigmaJ.S, sigmaJ.R, sigmaJ.sJ)
+                        Mu.S, Mu.R, 
+                        sigmaT.S, sigmaT.R,
+                        sigmaJ.S, sigmaJ.R)
 
 
 #########################
@@ -129,7 +129,7 @@ simulate.pop <- function(Amax, Tmax, Jmax, VR.list, N1, stochastic = TRUE, plot 
   
   # Prepare arrays for storing population projections
   N <- array(NA, dim = c(Jmax, Amax, Tmax))
-  Chicks <- matrix(NA, nrow = Jmax, ncol = Tmax)
+  #Chicks <- matrix(NA, nrow = Jmax, ncol = Tmax)
   
   # Initialize population projection
   N[,,1] <- N1
@@ -151,10 +151,10 @@ simulate.pop <- function(Amax, Tmax, Jmax, VR.list, N1, stochastic = TRUE, plot 
         N[j,2,t+1] <- rbinom(1, size = sum(N[j,1:Amax,t]), prob = VR.list$S[j,t])
       
         # - Reproduction of survivors
-        Chicks[j,t+1] <- rpois(1, lambda = N[j,2,t+1]*VR.list$R[j,t+1])
+        N[j,1,t+1] <- rpois(1, lambda = N[j,2,t+1]*(VR.list$R[j,t+1])/2)
       
         # - Young-of-the-year recruiting in the end of summer
-        N[j,1,t+1] <- rbinom(1, size = Chicks[j,t+1], prob = VR.list$sJ[j,t+1])
+       # N[j,1,t+1] <- rbinom(1, size = Chicks[j,t+1], prob = VR.list$sJ[j,t+1])
     
     
       }else{
@@ -163,29 +163,28 @@ simulate.pop <- function(Amax, Tmax, Jmax, VR.list, N1, stochastic = TRUE, plot 
         N[j,2,t+1] <- sum(N[j,1:Amax,t])*VR.list$S[j,t]
       
         # - Reproduction of survivors
-        Chicks[j,t+1] <- N[j,2,t+1]*VR.list$R[j,t+1]
+        N[j,1,t+1] <- N[j,2,t+1]*(VR.list$R[j,t+1]/2)
       
         # - Young-of-the-year recruiting in the end of summer
-        N[j,1,t+1] <- Chicks[j,t+1]*VR.list$sJ[j,t+1]
+        #N[j,1,t+1] <- Chicks[j,t+1]*VR.list$sJ[j,t+1]
       }
     }
   }
   
   # Plot trajectories
-  par(mfrow = c(1,2))
-  plot(colSums(Chicks), type = 'l', col = 'red', lty = 'dashed', 
-       ylab = 'Number', xlab = 'Time', ylim = c(min(colSums(N[,2,])), max(colSums(Chicks), na.rm = T)))
-  lines(colSums(N[,1,]))
+  #par(mfrow = c(1,2))
+  plot(colSums(N[,1,]), type = 'l', col = 'red', lty = 'dashed', 
+       ylab = 'Number', xlab = 'Time', ylim = c(0, max(colSums(N[,1,]), na.rm = T)))
   lines(colSums(N[,2,]), col = 'blue')
-  legend('topleft', legend = c('Chicks', 'Recruits', 'Adults'), 
-               col = c('red', 'blue', 'black'),
-               lty = c('dashed', 'solid', 'solid'), 
+  legend('topleft', legend = c('Recruits', 'Adults'), 
+               col = c('red', 'blue'),
+               lty = c('dashed', 'solid'), 
                cex = 0.8, y.intersp = 0.1, bty = 'n')
   
   matplot(apply(N, 1, colSums), type = 'l', ylab = 'Number per site', xlab = 'Time')
   
   # Arrange simulated numbers in a list & return
-  SimData <- list(N = N, Chicks = Chicks)
+  SimData <- list(N = N)
   return(SimData)
 }
 
@@ -215,7 +214,7 @@ simulate.HDSdata <- function(Jmax, Tmax, N.age,
   # Sample random year and site effects on sigma parameter
   epsilonT <- rnorm(Tmax, mean = 0, sd = sigmaT.dd)
   epsilonJ <- rnorm(Jmax, mean = 0, sd = sigmaJ.dd)
-
+  
   # Calculate year- and site-specific sigma parameter
   Sigma <- exp(log(Mu.dd) + outer(epsilonJ, epsilonT, FUN = '+'))
   
@@ -229,46 +228,63 @@ simulate.HDSdata <- function(Jmax, Tmax, N.age,
     for(j in 1:Jmax){
       
       if(N.tot[j,t] == 0){
-        data <- rbind(data, c(j, NA, NA))
+        data <- rbind(data, c(j, NA, NA, NA))
         next
       }
       
       # - Sample distance from transect line for each individual (assuming uniform distribution)
-      d <- runif(N.tot[j,t], 0, W) 
+      #d <- runif(N.tot[j,t], 0, W) 
+      d_juv <- runif(N.age[j, 1, t], 0, W)
+      d_ad <- runif(N.age[j, 2, t], 0, W) 
+      d <- as.matrix(cbind(c(d_ad, d_juv), c(rep(1, length(d_juv)), rep(2, length(d_ad)))))
+      
       
       # - Calculate individual detection probabilities p based on distances d
       p <- exp(-d * d/(2 * (Sigma[j,t]^2)))
       
       # - Simulate observation process (whether each individual was observed or not)
-      y <- rbinom(n = N.tot[j,t], size = 1, prob = p)
+      #y <- rbinom(n = N.tot[j,t], size = 1, prob = p)
+      y_juv <- rbinom(n = N.age[j, 1, t], size = 1, prob = p)
+      y_ad <- rbinom(n = N.age[j, 2, t], size = 1, prob = p)
+      y <- as.matrix(cbind(c(y_ad, y_juv), c(rep(1, length(y_juv)), rep(2, length(y_ad)))))
+      
       
       # - Retain only data from observations if "discard0"
       if(discard0){
-        d <- d[y == 1]
-        y <- y[y == 1]
+        d <- d[y[,1] == 1,]
+        # d_juv <- d_juv[y == 1]
+        # d_ad <- d_ad[y == 1]
+        y <- y[y[,1] == 1,]
+        # y_juv <- y_juv[y == 1]
+        # y_ad <- y_ad[y == 1]
+        
       }
       
+      
       # - Arrange data
-      if(sum(y) > 0){
-        data <- rbind(data, cbind(rep(j, sum(y)), rep(t, sum(y)), y, d))
+      if(sum(y[,1]) > 0){
+        data <- rbind(data, cbind(rep(j, sum(y[,1])), rep(t, sum(y[,1])), y[,1], d[,1], d[,2]))
       }else{
         data <- rbind(data, c(j, NA, NA, NA))
       } 
     }
   }
-  colnames(data) <- c("site", "year", "obs", "distance")
-
+  colnames(data) <- c("site", "year", "obs", "distance", "age")
+  
   # Summarise number of individuals observed per year-site combination
-  DS.count <- matrix(NA, nrow = Jmax, ncol = Tmax)
+  #DS.count <- array(NA, nrow = Jmax, ncol = Tmax)
+  DS.count <- array(NA, c(Jmax, 2, Tmax))
   for(t in 1:Tmax){
     for(j in 1:Jmax){
-      data.sub <- subset(data, year == t & site == j)
-      DS.count[j,t] <- nrow(data.sub)
+      for(a in 1:2){
+        data.sub <- subset(data, year == t & site == j & age == a)
+        DS.count[j, a, t] <- nrow(data.sub)
+      }
     }
   }
   
   # Collate and return data
-  DS.data <- list(d = data$d, d_year = data$year, d_site = data$site, 
+  DS.data <- list(d = data$d, d_year = data$year, d_site = data$site, d_age=data$age, 
                   DS.count = DS.count, L = L)
   return(DS.data)
 }
@@ -278,6 +294,7 @@ DS.data <- simulate.HDSdata(Jmax, Tmax, N.age = SimData$N,
                             Mu.dd, sigmaT.dd, sigmaJ.dd,
                             W, discard0 = TRUE, 
                             min.Tlength, max.Tlength)
+
 
 
 ########################################
@@ -316,39 +333,39 @@ RT.data <- simulate.RTdata(nind.avg.RT, Tmin.RT, Tmax.RT, Tmax, SurvProbs = VR.l
 # NEST SURVEY DATA SIMULATION #
 ###############################
 
-## Function for simulating nest survey data
-simulate.NSdata <- function(nind.avg.NS, Tmin.NS, Tmax.NS, Tmax, RepRates){
-  
-  # Determine number of nests surveyed in each year
-  n.nests <- rep(NA, Tmax)
-  for(t in Tmin.NS:Tmax.NS){
-    n.nests[t] <- rpois(1, nind.avg.NS)
-  }
-  
-  # Set up empty vectors for storing data
-  nChicks.obs <- year.obs <- vector()
-  
-  # Simulate nest survey data collection
-  for(t in Tmin.NS:Tmax.NS){
-    
-    # - Simulate number of chicks in each nest surveyed in year t
-    nChicks.obs.t <- rpois(n.nests[t], RepRates[t])
-    
-    # - Make a vector with year indices
-    year.obs.t <- rep(t, n.nests[t])
-    
-    # - Merge data of year t with data from previous years
-    nChicks.obs <- c(nChicks.obs, nChicks.obs.t)
-    year.obs <- c(year.obs, year.obs.t)
-  }
-  
-  # Assemble data in a list and return
-  NS.data <- list(nChicks.obs = nChicks.obs, year.obs = year.obs)
-  return(NS.data)
-}
-
-## Simulate nest survey data
-NS.data <- simulate.NSdata(nind.avg.NS, Tmin.NS, Tmax.NS, RepRates = VR.list$R[1,])
+# ## Function for simulating nest survey data
+# simulate.NSdata <- function(nind.avg.NS, Tmin.NS, Tmax.NS, Tmax, RepRates){
+#   
+#   # Determine number of nests surveyed in each year
+#   n.nests <- rep(NA, Tmax)
+#   for(t in Tmin.NS:Tmax.NS){
+#     n.nests[t] <- rpois(1, nind.avg.NS)
+#   }
+#   
+#   # Set up empty vectors for storing data
+#   nChicks.obs <- year.obs <- vector()
+#   
+#   # Simulate nest survey data collection
+#   for(t in Tmin.NS:Tmax.NS){
+#     
+#     # - Simulate number of chicks in each nest surveyed in year t
+#     nChicks.obs.t <- rpois(n.nests[t], RepRates[t])
+#     
+#     # - Make a vector with year indices
+#     year.obs.t <- rep(t, n.nests[t])
+#     
+#     # - Merge data of year t with data from previous years
+#     nChicks.obs <- c(nChicks.obs, nChicks.obs.t)
+#     year.obs <- c(year.obs, year.obs.t)
+#   }
+#   
+#   # Assemble data in a list and return
+#   NS.data <- list(nChicks.obs = nChicks.obs, year.obs = year.obs)
+#   return(NS.data)
+# }
+# 
+# ## Simulate nest survey data
+# NS.data <- simulate.NSdata(nind.avg.NS, Tmin.NS, Tmax.NS, RepRates = VR.list$R[1,])
 
 
 #########################
@@ -360,17 +377,17 @@ SimParams <- list(
   Seed = mySeed,
   Amax = Amax, Tmax = Tmax, Jmax = Jmax,
   N1 = N1,
-  Mu.S = Mu.S, Mu.R = Mu.R, Mu.sJ = Mu.sJ,
-  sigmaT.S = sigmaT.S, sigmaT.R = sigmaT.R, sigmaT.sJ = sigmaT.sJ,
-  sigmaJ.S = sigmaJ.S, sigmaJ.R = sigmaJ.R, sigmaJ.sJ = sigmaJ.sJ,
+  Mu.S = Mu.S, Mu.R = Mu.R, 
+  sigmaT.S = sigmaT.S, sigmaT.R = sigmaT.R, 
+  sigmaJ.S = sigmaJ.S, sigmaJ.R = sigmaJ.R, 
   
   min.Tlength = min.Tlength,
   max.Tlength = max.Tlength,
   W = W,
   Mu.dd = Mu.dd, sigmaT.dd = sigmaT.dd, sigmaJ.dd = sigmaJ.dd,
   
-  Tmin.RT = Tmin.RT, Tmax.RT = Tmax.RT, nind.avg.RT = nind.avg.RT,
-  Tmin.NS = Tmin.NS, Tmax.NS = Tmax.NS, nind.avg.NS = nind.avg.NS
+  Tmin.RT = Tmin.RT, Tmax.RT = Tmax.RT, nind.avg.RT = nind.avg.RT
+  #Tmin.NS = Tmin.NS, Tmax.NS = Tmax.NS, nind.avg.NS = nind.avg.NS
 )
 
 ## Collate and save all data
@@ -378,7 +395,6 @@ AllSimData <- list(
   SimParams = SimParams,
   VR.list = VR.list,
   DS.data = DS.data,
-  RT.data = RT.data,
-  NS.data = NS.data
+  RT.data = RT.data
 )
 
