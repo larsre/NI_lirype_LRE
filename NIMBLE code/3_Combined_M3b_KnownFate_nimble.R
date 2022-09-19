@@ -1,5 +1,5 @@
 
-modM3b.code <- nimbleCode({
+modM3b.code.A <- nimbleCode({
   
   ####################################################
   #### Distance sampling half normal detection function; 
