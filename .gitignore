@@ -1,5 +1,6 @@
 # Folders
 .Rproj.user/
+data/
 
 # History files
 .Rhistory
@@ -8,6 +9,8 @@
 # RDS files
 *.rds
 
-#
+# Others
 1b_Data_from_Hønsefuglportalen_wrangling.R
 manuscript
+
+
