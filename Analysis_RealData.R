@@ -2,6 +2,17 @@
 # SETUP #
 #-------#
 
+## Source all functions in "R" folder
+sourceDir <- function(path, trace = TRUE, ...) {
+  for (nm in list.files(path, pattern = "[.][RrSsQq]$")) {
+    if(trace) cat(nm,":")
+    source(file.path(path, nm), ...)
+    if(trace) cat("\n")
+  }
+}
+sourceDir('R')
+
+
 ## Set switches 
 
 # (Re-)downloading data
@@ -50,4 +61,31 @@ input_data <- prepareInputData(d_trans = LT_data$d_trans,
                                d_cmr = d_cmr,
                                dataVSconstants = TRUE,
                                save = TRUE)
+
+
+# MODEL SETUP #
+#-------------#
+
+model_setup <- setupModel(modelCode.path = "NIMBLE Code/RypeIDSM.R",
+                          nim.data = input_data$nim.data, 
+                          nim.constants = input_data$nim.constants,
+                          testRun = TRUE, initVals.seed = 0)
+  
+
+# MODEL (TEST) RUN #
+#------------------#
+
+IDSM.out <- nimbleMCMC(code = model_setup$modelCode, 
+                       data = input_data$nim.data, 
+                       constants = input_data$nim.constants,
+                       inits = model_setup$initVals, 
+                       monitors = model_setup$modelParams,
+                       nchains = model_setup$mcmcParams$nchains, 
+                       niter = model_setup$mcmcParams$niter, 
+                       nburnin = model_setup$mcmcParams$nburn, 
+                       thin = model_setup$mcmcParams$nthin, 
+                       samplesAsCodaMCMC = TRUE, 
+                       setSeed = 0)
+
+saveRDS(IDSM.out, file = 'rypeIDSM_realData_Lierne.rds')
 
