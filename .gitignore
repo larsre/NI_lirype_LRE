@@ -9,6 +9,9 @@ data/
 # RDS files
 *.rds
 
+# PDF files
+*.pdf
+
 # Others
 1b_Data_from_Hønsefuglportalen_wrangling.R
 manuscript

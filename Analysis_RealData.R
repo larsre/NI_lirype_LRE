@@ -89,3 +89,13 @@ IDSM.out <- nimbleMCMC(code = model_setup$modelCode,
 
 saveRDS(IDSM.out, file = 'rypeIDSM_realData_Lierne.rds')
 
+
+# OPTIONAL: MODEL COMPARISON (PLOTS) #
+#------------------------------------#
+
+modelComp <- plotModelComparison(modelPaths = c("mod3b_versionB_realData.rds", 
+                                                "mod3b_versionC_realData.rds"), 
+                                 modelChars = c("Model B", "Model C"), 
+                                 N_sites = 58, N_years = 6,
+                                 plotPath = "Plots/ModelCompTest",
+                                 returnData = FALSE)
