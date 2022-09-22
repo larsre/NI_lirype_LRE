@@ -49,24 +49,28 @@ plotModelComparison <- function(modelPaths, modelChars, N_sites, N_years, plotPa
              'Mu.S1', 'Mu.S2', 'ratio.JA1')
   
   pdf(paste0(plotPath, '/ModelComp_Mains.pdf'), width = 8, height = 5)
-  ggplot(subset(data.all, Parameter %in% mains)) + 
-    geom_density(aes(x = Value, color = Model, fill = Model), alpha = 0.5) + 
-    facet_wrap(~Parameter, scales = 'free') +
-    scale_fill_viridis(discrete = T) + 
-    scale_color_viridis(discrete = T) + 
-    theme_bw() + theme(panel.grid = element_blank())
+  print(
+    ggplot(subset(data.all, Parameter %in% mains)) + 
+      geom_density(aes(x = Value, color = Model, fill = Model), alpha = 0.5) + 
+      facet_wrap(~Parameter, scales = 'free') +
+      scale_fill_viridis(discrete = T) + 
+      scale_color_viridis(discrete = T) + 
+      theme_bw() + theme(panel.grid = element_blank())
+  )
   dev.off()
   
   # Detection parameters
   detects <- c(paste0('ews[', 1:N_years, ']'), paste0('p[', 1:N_years, ']'))
   
   pdf(paste0(plotPath, '/ModelComp_Detects.pdf'), width = 8, height = 5)
-  ggplot(subset(data.all, Parameter %in% detects)) + 
-    geom_density(aes(x = Value, color = Model, fill = Model), alpha = 0.5) + 
-    facet_wrap(~Parameter, scales = 'free') +
-    scale_fill_viridis(discrete = T) + 
-    scale_color_viridis(discrete = T) + 
-    theme_bw() + theme(panel.grid = element_blank())
+  print(
+    ggplot(subset(data.all, Parameter %in% detects)) + 
+      geom_density(aes(x = Value, color = Model, fill = Model), alpha = 0.5) + 
+      facet_wrap(~Parameter, scales = 'free') +
+      scale_fill_viridis(discrete = T) + 
+      scale_color_viridis(discrete = T) + 
+      theme_bw() + theme(panel.grid = element_blank())
+  )
   dev.off()
   
   
@@ -74,24 +78,28 @@ plotModelComparison <- function(modelPaths, modelChars, N_sites, N_years, plotPa
   R_year <- paste0('R_year[', 1:N_years, ']')
   
   pdf(paste0(plotPath, '/ModelComp_R_year.pdf'), width = 8, height = 5)
-  ggplot(subset(data.all, Parameter %in% R_year)) + 
-    geom_density(aes(x = Value, color = Model, fill = Model), alpha = 0.5) + 
-    facet_wrap(~Parameter, scales = 'free') +
-    scale_fill_viridis(discrete = T) + 
-    scale_color_viridis(discrete = T) + 
-    theme_bw() + theme(panel.grid = element_blank())
+  print(
+    ggplot(subset(data.all, Parameter %in% R_year)) + 
+      geom_density(aes(x = Value, color = Model, fill = Model), alpha = 0.5) + 
+      facet_wrap(~Parameter, scales = 'free') +
+      scale_fill_viridis(discrete = T) + 
+      scale_color_viridis(discrete = T) + 
+      theme_bw() + theme(panel.grid = element_blank())
+  )
   dev.off()
   
   # Annual density (total)
   D <- paste0('D[', 1:N_years, ']') 
   
   pdf(paste0(plotPath, '/ModelComp_D.pdf'), width = 8, height = 5)
-  ggplot(subset(data.all, Parameter %in% D)) + 
-    geom_density(aes(x = Value, color = Model, fill = Model), alpha = 0.5) + 
-    facet_wrap(~Parameter, scales = 'free') +
-    scale_fill_viridis(discrete = T) + 
-    scale_color_viridis(discrete = T) + 
-    theme_bw() + theme(panel.grid = element_blank())
+  print(
+    ggplot(subset(data.all, Parameter %in% D)) + 
+      geom_density(aes(x = Value, color = Model, fill = Model), alpha = 0.5) + 
+      facet_wrap(~Parameter, scales = 'free') +
+      scale_fill_viridis(discrete = T) + 
+      scale_color_viridis(discrete = T) + 
+      theme_bw() + theme(panel.grid = element_blank())
+  )
   dev.off()
   
   # Site- and age-specific population sizes
