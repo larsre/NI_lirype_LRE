@@ -33,21 +33,16 @@ rypeIDSM <- nimbleCode({
     # effective strip width
     esw[t] <- sqrt(pi * sigma2[t] / 2) 
     p[t] <- min(esw[t], W) / W
-    #f0[t] <- 1/esw[t] #assuming all detected on the line
   }
   
   ########################################################   
   for (i in 1:N_obs){ 
     # LIKELIHOOD
-    # using zeros trick
-    y[i] ~ dunif(0,W) 
-    L.f0[i] <- exp(-y[i]*y[i] / (2*sigma2[Year_obs[i]])) * 1/esw[Year_obs[i]] #y are the distances
-    nlogL.f0[i] <- -log(L.f0[i])
-    zeros.dist[i] ~ dpois(nlogL.f0[i])
+    # using nimbleDistance::dHN
+    y[i] ~ dHN(sigma = sigma[Year_obs[i]], Xmax = W, point = 0)
   }
   
-  ## Hierarchical node: esw[t]; 
-  ##
+
   ###################################################
   ## Random effects model for R (i.e. )
   ## Data: 

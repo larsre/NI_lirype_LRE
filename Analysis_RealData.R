@@ -66,15 +66,24 @@ input_data <- prepareInputData(d_trans = LT_data$d_trans,
 # MODEL SETUP #
 #-------------#
 
-model_setup <- setupModel(modelCode.path = "NIMBLE Code/RypeIDSM.R",
+# Original version (zeroes-trick)
+# model_setup <- setupModel(modelCode.path = "NIMBLE Code/RypeIDSM.R",
+#                           customDist = FALSE,
+#                           nim.data = input_data$nim.data, 
+#                           nim.constants = input_data$nim.constants,
+#                           testRun = FALSE, initVals.seed = 0)
+  
+# Updated version (nimbleDistance::dHN)
+model_setup <- setupModel(modelCode.path = "NIMBLE Code/RypeIDSM_dHN.R",
+                          customDist = TRUE,
                           nim.data = input_data$nim.data, 
                           nim.constants = input_data$nim.constants,
-                          testRun = TRUE, initVals.seed = 0)
-  
+                          testRun = FALSE, initVals.seed = 0)
+
 
 # MODEL (TEST) RUN #
 #------------------#
-
+t.start <- Sys.time()
 IDSM.out <- nimbleMCMC(code = model_setup$modelCode, 
                        data = input_data$nim.data, 
                        constants = input_data$nim.constants,
@@ -86,16 +95,18 @@ IDSM.out <- nimbleMCMC(code = model_setup$modelCode,
                        thin = model_setup$mcmcParams$nthin, 
                        samplesAsCodaMCMC = TRUE, 
                        setSeed = 0)
+Sys.time() - t.start
 
-saveRDS(IDSM.out, file = 'rypeIDSM_realData_Lierne.rds')
+#saveRDS(IDSM.out, file = 'rypeIDSM_realData_Lierne.rds')
+saveRDS(IDSM.out, file = 'rypeIDSM_dHN_realData_Lierne.rds')
 
 
 # OPTIONAL: MODEL COMPARISON (PLOTS) #
 #------------------------------------#
 
-modelComp <- plotModelComparison(modelPaths = c("mod3b_versionB_realData.rds", 
-                                                "mod3b_versionC_realData.rds"), 
-                                 modelChars = c("Model B", "Model C"), 
+modelComp <- plotModelComparison(modelPaths = c("rypeIDSM_realData_Lierne.rds", 
+                                                "rypeIDSM_dHN_realData_Lierne.rds"), 
+                                 modelChars = c("Zeroes trick", "dHN"), 
                                  N_sites = 58, N_years = 6,
                                  plotPath = "Plots/ModelCompTest",
                                  returnData = FALSE)
