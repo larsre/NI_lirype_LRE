@@ -60,7 +60,7 @@ plotModelComparison <- function(modelPaths, modelChars, N_sites, N_years, plotPa
   dev.off()
   
   # Detection parameters
-  detects <- c(paste0('ews[', 1:N_years, ']'), paste0('p[', 1:N_years, ']'))
+  detects <- c('mu.dd', 'sigma.dd', 'b', paste0('esw[', 1:N_years, ']'), paste0('p[', 1:N_years, ']'))
   
   pdf(paste0(plotPath, '/ModelComp_Detects.pdf'), width = 8, height = 5)
   print(

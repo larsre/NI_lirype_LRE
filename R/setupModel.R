@@ -1,6 +1,8 @@
 #' Set up model, data, and initial values for running MCMC
 #'
 #' @param modelCode.path string. Relative path to the model file to be used
+#' @param customDist logical. If TRUE, uses custom half-normal distribution from
+#' nimbleDistance package.  
 #' @param nim.data list of input objects representing data
 #' @param nim.constants list of input objects representing constants
 #' @param niter integer. Number of MCMC iterations (default = 25000)
@@ -17,20 +19,33 @@
 #'
 #' @examples
 
-setupModel <- function(modelCode.path, 
+setupModel <- function(modelCode.path, customDist,
                        nim.data, nim.constants,
                        niter = 25000, nthin = 5, nburn = 5000, nchains = 3,
                        testRun = FALSE, initVals.seed){
 
+  
+  ## Catch mismatches between model code name and distribution settings
+  if((customDist & (!(grepl('dHN', modelCode.path, fixed = TRUE)) & !(grepl('dHR', modelCode.path, fixed = TRUE)))) |
+     (!customDist & (grepl('dHN', modelCode.path, fixed = TRUE) & grepl('dHR', modelCode.path, fixed = TRUE)))){
+    stop('Mismatch between model code name and distribution settings. Check inputs for modelCode.path and customDist.')
+  }
+  
   ## Load model code
   require('nimble')
+  if(customDist){require('nimbleDistance')}
   source(modelCode.path)
   
   ## Set parameters to monitor
   params <- c("esw", "R_year", "p", "D",
-              "Density", "N_exp", 
+              "sigma", "mu.dd", "sigma.dd",
+              "Density", "N_exp",
               "mu.D1", "sigma.D", "mu.R", "sigma.R",
               "Mu.S1", "Mu.S2", "ratio.JA1")
+  
+  if(grepl('dHR', modelCode.path, fixed = TRUE)){
+    params <- c(params, "b")
+  }
   
   ## Simulate initial values
   set.seed(initVals.seed)
