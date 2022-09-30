@@ -26,8 +26,8 @@ setupModel <- function(modelCode.path, customDist,
 
   
   ## Catch mismatches between model code name and distribution settings
-  if((customDist & !(grepl('dHN', modelCode.path, fixed = TRUE))) |
-     (!customDist & grepl('dHN', modelCode.path, fixed = TRUE))){
+  if((customDist & (!(grepl('dHN', modelCode.path, fixed = TRUE)) & !(grepl('dHR', modelCode.path, fixed = TRUE)))) |
+     (!customDist & (grepl('dHN', modelCode.path, fixed = TRUE) & grepl('dHR', modelCode.path, fixed = TRUE)))){
     stop('Mismatch between model code name and distribution settings. Check inputs for modelCode.path and customDist.')
   }
   
@@ -42,6 +42,10 @@ setupModel <- function(modelCode.path, customDist,
               "Density", "N_exp",
               "mu.D1", "sigma.D", "mu.R", "sigma.R",
               "Mu.S1", "Mu.S2", "ratio.JA1")
+  
+  if(grepl('dHR', modelCode.path, fixed = TRUE)){
+    params <- c(params, "b")
+  }
   
   ## Simulate initial values
   set.seed(initVals.seed)
