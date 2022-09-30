@@ -1,7 +1,7 @@
 
 ## MODEL B: Altered process model
 
-modM3b.code.B <- nimbleCode({
+rypeIDSM <- nimbleCode({
   
   ####################################################
   #### Distance sampling half normal detection function; 
@@ -184,7 +184,7 @@ modM3b.code.B <- nimbleCode({
 
 ## MODEL C: Altered process model + explicit use of age-structured data
 
-modM3b.code.C <- nimbleCode({
+rypeIDSM <- nimbleCode({
   
   ####################################################
   #### Distance sampling half normal detection function; 
