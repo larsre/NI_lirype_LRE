@@ -69,7 +69,7 @@ input_data <- prepareInputData(d_trans = LT_data$d_trans,
 # Original version (zeroes-trick)
 # model_setup <- setupModel(modelCode.path = "NIMBLE Code/RypeIDSM.R",
 #                           customDist = FALSE,
-#                           nim.data = input_data$nim.data, 
+#                           nim.data = input_data$nim.data,
 #                           nim.constants = input_data$nim.constants,
 #                           testRun = FALSE, initVals.seed = 0)
   
