@@ -92,7 +92,8 @@ model_setup <- setupModel(modelCode.path = "NIMBLE Code/RypeIDSM_dHN.R",
 # MODEL (TEST) RUN #
 #------------------#
 t.start <- Sys.time()
-IDSM.out <- nimbleMCMC(code = model_setup$modelCode, 
+IDSM.out <- nimbleMCMC(#code = model_setup$modelCode,
+                       code = rypeIDSM,
                        data = input_data$nim.data, 
                        constants = input_data$nim.constants,
                        inits = model_setup$initVals, 

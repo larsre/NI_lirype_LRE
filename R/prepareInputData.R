@@ -208,7 +208,7 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities, dataVSconstants 
     N_a_line_year = N_a_line_year, # Number of birds observed per ageclass per site per year
     L = L, # Transect length per site and year
     
-    N_years = N_years, # Number of years with data
+    N_years = max(N_years), # Max number of years with data
     N_sites = N_sites, # Total number of monitored sites
     
     A = A, # Total covered area per year
@@ -219,6 +219,7 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities, dataVSconstants 
     Survs1 = d_cmr$Survs1, # Season 1 releases & survivors (area 1)
     Survs2 = d_cmr$Survs2, # Season 2 releases & survivors (area 1)
     
+    N_areas = N_areas,
     area_names = localities
   )
   
@@ -236,7 +237,7 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities, dataVSconstants 
                         N_sites = input.data$N_sites, 
                         R_obs_year = input.data$R_obs_year, N_R_obs = input.data$N_R_obs,
                         N_ageC = N_ageC,
-                        area_names = input.data$area_names)
+                        N_areas = input.data$N_areas, area_names = input.data$area_names)
   
   ## Make final data list to return
   if(dataVSconstants){

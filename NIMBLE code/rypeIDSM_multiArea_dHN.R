@@ -36,12 +36,13 @@ rypeIDSM <- nimbleCode({
   }
   
   ########################################################   
-  for (i in 1:N_obs){ 
-    # LIKELIHOOD
-    # using nimbleDistance::dHN
-    y[i] ~ dHN(sigma = sigma[Year_obs[i]], Xmax = W, point = 0)
+  for(x in 1:N_areas){
+    for (i in 1:N_obs[x]){ 
+      # LIKELIHOOD
+      # using nimbleDistance::dHN
+      y[x, i] ~ dHN(sigma = sigma[Year_obs[x, i]], Xmax = W, point = 0)
+    }
   }
-  
 
   ###################################################
   ## Random effects model for R (i.e. )
@@ -64,11 +65,12 @@ rypeIDSM <- nimbleCode({
   R_year[1:N_years] <- exp(mu.R + eps.R[1:N_years])
   
   ## Likelihood;
-  for (i in 1:N_R_obs){
-    
-    R_obs[i] ~ dpois(R_year[R_obs_year[i]])
+  for(x in 1:N_areas){
+    for (i in 1:N_R_obs[x]){
+      
+      R_obs[x, i] ~ dpois(R_year[R_obs_year[x, i]])
+    }
   }
-  
   
   
   ########################################################################
@@ -83,7 +85,7 @@ rypeIDSM <- nimbleCode({
   
   ## Priors; 
   
-  for(j in 1:N_sites){
+  for(j in 1:N_sites[1]){
     eps.D1[j] ~ dnorm(0, sd = sigma.D)
   }
   
@@ -93,24 +95,26 @@ rypeIDSM <- nimbleCode({
   ratio.JA1 ~ dunif(0, 1)
   
   ## State model
-  for (j in 1:N_sites){
+  for (j in 1:N_sites[1]){
     
     #for(a in 1:N_ageC){
-    #  N_exp[a, j, 1] ~ dpois(Density[a, j, 1]*L[j, 1]*(W/scale1)*2)      ## Expected number of birds
+    #  N_exp[a, j, 1] ~ dpois(Density[a, j, 1]*L[1, j, 1]*(W/scale1)*2)      ## Expected number of birds
     #}  
     
-    N_exp[1, j, 1] ~ dpois(Density[1, j, 1]*L[j, 1]*(W/scale1)*2) 
-    N_exp[2, j, 1] ~ dpois(Density[2, j, 1]*L[j, 1]*(W/scale1)*2) 
+    N_exp[1, j, 1] ~ dpois(Density[1, j, 1]*L[1, j, 1]*(W/scale1)*2) 
+    N_exp[2, j, 1] ~ dpois(Density[2, j, 1]*L[1, j, 1]*(W/scale1)*2) 
     
     Density[1, j, 1] <- exp(mu.D1 + eps.D1[j])*ratio.JA1             ## random effects model for spatial variation in density for year 1
     Density[2, j, 1] <- exp(mu.D1 + eps.D1[j])*(1-ratio.JA1)
     
     ## Detection model year 1
-    for(x in 1:N_ageC){
-      N_a_line_year[x, j, 1] ~ dpois(p[1]*N_exp[x, j, 1])
+    for(x in 1:N_areas){
+      for(a in 1:N_ageC){
+        N_a_line_year[x, a, j, 1] ~ dpois(p[1]*N_exp[a, j, 1])
+      }
+      
+      #N_line_year[x, j, 1] ~ dpois(p[1]* sum(N_exp[1:N_ageC, j, 1]))
     }
-    
-    #N_line_year[j, 1] ~ dpois(p[1]* sum(N_exp[1:N_ageC, j, 1]))
   }
   
   #####################################################
@@ -127,10 +131,10 @@ rypeIDSM <- nimbleCode({
   S[1:N_years] <- S1[1:N_years]*S2[1:N_years]
   
   ## Data likelihoods
-  for (t in 1:4){
+  for (t in 1:5){
     
-    Survs1[t, 2] ~ dbinom(S1[t], Survs1[t, 1])
-    Survs2[t, 2] ~ dbinom(S2[t], Survs2[t, 1])
+    Survs1[1, t, 2] ~ dbinom(S1[t], Survs1[1, t, 1])
+    Survs2[1, t, 2] ~ dbinom(S2[t], Survs2[1, t, 1])
     
   }
   
@@ -139,22 +143,23 @@ rypeIDSM <- nimbleCode({
   ### Model for year 2 - n.years; 
   ### post-breeding census
   
-  for(j in 1:N_sites){
+  for(j in 1:N_sites[1]){
     for(t in 2:N_years){
       
       ## Process model
       Density[2, j, t] <- sum(Density[1:N_ageC, j, t-1])*S[t-1] # Juveniles
       Density[1, j, t] <- Density[2, j, t]*R_year[t]/2 # Adults
       
-      N_exp[1:N_ageC, j, t] <- Density[1:N_ageC, j, t]*L[j, t]*(W*scale1)*2
+      N_exp[1:N_ageC, j, t] <- Density[1:N_ageC, j, t]*L[1, j, t]*(W*scale1)*2
       
       ## Detection model year 2 - T
-      for(x in 1:N_ageC){
-        N_a_line_year[x, j, t] ~ dpois(p[t]*N_exp[x, j, t])
+      for(x in 1:N_areas){
+        for(a in 1:N_ageC){
+          N_a_line_year[x, a, j, t] ~ dpois(p[t]*N_exp[a, j, t])
+        }
+        
+        #N_line_year[x, j, t] ~ dpois(p[t]*sum(N_exp[1:N_ageC, j, t]))
       }
-      
-      #N_line_year[j, t] ~ dpois(p[t]*sum(N_exp[1:N_ageC, j, t]))
-      
     }
   }
   
@@ -167,8 +172,8 @@ rypeIDSM <- nimbleCode({
   ### Derived parameters; Nt and Dt
   
   for (t in 1:N_years){
-    N_tot_exp[t] <- sum(N_exp[1, 1:N_sites, t] + N_exp[2, 1:N_sites, t])    ## Summing up expected number of birds in covered area; 
-    D[t] <- N_tot_exp[t] / A[t]       ## Deriving density as N/A     
+    N_tot_exp[t] <- sum(N_exp[1, 1:N_sites[1], t] + N_exp[2, 1:N_sites[1], t])    ## Summing up expected number of birds in covered area; 
+    D[t] <- N_tot_exp[t] / A[1, t]       ## Deriving density as N/A     
   }
   
 })
