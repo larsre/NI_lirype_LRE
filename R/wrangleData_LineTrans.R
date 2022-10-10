@@ -61,7 +61,7 @@ wrangleData_LineTrans <- function(DwC_archive, localities, minYear, maxYear){
   
   # Observations: distance to transect lines
   d_obsTemp <- Eve %>% 
-    dplyr::select(locationID, parentEventID, eventID, eventRemarks, 
+    dplyr::select(locationID, locality, parentEventID, eventID, eventRemarks, 
                   dynamicProperties, eventDate) %>%
     dplyr::filter(eventRemarks == "Human observation") %>%
     dplyr::mutate(dynamicProperties = purrr::map(dynamicProperties, ~ jsonlite::fromJSON(.) %>% as.data.frame())) %>%
@@ -69,7 +69,7 @@ wrangleData_LineTrans <- function(DwC_archive, localities, minYear, maxYear){
     dplyr::rename(DistanceToTransectLine = "perpendicular.distance.in.meters.from.transect.line.as.reported.by.the.field.worker") %>%
     dplyr::mutate(DistanceToTransectLine = as.numeric(DistanceToTransectLine), 
                   Year = lubridate::year(eventDate)) %>%
-    dplyr::select(locationID, parentEventID, eventID, DistanceToTransectLine, Year)
+    dplyr::select(locationID, locality, parentEventID, eventID, DistanceToTransectLine, Year)
   
   # Observations: remaining information (willow ptarmigan only)
   d_obs <- Occ %>% 

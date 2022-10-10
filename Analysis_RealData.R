@@ -35,7 +35,7 @@ if(downloadData){
 #----------------------------#
 
 ## Set localities and time period of interest
-localities <- "Lierne Fjellst. Vest"
+localities <- c("Lierne Fjellst. Vest", "Lierne Fjellst. øst", "Middagskneppen")
 minYear <- 2015
 maxYear <- 2020
 
@@ -59,6 +59,7 @@ d_cmr <- wrangleData_CMR()
 input_data <- prepareInputData(d_trans = LT_data$d_trans, 
                                d_obs = LT_data$d_obs,
                                d_cmr = d_cmr,
+                               localities = localities, 
                                dataVSconstants = TRUE,
                                save = TRUE)
 
