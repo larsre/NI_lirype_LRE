@@ -54,17 +54,23 @@ rypeIDSM <- nimbleCode({
   # Year_obs <- vector with years for each observation. 
   
   ## Priors; 
-  for (t in 1:N_years){
-    eps.R[t] ~ dnorm(0, sd = sigma.R)
-  }
+
   
-  mu.R  ~ dunif(-5, 5)
-  sigma.R ~ dunif(0, 15)
+  h.mu.R  ~ dunif(-5, 5)
+  h.sigma.R ~ dunif(0, 5)
+  
+  sigmaT.R ~ dunif(0, 5)
+  
+  for (t in 1:N_years){
+    epsT.R[t] ~ dnorm(0, sd = sigmaT.R) # Temporal RE (shared across areas)
+  }
   
   for(x in 1:N_areas){
     
+    mu.R[x]  ~ dnorm(mean = h.mu.R, sd = h.sigma.R)
+    
     ## Constraints;
-    R_year[x, 1:N_years] <- exp(mu.R + eps.R[1:N_years])
+    R_year[x, 1:N_years] <- exp(mu.R[x] + epsT.R[1:N_years])
     
     ## Likelihood;
     for (i in 1:N_R_obs[x]){
@@ -160,8 +166,8 @@ rypeIDSM <- nimbleCode({
       for(t in 2:N_years){
         
         ## Process model
-        Density[x, 2, j, t] <- sum(Density[x, 1:N_ageC, j, t-1])*S[x, t-1] # Juveniles
-        Density[x, 1, j, t] <- Density[x, 2, j, t]*R_year[x, t]/2 # Adults
+        Density[x, 2, j, t] <- sum(Density[x, 1:N_ageC, j, t-1])*S[x, t-1] # Adults
+        Density[x, 1, j, t] <- Density[x, 2, j, t]*R_year[x, t]/2 # Juveniles
         
         N_exp[x, 1:N_ageC, j, t] <- Density[x, 1:N_ageC, j, t]*L[x, j, t]*(W*scale1)*2
         

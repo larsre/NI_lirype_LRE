@@ -112,6 +112,18 @@ Sys.time() - t.start
 saveRDS(IDSM.out, file = 'rypeIDSM_dHN_multiArea_realData_Lierne.rds')
 
 
+# OPTIONAL: MCMC TRACE PLOTS #
+#----------------------------#
+
+MCMCvis::MCMCtrace(IDSM.out,
+                   params = c("esw", "p", "D",
+                              "R_year", "mu.R", "h.mu.R", "h.sigma.R", "sigmaT.R",
+                              "sigma", "mu.dd", "sigma.dd",
+                              "mu.D1", "sigma.D",
+                              "Mu.S1", "Mu.S2", "h.Mu.S1", "h.Mu.S2", "h.sigma.S1", "h.sigma.S2",
+                              "ratio.JA1"))
+
+
 # OPTIONAL: MODEL COMPARISON (PLOTS) #
 #------------------------------------#
 

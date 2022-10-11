@@ -37,10 +37,11 @@ setupModel <- function(modelCode.path, customDist,
   source(modelCode.path)
   
   ## Set parameters to monitor
-  params <- c("esw", "R_year", "p", "D",
+  params <- c("esw", "p", "D",
+              "R_year", "mu.R", "h.mu.R", "h.sigma.R", "sigmaT.R",
               "sigma", "mu.dd", "sigma.dd",
               "Density", "N_exp",
-              "mu.D1", "sigma.D", "mu.R", "sigma.R",
+              "mu.D1", "sigma.D",
               "Mu.S1", "Mu.S2", "h.Mu.S1", "h.Mu.S2", "h.sigma.S1", "h.sigma.S2",
               "ratio.JA1")
   
