@@ -75,7 +75,7 @@ input_data <- prepareInputData(d_trans = LT_data$d_trans,
 #                           testRun = FALSE, initVals.seed = 0)
   
 # Updated version (nimbleDistance::dHN)
-model_setup <- setupModel(modelCode.path = "NIMBLE Code/RypeIDSM_dHN.R",
+model_setup <- setupModel(modelCode.path = "NIMBLE Code/RypeIDSM_multiArea_dHN.R",
                           customDist = TRUE,
                           nim.data = input_data$nim.data,
                           nim.constants = input_data$nim.constants,
@@ -107,16 +107,17 @@ IDSM.out <- nimbleMCMC(#code = model_setup$modelCode,
 Sys.time() - t.start
 
 #saveRDS(IDSM.out, file = 'rypeIDSM_realData_Lierne.rds')
-saveRDS(IDSM.out, file = 'rypeIDSM_dHN_realData_Lierne.rds')
+#saveRDS(IDSM.out, file = 'rypeIDSM_dHN_realData_Lierne.rds')
 #saveRDS(IDSM.out, file = 'rypeIDSM_dHR_realData_Lierne.rds')
+saveRDS(IDSM.out, file = 'rypeIDSM_dHN_multiArea_realData_Lierne.rds')
 
 
 # OPTIONAL: MODEL COMPARISON (PLOTS) #
 #------------------------------------#
 
-modelComp <- plotModelComparison(modelPaths = c("rypeIDSM_realData_Lierne.rds", 
-                                                "rypeIDSM_dHN_realData_Lierne.rds"), 
-                                 modelChars = c("Zeroes trick", "dHN"), 
-                                 N_sites = 58, N_years = 6,
-                                 plotPath = "Plots/ModelCompTest",
-                                 returnData = FALSE)
+# modelComp <- plotModelComparison(modelPaths = c("rypeIDSM_realData_Lierne.rds", 
+#                                                 "rypeIDSM_dHN_realData_Lierne.rds"), 
+#                                  modelChars = c("Zeroes trick", "dHN"), 
+#                                  N_sites = 58, N_years = 6,
+#                                  plotPath = "Plots/ModelCompTest",
+#                                  returnData = FALSE)

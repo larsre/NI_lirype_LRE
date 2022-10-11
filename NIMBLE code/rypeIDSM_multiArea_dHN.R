@@ -61,14 +61,14 @@ rypeIDSM <- nimbleCode({
   mu.R  ~ dunif(-5, 5)
   sigma.R ~ dunif(0, 15)
   
-  ## Constraints;
-  R_year[1:N_years] <- exp(mu.R + eps.R[1:N_years])
-  
-  ## Likelihood;
   for(x in 1:N_areas){
+    
+    ## Constraints;
+    R_year[x, 1:N_years] <- exp(mu.R + eps.R[1:N_years])
+    
+    ## Likelihood;
     for (i in 1:N_R_obs[x]){
-      
-      R_obs[x, i] ~ dpois(R_year[R_obs_year[x, i]])
+      R_obs[x, i] ~ dpois(R_year[x, R_obs_year[x, i]])
     }
   }
   
@@ -82,38 +82,38 @@ rypeIDSM <- nimbleCode({
   # N_line_year <- number of birds pr. line 
   # L <- length of transect lines
   
-  
-  ## Priors; 
-  
-  for(j in 1:N_sites[1]){
-    eps.D1[j] ~ dnorm(0, sd = sigma.D)
-  }
-  
-  mu.D1 ~ dunif(-3, 30)
-  sigma.D ~ dunif(0, 20)
-  
-  ratio.JA1 ~ dunif(0, 1)
-  
-  ## State model
-  for (j in 1:N_sites[1]){
+  for(x in 1:N_areas){
     
-    #for(a in 1:N_ageC){
-    #  N_exp[a, j, 1] ~ dpois(Density[a, j, 1]*L[1, j, 1]*(W/scale1)*2)      ## Expected number of birds
-    #}  
+    ## Priors; 
     
-    N_exp[1, j, 1] ~ dpois(Density[1, j, 1]*L[1, j, 1]*(W/scale1)*2) 
-    N_exp[2, j, 1] ~ dpois(Density[2, j, 1]*L[1, j, 1]*(W/scale1)*2) 
+    for(j in 1:N_sites[x]){
+      eps.D1[x, j] ~ dnorm(0, sd = sigma.D[x])
+    }
     
-    Density[1, j, 1] <- exp(mu.D1 + eps.D1[j])*ratio.JA1             ## random effects model for spatial variation in density for year 1
-    Density[2, j, 1] <- exp(mu.D1 + eps.D1[j])*(1-ratio.JA1)
+    mu.D1[x] ~ dunif(-3, 30)
+    sigma.D[x] ~ dunif(0, 20)
     
-    ## Detection model year 1
-    for(x in 1:N_areas){
+    ratio.JA1[x] ~ dunif(0, 1)
+    
+    ## State model
+    for (j in 1:N_sites[x]){
+      
+      #for(a in 1:N_ageC){
+      #  N_exp[a, j, 1] ~ dpois(Density[a, j, 1]*L[1, j, 1]*(W/scale1)*2)      ## Expected number of birds
+      #}  
+      
+      N_exp[x, 1, j, 1] ~ dpois(Density[x, 1, j, 1]*L[x, j, 1]*(W/scale1)*2) 
+      N_exp[x, 2, j, 1] ~ dpois(Density[x, 2, j, 1]*L[x, j, 1]*(W/scale1)*2) 
+      
+      Density[x, 1, j, 1] <- exp(mu.D1[x] + eps.D1[x, j])*ratio.JA1[x]             ## random effects model for spatial variation in density for year 1
+      Density[x, 2, j, 1] <- exp(mu.D1[x] + eps.D1[x, j])*(1-ratio.JA1[x])
+      
+      ## Detection model year 1
       for(a in 1:N_ageC){
-        N_a_line_year[x, a, j, 1] ~ dpois(p[1]*N_exp[a, j, 1])
+        N_a_line_year[x, a, j, 1] ~ dpois(p[1]*N_exp[x, a, j, 1])
       }
       
-      #N_line_year[x, j, 1] ~ dpois(p[1]* sum(N_exp[1:N_ageC, j, 1]))
+      #N_line_year[x, j, 1] ~ dpois(p[1]* sum(N_exp[x, 1:N_ageC, j, 1]))
     }
   }
   
@@ -143,22 +143,22 @@ rypeIDSM <- nimbleCode({
   ### Model for year 2 - n.years; 
   ### post-breeding census
   
-  for(j in 1:N_sites[1]){
-    for(t in 2:N_years){
-      
-      ## Process model
-      Density[2, j, t] <- sum(Density[1:N_ageC, j, t-1])*S[t-1] # Juveniles
-      Density[1, j, t] <- Density[2, j, t]*R_year[t]/2 # Adults
-      
-      N_exp[1:N_ageC, j, t] <- Density[1:N_ageC, j, t]*L[1, j, t]*(W*scale1)*2
-      
-      ## Detection model year 2 - T
-      for(x in 1:N_areas){
+  for(x in 1:N_areas){
+    for(j in 1:N_sites[x]){
+      for(t in 2:N_years){
+        
+        ## Process model
+        Density[x, 2, j, t] <- sum(Density[x, 1:N_ageC, j, t-1])*S[t-1] # Juveniles
+        Density[x, 1, j, t] <- Density[x, 2, j, t]*R_year[x, t]/2 # Adults
+        
+        N_exp[x, 1:N_ageC, j, t] <- Density[x, 1:N_ageC, j, t]*L[x, j, t]*(W*scale1)*2
+        
+        ## Detection model year 2 - T
         for(a in 1:N_ageC){
-          N_a_line_year[x, a, j, t] ~ dpois(p[t]*N_exp[a, j, t])
+          N_a_line_year[x, a, j, t] ~ dpois(p[t]*N_exp[x, a, j, t])
         }
         
-        #N_line_year[x, j, t] ~ dpois(p[t]*sum(N_exp[1:N_ageC, j, t]))
+        #N_line_year[x, j, t] ~ dpois(p[t]*sum(N_exp[x, 1:N_ageC, j, t]))
       }
     }
   }
@@ -170,10 +170,11 @@ rypeIDSM <- nimbleCode({
   
   ####################################################
   ### Derived parameters; Nt and Dt
-  
-  for (t in 1:N_years){
-    N_tot_exp[t] <- sum(N_exp[1, 1:N_sites[1], t] + N_exp[2, 1:N_sites[1], t])    ## Summing up expected number of birds in covered area; 
-    D[t] <- N_tot_exp[t] / A[1, t]       ## Deriving density as N/A     
+  for(x in 1:N_areas){
+    for (t in 1:N_years){
+      N_tot_exp[x, t] <- sum(N_exp[x, 1, 1:N_sites[x], t] + N_exp[x, 2, 1:N_sites[x], t])    ## Summing up expected number of birds in covered area; 
+      D[x, t] <- N_tot_exp[x, t] / A[x, t]       ## Deriving density as N/A     
+    }
   }
-  
+
 })

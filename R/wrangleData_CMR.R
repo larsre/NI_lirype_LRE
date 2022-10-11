@@ -28,8 +28,8 @@ wrangleData_CMR <- function(){
     as.matrix()
   
   ## Reformat to arrays for matching to area index
-  Survs1_arr <- array(d_cmr$Survs1, dim = c(1, nrow(d_cmr$Survs1), 2))
-  Survs2_arr <- array(d_cmr$Survs2, dim = c(1, nrow(d_cmr$Survs2), 2))
+  Survs1_arr <- array(Survs1, dim = c(1, nrow(Survs1), 2))
+  Survs2_arr <- array(Survs2, dim = c(1, nrow(Survs2), 2))
   
   ## Arrange in list
   d_cmr <- list(Survs1 = Survs1_arr, Survs2 = Survs2_arr, area_names = "Lierne Fjellst. Vest")
