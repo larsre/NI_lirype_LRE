@@ -121,20 +121,32 @@ rypeIDSM <- nimbleCode({
   ## Model for survival; 
   
   ## Priors
-  Mu.S1 ~ dunif(0.25, 0.9)
-  Mu.S2 ~ dunif(0.25, 0.9)
+  h.Mu.S1 ~ dunif(0.25, 0.9)
+  h.Mu.S2 ~ dunif(0.25, 0.9)
   
-  ## Constraints
-  S1[1:N_years] <- Mu.S1
-  S2[1:N_years] <- Mu.S2
+  h.sigma.S1 ~ dunif(0, 5)
+  h.sigma.S2 ~ dunif(0, 5)
   
-  S[1:N_years] <- S1[1:N_years]*S2[1:N_years]
-  
+  for(x in 1:N_areas){
+    mu.S1[x] ~ dnorm(logit(h.Mu.S1), sd = h.sigma.S1)
+    mu.S2[x] ~ dnorm(logit(h.Mu.S2), sd = h.sigma.S2)
+    
+    logit(Mu.S1[x]) <- mu.S1[x]
+    logit(Mu.S2[x]) <- mu.S2[x]
+    
+    ## Constraints
+    S1[x, 1:N_years] <- Mu.S1[x]
+    S2[x, 1:N_years] <- Mu.S2[x]
+    
+    S[x, 1:N_years] <- S1[x, 1:N_years]*S2[x, 1:N_years]
+    
+  }
+   
   ## Data likelihoods
   for (t in 1:5){
     
-    Survs1[1, t, 2] ~ dbinom(S1[t], Survs1[1, t, 1])
-    Survs2[1, t, 2] ~ dbinom(S2[t], Survs2[1, t, 1])
+    Survs1[t, 2] ~ dbinom(S1[SurvAreaIdx, t], Survs1[t, 1])
+    Survs2[t, 2] ~ dbinom(S2[SurvAreaIdx, t], Survs2[t, 1])
     
   }
   
@@ -148,7 +160,7 @@ rypeIDSM <- nimbleCode({
       for(t in 2:N_years){
         
         ## Process model
-        Density[x, 2, j, t] <- sum(Density[x, 1:N_ageC, j, t-1])*S[t-1] # Juveniles
+        Density[x, 2, j, t] <- sum(Density[x, 1:N_ageC, j, t-1])*S[x, t-1] # Juveniles
         Density[x, 1, j, t] <- Density[x, 2, j, t]*R_year[x, t]/2 # Adults
         
         N_exp[x, 1:N_ageC, j, t] <- Density[x, 1:N_ageC, j, t]*L[x, j, t]*(W*scale1)*2

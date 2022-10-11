@@ -1,5 +1,6 @@
 simulateInits <- function(nim.data, nim.constants){
   
+  ## Initial densities / population sizes
   mu.D1 <- runif(nim.constants$N_areas, 3, 4)
   ratio.JA1 <- runif(nim.constants$N_areas, 0.2, 0.6)
   
@@ -15,6 +16,14 @@ simulateInits <- function(nim.data, nim.constants){
     }
   }
 
+  ## Area-specific survival parameters
+  h.Mu.S1 <- runif(1, 0.6, 0.7) 
+  h.Mu.S2 <- runif(1, 0.6, 0.7)
+  h.sigma.S1 <- runif(1, 0, 0.1)
+  h.sigma.S2 <- runif(1, 0, 0.1)
+  
+  mu.S1 <- rnorm(nim.constants$N_areas, plogis(h.Mu.S1), sd = h.sigma.S1)
+  mu.S2 <- rnorm(nim.constants$N_areas, plogis(h.Mu.S2), sd = h.sigma.S2)
   
   list(
     mu.dd = runif(1, 4, 5), 
@@ -27,8 +36,9 @@ simulateInits <- function(nim.data, nim.constants){
     eps.dd = rep(0, nim.constants$N_years), 
     eps.R = rep(0, nim.constants$N_years), 
     eps.D1 = matrix(0, nrow = nim.constants$N_areas, ncol = max(nim.constants$N_sites)),
-    Mu.S1 = runif(1, 0.6, 0.7), 
-    Mu.S2 = runif(1, 0.6, 0.7),
+    h.Mu.S1 = h.Mu.S1, h.Mu.S2 = h.Mu.S2,
+    h.sigma.S1 = h.sigma.S1, h.sigma.S2 = h.sigma.S2,
+    mu.S1 = mu.S1, mu.S2 = mu.S2,
     N_exp = N_exp,
     ratio.JA1 = ratio.JA1
   )

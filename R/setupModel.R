@@ -41,7 +41,8 @@ setupModel <- function(modelCode.path, customDist,
               "sigma", "mu.dd", "sigma.dd",
               "Density", "N_exp",
               "mu.D1", "sigma.D", "mu.R", "sigma.R",
-              "Mu.S1", "Mu.S2", "ratio.JA1")
+              "Mu.S1", "Mu.S2", "h.Mu.S1", "h.Mu.S2", "h.sigma.S1", "h.sigma.S2",
+              "ratio.JA1")
   
   if(grepl('dHR', modelCode.path, fixed = TRUE)){
     params <- c(params, "b")

@@ -27,12 +27,8 @@ wrangleData_CMR <- function(){
     dplyr::select(-YearPeriod, -TimePeriod) %>%
     as.matrix()
   
-  ## Reformat to arrays for matching to area index
-  Survs1_arr <- array(Survs1, dim = c(1, nrow(Survs1), 2))
-  Survs2_arr <- array(Survs2, dim = c(1, nrow(Survs2), 2))
-  
   ## Arrange in list
-  d_cmr <- list(Survs1 = Survs1_arr, Survs2 = Survs2_arr, area_names = "Lierne Fjellst. Vest")
+  d_cmr <- list(Survs1 = Survs1, Survs2 = Survs2, area_names = "Lierne Fjellst. Vest")
   
   ## Return list
   return(d_cmr)

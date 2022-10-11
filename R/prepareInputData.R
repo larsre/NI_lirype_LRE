@@ -218,6 +218,7 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities, dataVSconstants 
     
     Survs1 = d_cmr$Survs1, # Season 1 releases & survivors (area 1)
     Survs2 = d_cmr$Survs2, # Season 2 releases & survivors (area 1)
+    SurvAreaIdx = which(localities == d_cmr$area_names),
     
     N_areas = N_areas,
     area_names = localities
@@ -237,7 +238,8 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities, dataVSconstants 
                         N_sites = input.data$N_sites, 
                         R_obs_year = input.data$R_obs_year, N_R_obs = input.data$N_R_obs,
                         N_ageC = N_ageC,
-                        N_areas = input.data$N_areas, area_names = input.data$area_names)
+                        N_areas = input.data$N_areas, area_names = input.data$area_names,
+                        SurvAreaIdx = input.data$SurvAreaIdx)
   
   ## Make final data list to return
   if(dataVSconstants){

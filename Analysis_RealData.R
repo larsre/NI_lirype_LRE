@@ -79,7 +79,8 @@ model_setup <- setupModel(modelCode.path = "NIMBLE Code/RypeIDSM_multiArea_dHN.R
                           customDist = TRUE,
                           nim.data = input_data$nim.data,
                           nim.constants = input_data$nim.constants,
-                          testRun = FALSE, initVals.seed = 0)
+                          testRun = FALSE, nchains = 3,
+                          initVals.seed = 0)
 
 # Updated version (nimbleDistance::dHR)
 # NOTE: This does not work properly yet (calculation of esw likely needs adjusting)
@@ -92,8 +93,7 @@ model_setup <- setupModel(modelCode.path = "NIMBLE Code/RypeIDSM_multiArea_dHN.R
 # MODEL (TEST) RUN #
 #------------------#
 t.start <- Sys.time()
-IDSM.out <- nimbleMCMC(#code = model_setup$modelCode,
-                       code = rypeIDSM,
+IDSM.out <- nimbleMCMC(code = model_setup$modelCode,
                        data = input_data$nim.data, 
                        constants = input_data$nim.constants,
                        inits = model_setup$initVals, 
