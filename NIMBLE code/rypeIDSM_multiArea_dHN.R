@@ -16,23 +16,36 @@ rypeIDSM <- nimbleCode({
   
   #random year effect for distance sampling model; 
   ## Priors for hyper-parameters
-  mu.dd ~ dunif(-10, 100)
-  sigma.dd ~ dunif(0, 20)
+  h.mu.dd ~ dunif(-10, 100)
+  h.sigma.dd ~ dunif(0, 5)
+
+  for(x in 1:N_areas){
+    mu.dd[x] ~ dnorm(h.mu.dd, sd = h.sigma.dd)
+  }
+  
+  #mu.dd ~ dunif(-10, 100)
+  
+  sigmaT.dd ~ dunif(0, 20)
   
   for(t in 1:N_years){
-    eps.dd[t] ~ dnorm(0, sd = sigma.dd) 
+    epsT.dd[t] ~ dnorm(0, sd = sigmaT.dd) 
   }
   
   
   
   ########################################################
-  for(t in 1:N_years){
-    log(sigma[t]) <- mu.dd + eps.dd[t]
-    sigma2[t] <- sigma[t] * sigma[t]
-    
-    # effective strip width
-    esw[t] <- sqrt(pi * sigma2[t] / 2) 
-    p[t] <- min(esw[t], W) / W
+  for(x in 1:N_areas){
+    for(t in 1:N_years){
+      
+      #log(sigma[x, t]) <- mu.dd + epsT.dd[t]
+      log(sigma[x, t]) <- mu.dd[x] + epsT.dd[t]
+      
+      sigma2[x, t] <- sigma[x, t] * sigma[x, t]
+      
+      # effective strip width
+      esw[x, t] <- sqrt(pi * sigma2[x, t] / 2) 
+      p[x, t] <- min(esw[x, t], W) / W
+    }
   }
   
   ########################################################   
@@ -40,7 +53,7 @@ rypeIDSM <- nimbleCode({
     for (i in 1:N_obs[x]){ 
       # LIKELIHOOD
       # using nimbleDistance::dHN
-      y[x, i] ~ dHN(sigma = sigma[Year_obs[x, i]], Xmax = W, point = 0)
+      y[x, i] ~ dHN(sigma = sigma[x, Year_obs[x, i]], Xmax = W, point = 0)
     }
   }
 
@@ -116,10 +129,10 @@ rypeIDSM <- nimbleCode({
       
       ## Detection model year 1
       for(a in 1:N_ageC){
-        N_a_line_year[x, a, j, 1] ~ dpois(p[1]*N_exp[x, a, j, 1])
+        N_a_line_year[x, a, j, 1] ~ dpois(p[x, 1]*N_exp[x, a, j, 1])
       }
       
-      #N_line_year[x, j, 1] ~ dpois(p[1]* sum(N_exp[x, 1:N_ageC, j, 1]))
+      #N_line_year[x, j, 1] ~ dpois(p[x, 1]* sum(N_exp[x, 1:N_ageC, j, 1]))
     }
   }
   
@@ -173,10 +186,10 @@ rypeIDSM <- nimbleCode({
         
         ## Detection model year 2 - T
         for(a in 1:N_ageC){
-          N_a_line_year[x, a, j, t] ~ dpois(p[t]*N_exp[x, a, j, t])
+          N_a_line_year[x, a, j, t] ~ dpois(p[x, t]*N_exp[x, a, j, t])
         }
         
-        #N_line_year[x, j, t] ~ dpois(p[t]*sum(N_exp[x, 1:N_ageC, j, t]))
+        #N_line_year[x, j, t] ~ dpois(p[x, t]*sum(N_exp[x, 1:N_ageC, j, t]))
       }
     }
   }
