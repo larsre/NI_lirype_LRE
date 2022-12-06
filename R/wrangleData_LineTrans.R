@@ -19,11 +19,6 @@
 
 wrangleData_LineTrans <- function(DwC_archive, localities, minYear, maxYear){
   
-  ## Ensure necessary packages are available
-  require('tidyverse')
-  require('LivingNorwayR')
-  
-  
   ## Extract relevant parts from DwC_archive
   
   # Core table
