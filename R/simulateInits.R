@@ -1,3 +1,13 @@
+#' Simulate values for initializing integrated model
+#'
+#' @param nim.data list of input objects representing data
+#' @param nim.constants list of input objects representing constants
+#'
+#' @return A list containing one complete set of initial values for the model.
+#' @export
+#'
+#' @examples
+
 simulateInits <- function(nim.data, nim.constants){
   
   ## Initial densities / population sizes
