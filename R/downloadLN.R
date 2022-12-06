@@ -1,4 +1,3 @@
-
 #' Download ptarmigan line transect data from Living Norway Data Portal
 #'
 #' @param version numeric. Version of the dataset to download. 
@@ -12,11 +11,6 @@
 #' @examples
 
 downloadLN <- function(version, save = TRUE){
-  
-  ## Check for availability of LivingNorwayR package
-  if(!require("LivingNorwayR", quietly = TRUE)){
-    stop("LivingNorwayR package not installed. Install from GitHub via devtools::install_github(\"LivingNorway/LivingNorwayR\")")
-  }
   
   ## Define dataset key
   datasetKey <- "b49a2978-0e30-4748-a99f-9301d17ae119"
