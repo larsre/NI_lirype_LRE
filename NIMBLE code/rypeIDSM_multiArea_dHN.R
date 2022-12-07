@@ -23,22 +23,20 @@ rypeIDSM <- nimbleCode({
     mu.dd[x] ~ dnorm(h.mu.dd, sd = h.sigma.dd)
   }
   
-  #mu.dd ~ dunif(-10, 100)
-  
   sigmaT.dd ~ dunif(0, 20)
   
   for(t in 1:N_years){
-    epsT.dd[t] ~ dnorm(0, sd = sigmaT.dd) 
+    epsT.dd[t] ~ dnorm(0, sd = sigmaT.dd)
   }
-  
+  #TODO: Implement spatial correlation in temporal RE (epsT.dd[x, t])
   
   
   ########################################################
   for(x in 1:N_areas){
     for(t in 1:N_years){
       
-      #log(sigma[x, t]) <- mu.dd + epsT.dd[t]
       log(sigma[x, t]) <- mu.dd[x] + epsT.dd[t]
+      #log(sigma[x, t]) <- mu.dd[x] + epsT.dd[x, t]
       
       sigma2[x, t] <- sigma[x, t] * sigma[x, t]
       
@@ -77,6 +75,7 @@ rypeIDSM <- nimbleCode({
   for (t in 1:N_years){
     epsT.R[t] ~ dnorm(0, sd = sigmaT.R) # Temporal RE (shared across areas)
   }
+  #TODO: Implement spatial correlation in temporal RE (epsT.R[x, t])
   
   for(x in 1:N_areas){
     
@@ -84,6 +83,7 @@ rypeIDSM <- nimbleCode({
     
     ## Constraints;
     R_year[x, 1:N_years] <- exp(mu.R[x] + epsT.R[1:N_years])
+    #R_year[x, 1:N_years] <- exp(mu.R[x] + epsT.R[x, 1:N_years])
     
     ## Likelihood;
     for (i in 1:N_R_obs[x]){
@@ -149,6 +149,7 @@ rypeIDSM <- nimbleCode({
   for(x in 1:N_areas){
     mu.S1[x] ~ dnorm(logit(h.Mu.S1), sd = h.sigma.S1)
     mu.S2[x] ~ dnorm(logit(h.Mu.S2), sd = h.sigma.S2)
+    #TODO: Implement spatial correlation in survival averages
     
     logit(Mu.S1[x]) <- mu.S1[x]
     logit(Mu.S2[x]) <- mu.S2[x]
@@ -156,6 +157,7 @@ rypeIDSM <- nimbleCode({
     ## Constraints
     S1[x, 1:N_years] <- Mu.S1[x]
     S2[x, 1:N_years] <- Mu.S2[x]
+    #TODO: Consider implementing spatially correlated random year variation
     
     S[x, 1:N_years] <- S1[x, 1:N_years]*S2[x, 1:N_years]
     
