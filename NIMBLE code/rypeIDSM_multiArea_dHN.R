@@ -206,7 +206,7 @@ rypeIDSM <- nimbleCode({
   for(x in 1:N_areas){
     for (t in 1:N_years){
       N_tot_exp[x, t] <- sum(N_exp[x, 1, 1:N_sites[x], t] + N_exp[x, 2, 1:N_sites[x], t])    ## Summing up expected number of birds in covered area; 
-      D[x, t] <- N_tot_exp[x, t] / A[x, t]       ## Deriving density as N/A     
+      #D[x, t] <- N_tot_exp[x, t] / A[x, t]       ## Deriving density as N/A     
     }
   }
 
