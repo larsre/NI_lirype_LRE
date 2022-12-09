@@ -42,8 +42,8 @@ wrangleData_LineTrans <- function(DwC_archive_list, localities = NULL, areas = N
   }
 
   # Bind datasets together
-  Eve_all <- bind_rows(Eve_all, .id = "column_label")
-  Occ <- bind_rows(Occ, .id = "column_label")
+  Eve_all <- dplyr::bind_rows(Eve_all, .id = "column_label")
+  Occ <- dplyr::bind_rows(Occ, .id = "column_label")
   
   ## Filter event data by either locality and year or area and year
   if(areaAggregation){

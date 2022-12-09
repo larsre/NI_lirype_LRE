@@ -28,12 +28,13 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
   # Multi-area setup #
   #------------------#
   
-  ## Number of spatial units
+  ## Assignment of spatial units
   if(areaAggregation){
-    N_sUnits <- length(areas)
+    sUnits <- areas
   }else{
-    N_sUnits <- length(localities)
+    sUnits <- localities
   }
+  N_sUnits <- length(sUnits)
   
   ## Rename appropriate column in line transect data to reflect level of spatial aggregation
   if(areaAggregation){
@@ -47,6 +48,11 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
   ## Variables shared across areas
   # Number of age classes
   N_ageC <- 2
+  
+  # (Number of) years
+  range_yearsTot <- min(d_trans$Year):max(d_trans$Year)
+  idx_yearsTot <- range_yearsTot - min(d_trans$Year) + 1
+  N_yearsTot <- length(range_yearsTot)
   
   # Truncation distance
   W <- 200
@@ -66,37 +72,41 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
     dplyr::summarise(count = n())
     
   ## Set up arrays for area-specific data
-  N_sites <- N_years <- N_obs <- N_R_obs <- rep(NA, N_sUnits)
+  N_sites <- N_years <- min_years <- max_years <- N_obs <- N_R_obs <- rep(NA, N_sUnits)
   
-  A <- matrix(NA, nrow = N_sUnits, ncol = n_distinct(d_trans$Year))
+  A <- matrix(NA, nrow = N_sUnits, ncol = N_yearsTot)
   y <- Year_obs <- zeros_dist <- matrix(NA, nrow = N_sUnits, ncol = max(obs_count$count))
   R_obs <- R_obs_year <- matrix(NA, nrow = N_sUnits, ncol = max(obs_count$count))
   
-  L <- N_line_year <- array(NA, dim = c(N_sUnits, max(site_count$count), n_distinct(d_trans$Year)))
+  L <- N_line_year <- N_J_line_year <- N_A_line_year <- array(0, dim = c(N_sUnits, max(site_count$count), N_yearsTot))
   
-  N_a_line_year <- array(NA, dim = c(N_sUnits, N_ageC, max(site_count$count), n_distinct(d_trans$Year)))
+  N_a_line_year <- array(0, dim = c(N_sUnits, N_ageC, max(site_count$count), N_yearsTot))
   
   
   for(x in 1:N_sUnits){
     
     ## Subset data (specific area)
-    if(areaAggregation){
-      d_trans_sub <- subset(d_trans, spatialUnit == areas[x])
-      d_obs_sub <- subset(d_obs, spatialUnit == areas[x])
-    }else{
-      d_trans_sub <- subset(d_trans, spatialUnit == localities[x])
-      d_obs_sub <- subset(d_obs, spatialUnit == localities[x])
-    }
-    
+    # if(areaAggregation){
+    #   d_trans_sub <- subset(d_trans, spatialUnit == areas[x])
+    #   d_obs_sub <- subset(d_obs, spatialUnit == areas[x])
+    # }else{
+    #   d_trans_sub <- subset(d_trans, spatialUnit == localities[x])
+    #   d_obs_sub <- subset(d_obs, spatialUnit == localities[x])
+    # }
+    d_trans_sub <- subset(d_trans, spatialUnit == sUnits[x])
+    d_obs_sub <- subset(d_obs, spatialUnit == sUnits[x])
     
     # Constants #
     #-----------#
     
-    ## Numbers of years and sites
+    ## Numbers of sites
     N_sites[x] <- n_distinct(d_trans_sub$locationID)
-    N_years[x] <- n_distinct(d_trans_sub$Year)
     
-    
+    ## (Number of) years with data
+    years_mon <- sort(unique(d_trans_sub$Year)) - min(range_yearsTot) + 1
+    min_years[x] <- min(years_mon)
+    max_years[x] <- max(years_mon)
+
     # Transect characteristics #
     #--------------------------#
     
@@ -107,13 +117,19 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
       reshape2::dcast(locationID~Year, value.var = "sampleSizeValue", sum) %>%
       arrange(locationID)
     
-    L[x, 1:N_sites[x], 1:N_years[x]] <- TransLen %>% select(-locationID) %>% as.matrix() 
+    TransLen_mat <- TransLen %>% select(-locationID) %>% as.matrix()
+    colnames(TransLen_mat) <- as.numeric(colnames(TransLen_mat)) - min(range_yearsTot) + 1
+    
+    for(t in 1:N_yearsTot){
+      
+      if(t %in% years_mon){
+        L[x, 1:N_sites[x], t] <- TransLen_mat[1:N_sites[x], which(years_mon == t)]
+      }
+    }
+ 
     
     ## Total covered area 
-    A_prel <- TransLen %>% 
-      dplyr::select(-locationID) 
-
-    A[x, 1:N_years[x]] <- colSums(A_prel)*(W/scale1)*2
+    A[x, 1:N_yearsTot] <- colSums(L[x,,])*(W/scale1)*2
     
     
     # Observation distance from transect #
@@ -122,7 +138,7 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
     temp_dist <- d_obs_sub %>% 
       dplyr::filter(between(DistanceToTransectLine, -0.1, W)) %>% 
       dplyr::select(Year, DistanceToTransectLine) %>%
-      dplyr::mutate(Year2 = Year - (min(Year)) + 1)
+      dplyr::mutate(Year2 = Year - (minYear) + 1)
     
     ## Number of observations
     N_obs[x] <- length(temp_dist$DistanceToTransectLine)
@@ -149,10 +165,15 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
       replace(., is.na(.), 0) %>%
       dplyr::arrange(locationID)
     
-    N_line_year[x, 1:N_sites[x], 1:N_years[x]] <- TaksObs %>% 
-      dplyr::select(-locationID) %>% 
-      as.matrix() 
+    TaksObs_mat <- TaksObs %>% dplyr::select(-locationID) %>% as.matrix() 
+    colnames(TaksObs_mat) <- as.numeric(colnames(TaksObs_mat)) - min(range_yearsTot) + 1
     
+    for(t in 1:N_yearsTot){
+      
+      if(t %in% years_mon){
+        N_line_year[x, 1:N_sites[x], t] <- TaksObs_mat[1:N_sites[x], which(years_mon == t)]
+      }
+    }
     
     # Number of birds/line (by age class) #
     #-------------------------------------#
@@ -165,9 +186,15 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
       replace(., is.na(.), 0) %>%
       dplyr::arrange(locationID)
     
-    N_J_line_year <- TaksObs_J %>% 
-      dplyr::select(-locationID) %>% 
-      as.matrix() 
+    TaksObs_J_mat <- TaksObs_J %>% dplyr::select(-locationID) %>% as.matrix() 
+    colnames(TaksObs_J_mat) <- as.numeric(colnames(TaksObs_J_mat)) - min(range_yearsTot) + 1
+    
+    for(t in 1:N_yearsTot){
+      
+      if(t %in% years_mon){
+        N_J_line_year[x, 1:N_sites[x], t] <- TaksObs_J_mat[1:N_sites[x], which(years_mon == t)]
+      }
+    }
     
     ## Adults 
     TaksObs_A <- d_obs_sub %>% filter(between(DistanceToTransectLine, -0.1, W)) %>%
@@ -177,17 +204,23 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
       replace(., is.na(.), 0) %>%
       dplyr::arrange(locationID)
     
-    N_A_line_year <- TaksObs_A %>% 
-      dplyr::select(-locationID) %>% 
-      as.matrix() 
+    TaksObs_A_mat <- TaksObs_A %>% dplyr::select(-locationID) %>% as.matrix() 
+    colnames(TaksObs_A_mat) <- as.numeric(colnames(TaksObs_A_mat)) - min(range_yearsTot) + 1
+    
+    for(t in 1:N_yearsTot){
+      
+      if(t %in% years_mon){
+        N_A_line_year[x, 1:N_sites[x], t] <- TaksObs_A_mat[1:N_sites[x], which(years_mon == t)]
+      }
+    }
     
     ## Check and combine in array
-    if(!(all(N_J_line_year + N_A_line_year == N_line_year[x, 1:N_sites[x], 1:N_years[x]]))){
+    if(!(all(N_J_line_year + N_A_line_year == N_line_year))){
       warning("Number of observed adults and juveniles does not add up correctly. Double-check data.")
     }
     
-    N_a_line_year[x, 1, 1:N_sites[x], 1:N_years[x]] <- N_J_line_year
-    N_a_line_year[x, 2, 1:N_sites[x], 1:N_years[x]] <- N_A_line_year
+    N_a_line_year[x, 1,,] <- N_J_line_year[3,,]
+    N_a_line_year[x, 2,,] <- N_A_line_year[3,,]
     
     
     # Recruitment #
@@ -216,9 +249,9 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
   
   ## Set spatial index for CMR data
   if(areaAggregation){
-    SurvAreaIdx <- which(areas == d_cmr$area_names)
+    SurvAreaIdx <- which(sUnits == d_cmr$area_names)
   }else{
-    SurvAreaIdx <- which(localities == d_cmr$locality_names)
+    SurvAreaIdx <- which(sUnits == d_cmr$locality_names)
   }
   
   ## Assembling all data in a list
@@ -236,8 +269,10 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
     N_a_line_year = N_a_line_year, # Number of birds observed per ageclass per site per year
     L = L, # Transect length per site and year
     
-    N_years = max(N_years), # Max number of years with data
-    N_sites = N_sites, # Total number of monitored sites
+    N_years = N_yearsTot, # Max number of years with data
+    min_years = min_years, # Earliest year (index) of monitoring per area
+    max_years = max_years, # Last year (index) of monitoring per area
+    N_sites = N_sites, # Total number of monitored sites per area
     
     A = A, # Total covered area per year
     W = W, # Truncation distance
@@ -249,7 +284,7 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
     SurvAreaIdx = SurvAreaIdx,
     
     N_areas = N_sUnits,
-    area_names = localities
+    area_names = sUnits
   )
   
   ## Assembling Nimble data
@@ -261,7 +296,8 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
                    Survs1 = input.data$Survs1, Survs2 = input.data$Survs2)
   
   ## Assembling Nimble constants
-  nim.constants <- list(N_years = input.data$N_years, W = input.data$W, scale1 = scale1,
+  nim.constants <- list(N_years = input.data$N_years, min_years = input.data$min_years, max_years = input.data$max_years,
+                        W = input.data$W, scale1 = scale1,
                         N_obs = input.data$N_obs, Year_obs = input.data$Year_obs,
                         N_sites = input.data$N_sites, 
                         R_obs_year = input.data$R_obs_year, N_R_obs = input.data$N_R_obs,
