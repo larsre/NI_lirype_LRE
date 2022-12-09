@@ -46,7 +46,7 @@ simulateInits <- function(nim.data, nim.constants){
   h.sigma.dd <- runif(1, 0, 1)
 
   #mu.dd <- rnorm(nim.constants$N_areas, h.mu.dd, sd = h.sigma.dd)
-  mu.dd <- rep(h.mu.dd, 3)
+  mu.dd <- rep(h.mu.dd, nim.constants$N_areas)
   
   ## Assemble all in list
   list(

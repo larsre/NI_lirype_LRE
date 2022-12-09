@@ -15,7 +15,7 @@ sourceDir('R')
 
 ## Set localities and time period of interest
 #localities <- unname(read.csv("localities.csv", encoding = "utf-8"))[,1]
-minYear <- 2015
+minYear <- 2007
 maxYear <- 2020
 
 
@@ -26,7 +26,7 @@ tar_option_set(packages = c("LivingNorwayR", "tidyverse"))
 list(
   tar_target(
     Rype_arkiv,
-    downloadLN(version = 1.6, save = TRUE)
+    downloadLN(datasets = c("Fjellstyrene", "Statskog", "FeFo"), versions = c(1.6, 1.7, 1.11), save = TRUE)
   ),
   
   tar_target(
@@ -35,15 +35,22 @@ list(
   ),
   
   tar_target(
+    areas,
+    listAreas()
+  ),
+  
+  tar_target(
     LT_data,
-    wrangleData_LineTrans(DwC_archive = Rype_arkiv, 
-                          localities = localities,
+    wrangleData_LineTrans(DwC_archive_list = Rype_arkiv, 
+                          #localities = localities,
+                          areas = areas,
+                          areaAggregation = TRUE,
                           minYear = minYear, maxYear = maxYear)
   ),
   
   tar_target(
     d_cmr,
-    wrangleData_CMR()
+    wrangleData_CMR(minYear = minYear)
   ),
   
   tar_target(
@@ -51,7 +58,9 @@ list(
     prepareInputData(d_trans = LT_data$d_trans, 
                      d_obs = LT_data$d_obs,
                      d_cmr = d_cmr,
-                     localities = localities, 
+                     #localities = localities,
+                     areas = areas,
+                     areaAggregation = TRUE,
                      dataVSconstants = TRUE,
                      save = TRUE)
   ),

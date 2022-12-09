@@ -1,10 +1,13 @@
 
 #' Extract and filter transect and observation data from DwC archive
 #'
-#' @param DwC_archive DwCArchive. A Darwin Core archive containing line transect 
+#' @param DwC_archive_list list of DwCArchives. Darwin Core archives containing line transect 
 #' data for willow ptarmigan (Lagopus lagopus) in Norway.
 #' @param localities string or vector of strings. Names of localities to extract
-#'data for. 
+#' data for. Either localities or areas must be provided. 
+#' @param areas string or vector of strings. Names of areas to extract
+#' data for. Either localities or areas must be provided.
+#' @param areaAggregation logical. If TRUE, areas are used as smallest spatial unit. If FALSE, locations (within areas) are used as smallest spatial unit.
 #' @param minYear integer. Earliest year of data to extract.
 #' @param maxYear integer. Latest year of data to extract.  
 #'
@@ -17,28 +20,45 @@
 #'
 #' @examples
 
-wrangleData_LineTrans <- function(DwC_archive, localities, minYear, maxYear){
+wrangleData_LineTrans <- function(DwC_archive_list, localities = NULL, areas = NULL, areaAggregation, minYear, maxYear){
   
   ## Extract relevant parts from DwC_archive
   
-  # Core table
-  Core <- DwC_archive$getCoreTable()
+  # Set up lists for storing data
+  Eve_all <- Occ <- list()
   
-  # Complete event table
-  Eve_all <- tibble::as_tibble(Core$exportAsDataFrame()) %>%
-    dplyr::mutate(sampleSizeValue = as.numeric(sampleSizeValue))
+  for(i in 1:length(DwC_archive_list)){
+    
+    # Core table
+    Core <- DwC_archive_list[[i]]$getCoreTable()
+    
+    # Complete event table
+    Eve_all[[i]] <- tibble::as_tibble(Core$exportAsDataFrame()) %>%
+      dplyr::mutate(sampleSizeValue = as.numeric(sampleSizeValue))
+    
+    # Complete occurrence table
+    Occ[[i]] <- tibble::as_tibble(DwC_archive_list[[i]]$getExtensionTables()[[1]]$exportAsDataFrame())
+    
+  }
+
+  # Bind datasets together
+  Eve_all <- bind_rows(Eve_all, .id = "column_label")
+  Occ <- bind_rows(Occ, .id = "column_label")
   
-  # Complete occurrence table
-  Occ <- tibble::as_tibble(DwC_archive$getExtensionTables()[[1]]$exportAsDataFrame())
-  
-  
-  ## Filter event data by locality and year
-  Eve <- Eve_all %>% 
-    dplyr::mutate(eventDate = as.Date(eventDate)) %>%
-    dplyr::mutate(Year = lubridate::year(eventDate)) %>%
-    dplyr::filter(locality %in% localities) %>%
-    dplyr::filter(between(Year, minYear, maxYear))
-  
+  ## Filter event data by either locality and year or area and year
+  if(areaAggregation){
+    Eve <- Eve_all %>% 
+      dplyr::mutate(eventDate = as.Date(eventDate)) %>%
+      dplyr::mutate(Year = lubridate::year(eventDate)) %>%
+      dplyr::filter(verbatimLocality %in% areas) %>%
+      dplyr::filter(between(Year, minYear, maxYear))
+  }else{
+    Eve <- Eve_all %>% 
+      dplyr::mutate(eventDate = as.Date(eventDate)) %>%
+      dplyr::mutate(Year = lubridate::year(eventDate)) %>%
+      dplyr::filter(locality %in% localities) %>%
+      dplyr::filter(between(Year, minYear, maxYear))
+  }
   
   ## Assemble transect level info
   d_trans <- Eve %>% 
@@ -56,20 +76,22 @@ wrangleData_LineTrans <- function(DwC_archive, localities, minYear, maxYear){
   
   # Observations: distance to transect lines
   d_obsTemp <- Eve %>% 
-    dplyr::select(locationID, locality, parentEventID, eventID, eventRemarks, 
+    dplyr::select(locationID, locality, verbatimLocality, parentEventID, eventID, eventRemarks, 
                   dynamicProperties, eventDate) %>%
-    dplyr::filter(eventRemarks == "Human observation") %>%
+    dplyr::filter(eventRemarks == "Human observation" & !is.na(dynamicProperties)) %>%
     dplyr::mutate(dynamicProperties = purrr::map(dynamicProperties, ~ jsonlite::fromJSON(.) %>% as.data.frame())) %>%
     tidyr::unnest(dynamicProperties) %>% 
     dplyr::rename(DistanceToTransectLine = "perpendicular.distance.in.meters.from.transect.line.as.reported.by.the.field.worker") %>%
     dplyr::mutate(DistanceToTransectLine = as.numeric(DistanceToTransectLine), 
                   Year = lubridate::year(eventDate)) %>%
-    dplyr::select(locationID, locality, parentEventID, eventID, DistanceToTransectLine, Year)
+    dplyr::select(locationID, locality, verbatimLocality, parentEventID, eventID, DistanceToTransectLine, Year)
   
   # Observations: remaining information (willow ptarmigan only)
   d_obs <- Occ %>% 
+    dplyr::filter(!is.na(eventID)) %>%
     dplyr::select(eventID, scientificName, individualCount, sex, lifeStage) %>%
-    #dplyr::mutate(lifeStage=if_else(is.na(lifeStage), "unknown", lifeStage)) %>%
+    dplyr::mutate(lifeStage = if_else(is.na(lifeStage), "unknown", lifeStage),
+                  sex = if_else(is.na(sex), "unknown", sex)) %>%
     dplyr::mutate(SexStage = str_c(sex, lifeStage, sep = "")) %>%
     dplyr::select(-sex, -lifeStage) %>%
     tidyr::spread(key = "SexStage", value = "individualCount", fill = 0) %>%

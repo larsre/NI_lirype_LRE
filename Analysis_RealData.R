@@ -24,7 +24,8 @@ downloadData <- TRUE
 #---------------------#
 
 if(downloadData){
-  Rype_arkiv <- downloadLN(version = 1.6, save = TRUE)
+  #Rype_arkiv <- downloadLN(datasets = "Fjellstyrene", versions = 1.6, save = TRUE)
+  Rype_arkiv <- downloadLN(datasets = c("Fjellstyrene", "Statskog", "FeFo"), versions = c(1.6, 1.7, 1.11), save = TRUE)
 }else{
   stop("downloadData = FALSE not supported yet. There is an issue with encoding when using LivingNorwayR::initializeDwCArchive() that needs to be resolved first.")
   #Rype_arkiv <- initializeDwCArchive("data/Rype_arkiv.zip")
@@ -34,14 +35,17 @@ if(downloadData){
 # WRANGLE LINE TRANSECT DATA #
 #----------------------------#
 
-## Set localities and time period of interest
-localities <- c("Lierne Fjellst. Vest", "Lierne Fjellst. øst", "Middagskneppen")
-minYear <- 2015
+## Set localities/areas and time period of interest
+#localities <- c("Lierne Fjellst. Vest", "Lierne Fjellst. øst", "Middagskneppen")
+areas <- listAreas()
+minYear <- 2007
 maxYear <- 2020
 
 ## Extract transect and observational data from DwC archive
-LT_data <- wrangleData_LineTrans(DwC_archive = Rype_arkiv, 
-                                 localities = localities,
+LT_data <- wrangleData_LineTrans(DwC_archive_list = Rype_arkiv, 
+                                 #localities = localities,
+                                 areas = areas,
+                                 areaAggregation = TRUE,
                                  minYear = minYear, maxYear = maxYear)
 
 
@@ -49,7 +53,7 @@ LT_data <- wrangleData_LineTrans(DwC_archive = Rype_arkiv,
 #-----------------------------#
 
 ## Read in and reformat CMR data
-d_cmr <- wrangleData_CMR()
+d_cmr <- wrangleData_CMR(minYear = minYear)
 
 
 # PREPARE INPUT DATA FOR INTEGRATED MODEL #
@@ -59,7 +63,9 @@ d_cmr <- wrangleData_CMR()
 input_data <- prepareInputData(d_trans = LT_data$d_trans, 
                                d_obs = LT_data$d_obs,
                                d_cmr = d_cmr,
-                               localities = localities, 
+                               #localities = localities, 
+                               areas = areas,
+                               areaAggregation = TRUE,
                                dataVSconstants = TRUE,
                                save = TRUE)
 

@@ -8,7 +8,9 @@
 #' @param d_cmr list with 2 elements. Surv1 and Surv2 are matrices of individuals 
 #' released (column 1) and known to have survived (column 2) in each year (row)
 #' for season 1 and season 2, respectively. Output of wrangleData_CMR().
-#' @param localities vector of strings listing areas to consider
+#' @param localities vector of strings listing localities to consider. Either localities or areas must be provided. 
+#' @param areas vector of strings listing areas to consider. Either localities or areas must be provided. 
+#' @param areaAggregation logical. If TRUE, areas are used as smallest spatial unit. If FALSE, locations (within areas) are used as smallest spatial unit.
 #' @param dataVSconstants logical. If TRUE (default) returns a list of 2 lists
 #' containing data and constants for analysis with Nimble. If FALSE, returns a
 #' list containing all data and constants. 
@@ -21,13 +23,26 @@
 #'
 #' @examples
 
-prepareInputData <- function(d_trans, d_obs, d_cmr, localities, dataVSconstants = TRUE, save = TRUE){
+prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = NULL, areaAggregation, dataVSconstants = TRUE, save = TRUE){
   
   # Multi-area setup #
   #------------------#
   
-  ## Number of areas
-  N_areas <- length(localities)
+  ## Number of spatial units
+  if(areaAggregation){
+    N_sUnits <- length(areas)
+  }else{
+    N_sUnits <- length(localities)
+  }
+  
+  ## Rename appropriate column in line transect data to reflect level of spatial aggregation
+  if(areaAggregation){
+    colnames(d_trans)[which(colnames(d_trans) == "verbatimLocality")] <- "spatialUnit"
+    colnames(d_obs)[which(colnames(d_obs) == "verbatimLocality")] <- "spatialUnit"
+  }else{
+    colnames(d_trans)[which(colnames(d_trans) == "locality")] <- "spatialUnit"
+    colnames(d_obs)[which(colnames(d_obs) == "locality")] <- "spatialUnit"
+  }
   
   ## Variables shared across areas
   # Number of age classes
@@ -41,32 +56,38 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities, dataVSconstants 
   
   ## Count sites per area (for defining correct array dimensions)
   site_count <- d_trans %>%                             
-    dplyr::group_by(locality) %>%
+    dplyr::group_by(spatialUnit) %>%
     dplyr::summarise(count = n_distinct(locationID))
   
   ## Count observations per area
   obs_count <- d_obs %>% 
     dplyr::filter(between(DistanceToTransectLine, -0.1, W)) %>% 
-    dplyr::group_by(locality) %>%
+    dplyr::group_by(spatialUnit) %>%
     dplyr::summarise(count = n())
     
-  ## Set up arrays for are-specific data
-  N_sites <- N_years <- N_obs <- N_R_obs <- rep(NA, N_areas)
+  ## Set up arrays for area-specific data
+  N_sites <- N_years <- N_obs <- N_R_obs <- rep(NA, N_sUnits)
   
-  A <- matrix(NA, nrow = N_areas, ncol = n_distinct(d_trans$Year))
-  y <- Year_obs <- zeros_dist <- matrix(NA, nrow = N_areas, ncol = max(obs_count$count))
-  R_obs <- R_obs_year <- matrix(NA, nrow = N_areas, ncol = max(obs_count$count))
+  A <- matrix(NA, nrow = N_sUnits, ncol = n_distinct(d_trans$Year))
+  y <- Year_obs <- zeros_dist <- matrix(NA, nrow = N_sUnits, ncol = max(obs_count$count))
+  R_obs <- R_obs_year <- matrix(NA, nrow = N_sUnits, ncol = max(obs_count$count))
   
-  L <- N_line_year <- array(NA, dim = c(N_areas, max(site_count$count), n_distinct(d_trans$Year)))
+  L <- N_line_year <- array(NA, dim = c(N_sUnits, max(site_count$count), n_distinct(d_trans$Year)))
   
-  N_a_line_year <- array(NA, dim = c(N_areas, N_ageC, max(site_count$count), n_distinct(d_trans$Year)))
+  N_a_line_year <- array(NA, dim = c(N_sUnits, N_ageC, max(site_count$count), n_distinct(d_trans$Year)))
   
   
-  for(x in 1:N_areas){
+  for(x in 1:N_sUnits){
     
     ## Subset data (specific area)
-    d_trans_sub <- subset(d_trans, locality == localities[x])
-    d_obs_sub <- subset(d_obs, locality == localities[x])
+    if(areaAggregation){
+      d_trans_sub <- subset(d_trans, spatialUnit == areas[x])
+      d_obs_sub <- subset(d_obs, spatialUnit == areas[x])
+    }else{
+      d_trans_sub <- subset(d_trans, spatialUnit == localities[x])
+      d_obs_sub <- subset(d_obs, spatialUnit == localities[x])
+    }
+    
     
     # Constants #
     #-----------#
@@ -186,12 +207,19 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities, dataVSconstants 
   } 
   
   ## Drop excess columns in recruitment data
-  R_obs <- R_obs[1:N_areas, 1:max(N_R_obs)]
-  R_obs_year <- R_obs_year[1:N_areas, 1:max(N_R_obs)]
+  R_obs <- R_obs[1:N_sUnits, 1:max(N_R_obs)]
+  R_obs_year <- R_obs_year[1:N_sUnits, 1:max(N_R_obs)]
   
   
   # Data assembly #
   #---------------#
+  
+  ## Set spatial index for CMR data
+  if(areaAggregation){
+    SurvAreaIdx <- which(areas == d_cmr$area_names)
+  }else{
+    SurvAreaIdx <- which(localities == d_cmr$locality_names)
+  }
   
   ## Assembling all data in a list
   input.data <- list(
@@ -218,9 +246,9 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities, dataVSconstants 
     
     Survs1 = d_cmr$Survs1, # Season 1 releases & survivors (area 1)
     Survs2 = d_cmr$Survs2, # Season 2 releases & survivors (area 1)
-    SurvAreaIdx = which(localities == d_cmr$area_names),
+    SurvAreaIdx = SurvAreaIdx,
     
-    N_areas = N_areas,
+    N_areas = N_sUnits,
     area_names = localities
   )
   
