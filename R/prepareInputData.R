@@ -219,8 +219,8 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
       warning("Number of observed adults and juveniles does not add up correctly. Double-check data.")
     }
     
-    N_a_line_year[x, 1,,] <- N_J_line_year[3,,]
-    N_a_line_year[x, 2,,] <- N_A_line_year[3,,]
+    N_a_line_year[x, 1,,] <- N_J_line_year[x,,]
+    N_a_line_year[x, 2,,] <- N_A_line_year[x,,]
     
     
     # Recruitment #
