@@ -36,7 +36,7 @@ simulateInits <- function(nim.data, nim.constants){
   mu.S2 <- rnorm(nim.constants$N_areas, plogis(h.Mu.S2), sd = h.sigma.S2)
   
   ## Area-specific reproductive parameters
-  h.mu.R  <- runif(1, -5, 5)
+  h.mu.R  <- runif(1, -2, 2)
   h.sigma.R <- runif(1, 0, 2)
   
   mu.R <- rnorm(nim.constants$N_areas,h.mu.R, sd =  h.sigma.R)
