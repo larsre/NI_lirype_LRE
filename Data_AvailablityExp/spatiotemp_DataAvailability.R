@@ -41,6 +41,11 @@ occ_FeFo$dataSet <- "FeFo"
 event <- dplyr::bind_rows(event_Fjellstyrene, event_Statskog, event_FeFo) 
 occ <- dplyr::bind_rows(occ_Fjellstyrene, occ_Statskog, occ_FeFo)
 
+## Fix area information for Finnmark reporting areas
+event <- event %>%
+  dplyr::mutate(verbatimLocality = ifelse(verbatimLocality == "Fefo", stringr::str_split_fixed(locationRemarks, pattern = ": ", n = 2)[,2], verbatimLocality)) %>%
+  dplyr::mutate(verbatimLocality = ifelse(verbatimLocality == "Stalluvarre", "Indre Finnmark", verbatimLocality))
+
 
 #--------------------------------------------#
 # CHECK FOR POTENTIAL ERRORS/INCONSISTENCIES #
@@ -125,9 +130,9 @@ hist(transect$n_occ)
 table(transect$n_occ)
 mean(transect$n_occ)
 
-# --> There are 1861 transects in total
-# --> Study duration ranges from 1 to 22 years, average = 7.84 years
-# --> Number of occurrences/observations ranges from 1 to 385, average = 36.78
+# --> There are 2175 transects in total
+# --> Study duration ranges from 1 to 22 years, average = 7.92 years
+# --> Number of occurrences/observations ranges from 1 to 385, average = 35.37
 
 
 ## Summarize transects per locality
@@ -149,8 +154,8 @@ table(locality$n_occ)
 mean(locality$n_occ)
 
 
-# --> There are 95 localities with 1-86 lines each (average = 19.59)
-# --> Number of occurrences/observations ranges from 2 to 5305, average = 720.59
+# --> There are 126 localities with 1-86 lines each (average = 17.26)
+# --> Number of occurrences/observations ranges from 2 to 5305, average = 610.53
 
 
 ## Summarize localities by (reporting) area 
@@ -177,8 +182,8 @@ hist(areas$n_occ)
 table(areas$n_occ)
 mean(areas$n_occ)
 
-# --> There are 41 areas with 1-10 localities (average 2.32) and 1-126 lines each (average = 45.39)
-# --> Number of occurrences/observations ranges from 1 to 7973, average = 1669.66
+# --> There are 44 areas with 1-12 localities (average 2.86) and 1-126 lines each (average = 49.43)
+# --> Number of occurrences/observations ranges from 1 to 7973, average = 1748.341
 
 
 #-------------------------------------------------#

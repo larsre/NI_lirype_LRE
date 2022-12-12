@@ -48,7 +48,10 @@ listAreas <- function(){
     "Statskog og Klinga utm.",
     "Statskog Røros",
     "Ytre Salten",
-    "Ytre Troms"
+    "Ytre Troms",
+    "Indre Finnmark",
+    "Øst Finnmark",
+    "Vest Finnmark kyst"
   )
   
   Encoding(areas) <- "UTF-8"
