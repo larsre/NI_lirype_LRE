@@ -3,6 +3,7 @@
 #'
 #' @param DwC_archive_list list of DwCArchives. Darwin Core archives containing line transect 
 #' data for willow ptarmigan (Lagopus lagopus) in Norway.
+#' @param duplTransects vector of strings. (parent) EventIDs of transects that are duplicates and need removing from the data
 #' @param localities string or vector of strings. Names of localities to extract
 #' data for. Either localities or areas must be provided. 
 #' @param areas string or vector of strings. Names of areas to extract
@@ -20,7 +21,7 @@
 #'
 #' @examples
 
-wrangleData_LineTrans <- function(DwC_archive_list, localities = NULL, areas = NULL, areaAggregation, minYear, maxYear){
+wrangleData_LineTrans <- function(DwC_archive_list, duplTransects, localities = NULL, areas = NULL, areaAggregation, minYear, maxYear){
   
   ## Extract relevant parts from DwC_archive
   
@@ -51,13 +52,13 @@ wrangleData_LineTrans <- function(DwC_archive_list, localities = NULL, areas = N
       dplyr::mutate(eventDate = as.Date(eventDate)) %>%
       dplyr::mutate(Year = lubridate::year(eventDate)) %>%
       dplyr::filter(verbatimLocality %in% areas) %>%
-      dplyr::filter(between(Year, minYear, maxYear))
+      dplyr::filter(dplyr::between(Year, minYear, maxYear))
   }else{
     Eve <- Eve_all %>% 
       dplyr::mutate(eventDate = as.Date(eventDate)) %>%
       dplyr::mutate(Year = lubridate::year(eventDate)) %>%
       dplyr::filter(locality %in% localities) %>%
-      dplyr::filter(between(Year, minYear, maxYear))
+      dplyr::filter(dplyr::between(Year, minYear, maxYear))
   }
   
   ## Assemble transect level info
@@ -71,6 +72,21 @@ wrangleData_LineTrans <- function(DwC_archive_list, localities = NULL, areas = N
     tidyr::separate(., col = locationRemarks, sep = ",", into = c("LineName", "locationRemarks")) %>%
     dplyr::select(-locationRemarks) 
   
+  ## Identify and remove transects with suspiciously short length (< 200 m) and duplicate transects
+  bad_transects <- c(d_trans$eventID[which(d_trans$sampleSizeValue < 200)], duplTransects)
+  d_trans <- d_trans %>%
+    dplyr::filter(!(eventID %in% bad_transects))
+  
+  ## Double-check no duplicate transects remain
+  transect_duplicates <- d_trans %>%
+    dplyr::mutate(year = lubridate::year(eventDate)) %>%
+    dplyr::group_by(locationID, locality, verbatimLocality, year) %>%
+    dplyr::summarise(transectCount = dplyr::n(), .groups = 'keep') %>%
+    dplyr::filter(transectCount > 1)
+  
+  if(nrow(transect_duplicates) > 1){
+    stop("There are duplicate transects (> 1 transect in same location per year).")
+  }
   
   ## Assemble observation level info
   
@@ -98,6 +114,9 @@ wrangleData_LineTrans <- function(DwC_archive_list, localities = NULL, areas = N
     dplyr::right_join(., d_obsTemp, by = "eventID") %>%
     dplyr::filter(scientificName == "Lagopus lagopus")
   
+  ## Remove observations from transects with suspiciously short length (< 200) and duplicate transects
+  d_obs <- d_obs %>%
+    dplyr::filter(!(parentEventID %in% bad_transects))
   
   ## Collate and return data
   LT_data <- list(d_trans = d_trans, d_obs = d_obs)

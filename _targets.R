@@ -30,6 +30,11 @@ list(
   ),
   
   tar_target(
+    duplTransects,
+    listDuplTransects()
+  ),
+  
+  tar_target(
     localities,
     listLocations()
   ),
@@ -41,7 +46,8 @@ list(
   
   tar_target(
     LT_data,
-    wrangleData_LineTrans(DwC_archive_list = Rype_arkiv, 
+    wrangleData_LineTrans(DwC_archive_list = Rype_arkiv,
+                          duplTransects = duplTransects,
                           #localities = localities,
                           areas = areas,
                           areaAggregation = TRUE,

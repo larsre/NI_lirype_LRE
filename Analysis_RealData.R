@@ -1,3 +1,4 @@
+library(tidyverse)
 
 # SETUP #
 #-------#
@@ -37,12 +38,16 @@ if(downloadData){
 
 ## Set localities/areas and time period of interest
 #localities <- c("Lierne Fjellst. Vest", "Lierne Fjellst. øst", "Middagskneppen")
-areas <- listAreas()
+areas <- listAreas()[c(11, 3)]
 minYear <- 2007
 maxYear <- 2020
 
+## List duplicate transects to remove
+duplTransects <- listDuplTransects()
+
 ## Extract transect and observational data from DwC archive
 LT_data <- wrangleData_LineTrans(DwC_archive_list = Rype_arkiv, 
+                                 duplTransects = duplTransects,
                                  #localities = localities,
                                  areas = areas,
                                  areaAggregation = TRUE,
@@ -85,7 +90,7 @@ model_setup <- setupModel(modelCode.path = "NIMBLE Code/RypeIDSM_multiArea_dHN.R
                           customDist = TRUE,
                           nim.data = input_data$nim.data,
                           nim.constants = input_data$nim.constants,
-                          testRun = FALSE, nchains = 3,
+                          testRun = TRUE, nchains = 3,
                           initVals.seed = 0)
 
 # Updated version (nimbleDistance::dHR)
