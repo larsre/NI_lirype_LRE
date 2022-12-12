@@ -38,8 +38,59 @@ occ_Fjellstyrene$dataSet <- "Fjellstyrene"
 occ_Statskog$dataSet <- "Statskog"
 occ_FeFo$dataSet <- "FeFo"
 
-event <- dplyr::bind_rows(event_Fjellstyrene, event_Statskog, event_FeFo)
+event <- dplyr::bind_rows(event_Fjellstyrene, event_Statskog, event_FeFo) 
 occ <- dplyr::bind_rows(occ_Fjellstyrene, occ_Statskog, occ_FeFo)
+
+
+#--------------------------------------------#
+# CHECK FOR POTENTIAL ERRORS/INCONSISTENCIES #
+#--------------------------------------------#
+
+## Add year and extract line names
+event <- event %>%
+  dplyr::mutate(
+    year = lubridate::year(eventDate),
+    lineName = paste0(verbatimLocality, ' - ', stringi::stri_extract_first_regex(locationRemarks, "[0-9]+"))
+  )
+
+## Check for suspicious transect lengths
+hist(event$sampleSizeValue, breaks = 200)
+# --> Normal distribution with a heavy right tail
+# --> But there seems to be some 0-inflation!
+
+hist(subset(event, sampleSizeValue < 400)$sampleSizeValue, breaks = 100)
+hist(subset(event, sampleSizeValue < 1000)$sampleSizeValue, breaks = 100)
+# --> Transects with reported lengths < 200 may need a closer look
+
+transect_issues <- subset(event, sampleSizeValue < 200)
+nrow(transect_issues)
+# --> 24 events are affected
+
+transect_issues <- transect_issues %>%
+  dplyr::select(id, eventID, sampleSizeValue, sampleSizeUnit, eventDate, locationID, locality, verbatimLocality, lineName, dataSet)
+
+#write.csv(transect_issues, file = "Hønsefugl_TransectLength_Issues.csv", row.names = FALSE)
+
+## Check for duplicate transects within years
+transect_duplicates <- event %>%
+  dplyr::filter(eventRemarks == "Line transect") %>%
+  dplyr::group_by(locationID, locality, verbatimLocality, dataSet, lineName, year) %>%
+  dplyr::summarise(transectCount = dplyr::n(), .groups = 'keep')
+
+table(transect_duplicates$transectCount)
+# --> Vast majority only has one entry per year (as it should be)
+# --> 5 transects have two entries per year, one has 3
+
+transect_duplicates <- transect_duplicates %>%
+  dplyr::filter(transectCount > 1)
+
+#write.csv(transect_duplicates, file = "Hønsefugl_TransectDuplicates_Issues.csv", row.names = FALSE)
+
+transect_duplicates$flag <- "x"
+transect_duplicateSuspects <- dplyr::right_join(event, transect_duplicates[,c("locationID", "year", "flag")], by = c("locationID", "year")) %>%
+  dplyr::filter(eventRemarks == "Line transect")
+
+event <- dplyr::left_join(event, transect_duplicates[,c("locationID", "year", "flag")], by = c("locationID", "year"))
 
 
 #-------------------------------------------#
@@ -58,12 +109,6 @@ table(occ_sum$n_occ)
 ## Add counts to event table
 event <- event %>%
   dplyr::inner_join(occ_sum, by = "eventID")
-
-## Extract line name
-event <- event %>%
-  dplyr::mutate(
-    lineName = paste0(verbatimLocality, ' - ', stringi::stri_extract_first_regex(locationRemarks, "[0-9]+"))
-  )
 
 ## Summarize events per transect
 transect <- event %>%
