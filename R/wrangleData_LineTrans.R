@@ -38,13 +38,21 @@ wrangleData_LineTrans <- function(DwC_archive_list, duplTransects, localities = 
       dplyr::mutate(sampleSizeValue = as.numeric(sampleSizeValue))
     
     # Complete occurrence table
-    Occ[[i]] <- tibble::as_tibble(DwC_archive_list[[i]]$getExtensionTables()[[1]]$exportAsDataFrame())
-    
+    if(names(DwC_archive_list)[i] == "FeFo"){
+      Occ[[i]] <- tibble::as_tibble(DwC_archive_list[[i]]$getExtensionTables()[[2]]$exportAsDataFrame())
+    }else{
+      Occ[[i]] <- tibble::as_tibble(DwC_archive_list[[i]]$getExtensionTables()[[1]]$exportAsDataFrame())
+    }
   }
 
   # Bind datasets together
   Eve_all <- dplyr::bind_rows(Eve_all, .id = "column_label")
   Occ <- dplyr::bind_rows(Occ, .id = "column_label")
+  
+  ## Fix area information for Finnmark reporting areas
+  Eve_all <- Eve_all %>%
+    dplyr::mutate(verbatimLocality = ifelse(verbatimLocality == "Fefo", stringr::str_split_fixed(locationRemarks, pattern = ": ", n = 2)[,2], verbatimLocality)) %>%
+    dplyr::mutate(verbatimLocality = ifelse(verbatimLocality == "Stalluvarre", "Indre Finnmark", verbatimLocality))
   
   ## Filter event data by either locality and year or area and year
   if(areaAggregation){

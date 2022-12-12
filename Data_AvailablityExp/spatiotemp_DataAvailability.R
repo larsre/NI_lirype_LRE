@@ -27,7 +27,7 @@ event_FeFo <- tibble::as_tibble(DwC_FeFo$getCoreTable()$exportAsDataFrame()) %>%
 
 occ_Fjellstyrene <- tibble::as_tibble(DwC_Fjellstyrene$getExtensionTables()[[1]]$exportAsDataFrame())
 occ_Statskog <- tibble::as_tibble(DwC_Statskog$getExtensionTables()[[1]]$exportAsDataFrame())
-occ_FeFo <- tibble::as_tibble(DwC_FeFo$getExtensionTables()[[1]]$exportAsDataFrame())
+occ_FeFo <- tibble::as_tibble(DwC_FeFo$getExtensionTables()[[2]]$exportAsDataFrame())
 
 ## Combine event and occurrence tables
 event_Fjellstyrene$dataSet <- "Fjellstyrene"
