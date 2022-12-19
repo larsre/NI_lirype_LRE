@@ -16,7 +16,7 @@ sourceDir('R')
 ## Set localities and time period of interest
 #localities <- unname(read.csv("localities.csv", encoding = "utf-8"))[,1]
 minYear <- 2007
-maxYear <- 2020
+maxYear <- 2021
 
 
 ## Set target-specific options such as packages.
@@ -26,7 +26,7 @@ tar_option_set(packages = c("LivingNorwayR", "tidyverse"))
 list(
   tar_target(
     Rype_arkiv,
-    downloadLN(datasets = c("Fjellstyrene", "Statskog", "FeFo"), versions = c(1.6, 1.7, 1.11), save = TRUE)
+    downloadLN(datasets = c("Fjellstyrene", "Statskog", "FeFo"), versions = c(1.7, 1.8, 1.12), save = TRUE)
   ),
   
   tar_target(

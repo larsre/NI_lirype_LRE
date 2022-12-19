@@ -38,7 +38,7 @@ if(downloadData){
 
 ## Set localities/areas and time period of interest
 #localities <- c("Lierne Fjellst. Vest", "Lierne Fjellst. øst", "Middagskneppen")
-areas <- listAreas()[c(17, 1)]
+areas <- listAreas()
 minYear <- 2007
 maxYear <- 2021
 
