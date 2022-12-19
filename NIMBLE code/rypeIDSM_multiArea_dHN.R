@@ -184,7 +184,7 @@ rypeIDSM <- nimbleCode({
         Density[x, 2, j, t] <- sum(Density[x, 1:N_ageC, j, t-1])*S[x, t-1] # Adults
         Density[x, 1, j, t] <- Density[x, 2, j, t]*R_year[x, t]/2 # Juveniles
         
-        N_exp[x, 1:N_ageC, j, t] <- Density[x, 1:N_ageC, j, t]*L[x, j, t]*(W*scale1)*2
+        N_exp[x, 1:N_ageC, j, t] <- Density[x, 1:N_ageC, j, t]*L[x, j, t]*(W/scale1)*2
         
         ## Detection model year 2 - T
         for(a in 1:N_ageC){
