@@ -93,6 +93,10 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
     #   d_trans_sub <- subset(d_trans, spatialUnit == localities[x])
     #   d_obs_sub <- subset(d_obs, spatialUnit == localities[x])
     # }
+    if(!(sUnits[x] %in% d_trans$spatialUnit)){
+      stop(paste0("Spatial unit ", sUnits[x], " (idex ", x, ") is not in the data."))
+    }
+    
     d_trans_sub <- subset(d_trans, spatialUnit == sUnits[x])
     d_obs_sub <- subset(d_obs, spatialUnit == sUnits[x])
     
@@ -252,6 +256,10 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
     SurvAreaIdx <- which(sUnits == d_cmr$area_names)
   }else{
     SurvAreaIdx <- which(sUnits == d_cmr$locality_names)
+  }
+  
+  if(length(SurvAreaIdx) == 0){
+    stop("No overlap in areas for line transect and survival data. The present implementation of the model requires including line transect data from Lierne.")
   }
   
   ## Assembling all data in a list
