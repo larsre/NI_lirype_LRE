@@ -25,8 +25,8 @@ event_FeFo <- tibble::as_tibble(DwC_FeFo$getCoreTable()$exportAsDataFrame()) %>%
   dplyr::mutate(sampleSizeValue = as.numeric(sampleSizeValue),
                 eventDate = as.Date(eventDate))
 
-occ_Fjellstyrene <- tibble::as_tibble(DwC_Fjellstyrene$getExtensionTables()[[1]]$exportAsDataFrame())
-occ_Statskog <- tibble::as_tibble(DwC_Statskog$getExtensionTables()[[1]]$exportAsDataFrame())
+occ_Fjellstyrene <- tibble::as_tibble(DwC_Fjellstyrene$getExtensionTables()[[2]]$exportAsDataFrame())
+occ_Statskog <- tibble::as_tibble(DwC_Statskog$getExtensionTables()[[2]]$exportAsDataFrame())
 occ_FeFo <- tibble::as_tibble(DwC_FeFo$getExtensionTables()[[2]]$exportAsDataFrame())
 
 ## Combine event and occurrence tables
@@ -40,11 +40,6 @@ occ_FeFo$dataSet <- "FeFo"
 
 event <- dplyr::bind_rows(event_Fjellstyrene, event_Statskog, event_FeFo) 
 occ <- dplyr::bind_rows(occ_Fjellstyrene, occ_Statskog, occ_FeFo)
-
-## Fix area information for Finnmark reporting areas
-event <- event %>%
-  dplyr::mutate(verbatimLocality = ifelse(verbatimLocality == "Fefo", stringr::str_split_fixed(locationRemarks, pattern = ": ", n = 2)[,2], verbatimLocality)) %>%
-  dplyr::mutate(verbatimLocality = ifelse(verbatimLocality == "Stalluvarre", "Indre Finnmark", verbatimLocality))
 
 
 #--------------------------------------------#
@@ -69,7 +64,7 @@ hist(subset(event, sampleSizeValue < 1000)$sampleSizeValue, breaks = 100)
 
 transect_issues <- subset(event, sampleSizeValue < 200)
 nrow(transect_issues)
-# --> 24 events are affected
+# --> 5 events are affected after data update
 
 transect_issues <- transect_issues %>%
   dplyr::select(id, eventID, sampleSizeValue, sampleSizeUnit, eventDate, locationID, locality, verbatimLocality, lineName, dataSet)
@@ -130,9 +125,9 @@ hist(transect$n_occ)
 table(transect$n_occ)
 mean(transect$n_occ)
 
-# --> There are 2175 transects in total
-# --> Study duration ranges from 1 to 22 years, average = 7.92 years
-# --> Number of occurrences/observations ranges from 1 to 385, average = 35.37
+# --> There are 2149 transects in total
+# --> Study duration ranges from 1 to 23 years, average = 8.57 years
+# --> Number of occurrences/observations ranges from 1 to 417, average = 38.78
 
 
 ## Summarize transects per locality
@@ -153,10 +148,10 @@ hist(locality$n_occ)
 table(locality$n_occ)
 mean(locality$n_occ)
 
+# --> There are 120 localities with 1-86 lines each (average = 17.91)
+# --> Number of occurrences/observations ranges from 2 to 5671, average = 694.5
 
-# --> There are 126 localities with 1-86 lines each (average = 17.26)
-# --> Number of occurrences/observations ranges from 2 to 5305, average = 610.53
-
+write.csv(locality, "Data_AvailabilityExp/localities.csv", row.names = FALSE)
 
 ## Summarize localities by (reporting) area 
 areas <- locality %>%
@@ -182,9 +177,10 @@ hist(areas$n_occ)
 table(areas$n_occ)
 mean(areas$n_occ)
 
-# --> There are 44 areas with 1-12 localities (average 2.86) and 1-126 lines each (average = 49.43)
-# --> Number of occurrences/observations ranges from 1 to 7973, average = 1748.341
+# --> There are 44 areas with 1-11 localities (average 2.72) and 1-126 lines each (average = 48.84)
+# --> Number of occurrences/observations ranges from 1 to 8560, average = 1894.091
 
+write.csv(areas, "Data_AvailabilityExp/areas.csv")
 
 #-------------------------------------------------#
 # VISUALIZE DATA AVAILABILITY AT DIFFERENT LEVELS #

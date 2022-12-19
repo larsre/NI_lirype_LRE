@@ -26,7 +26,7 @@ downloadData <- TRUE
 
 if(downloadData){
   #Rype_arkiv <- downloadLN(datasets = "Fjellstyrene", versions = 1.6, save = TRUE)
-  Rype_arkiv <- downloadLN(datasets = c("Fjellstyrene", "Statskog", "FeFo"), versions = c(1.6, 1.7, 1.11), save = TRUE)
+  Rype_arkiv <- downloadLN(datasets = c("Fjellstyrene", "Statskog", "FeFo"), versions = c(1.7, 1.8, 1.12), save = TRUE)
 }else{
   stop("downloadData = FALSE not supported yet. There is an issue with encoding when using LivingNorwayR::initializeDwCArchive() that needs to be resolved first.")
   #Rype_arkiv <- initializeDwCArchive("data/Rype_arkiv.zip")
@@ -38,9 +38,9 @@ if(downloadData){
 
 ## Set localities/areas and time period of interest
 #localities <- c("Lierne Fjellst. Vest", "Lierne Fjellst. øst", "Middagskneppen")
-areas <- listAreas()[c(11, 3)]
+areas <- listAreas()[c(17, 1)]
 minYear <- 2007
-maxYear <- 2020
+maxYear <- 2021
 
 ## List duplicate transects to remove
 duplTransects <- listDuplTransects()
@@ -103,7 +103,7 @@ model_setup <- setupModel(modelCode.path = "NIMBLE Code/RypeIDSM_multiArea_dHN.R
 
 # MODEL (TEST) RUN #
 #------------------#
-t.start <- Sys.time()
+#t.start <- Sys.time()
 IDSM.out <- nimbleMCMC(code = model_setup$modelCode,
                        data = input_data$nim.data, 
                        constants = input_data$nim.constants,
@@ -115,7 +115,7 @@ IDSM.out <- nimbleMCMC(code = model_setup$modelCode,
                        thin = model_setup$mcmcParams$nthin, 
                        samplesAsCodaMCMC = TRUE, 
                        setSeed = 0)
-Sys.time() - t.start
+#Sys.time() - t.start
 
 #saveRDS(IDSM.out, file = 'rypeIDSM_realData_Lierne.rds')
 #saveRDS(IDSM.out, file = 'rypeIDSM_dHN_realData_Lierne.rds')
