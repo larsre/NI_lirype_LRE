@@ -118,11 +118,11 @@ rypeIDSM <- nimbleCode({
     for (j in 1:N_sites[x]){
       
       #for(a in 1:N_ageC){
-      #  N_exp[a, j, 1] ~ dpois(Density[a, j, 1]*L[1, j, 1]*(W/scale1)*2)      ## Expected number of birds
+      #  N_exp[a, j, 1] ~ dpois(Density[a, j, 1]*L[1, j, 1]*W*2)      ## Expected number of birds
       #}  
       
-      N_exp[x, 1, j, 1] ~ dpois(Density[x, 1, j, 1]*L[x, j, 1]*(W/scale1)*2) 
-      N_exp[x, 2, j, 1] ~ dpois(Density[x, 2, j, 1]*L[x, j, 1]*(W/scale1)*2) 
+      N_exp[x, 1, j, 1] ~ dpois(Density[x, 1, j, 1]*L[x, j, 1]*W*2) 
+      N_exp[x, 2, j, 1] ~ dpois(Density[x, 2, j, 1]*L[x, j, 1]*W*2) 
       
       Density[x, 1, j, 1] <- exp(mu.D1[x] + eps.D1[x, j])*ratio.JA1[x]             ## random effects model for spatial variation in density for year 1
       Density[x, 2, j, 1] <- exp(mu.D1[x] + eps.D1[x, j])*(1-ratio.JA1[x])
@@ -184,7 +184,7 @@ rypeIDSM <- nimbleCode({
         Density[x, 2, j, t] <- sum(Density[x, 1:N_ageC, j, t-1])*S[x, t-1] # Adults
         Density[x, 1, j, t] <- Density[x, 2, j, t]*R_year[x, t]/2 # Juveniles
         
-        N_exp[x, 1:N_ageC, j, t] <- Density[x, 1:N_ageC, j, t]*L[x, j, t]*(W/scale1)*2
+        N_exp[x, 1:N_ageC, j, t] <- Density[x, 1:N_ageC, j, t]*L[x, j, t]*W*2
         
         ## Detection model year 2 - T
         for(a in 1:N_ageC){

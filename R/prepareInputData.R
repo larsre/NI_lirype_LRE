@@ -64,9 +64,6 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
   # Truncation distance
   W <- 200
   
-  # Scaling parameter
-  scale1 <- 1000
-  
   ## Count sites per area (for defining correct array dimensions)
   site_count <- d_trans %>%                             
     dplyr::group_by(spatialUnit) %>%
@@ -128,7 +125,6 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
     ## Tansect lengths
     TransLen <- d_trans_sub %>% 
       dplyr::select(locationID, Year, sampleSizeValue) %>%
-      dplyr::mutate(sampleSizeValue = sampleSizeValue/scale1) %>%
       reshape2::dcast(locationID~Year, value.var = "sampleSizeValue", sum) %>%
       arrange(locationID)
     
@@ -144,7 +140,7 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
  
     
     ## Total covered area 
-    A[x, 1:N_yearsTot] <- colSums(L[x,,])*(W/scale1)*2
+    A[x, 1:N_yearsTot] <- colSums(L[x,,])*W*2
     
     
     # Observation distance from transect #
@@ -295,7 +291,6 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
     
     A = A, # Total covered area per year
     W = W, # Truncation distance
-    scale1 = scale1, # Scaling parameter
     N_ageC = N_ageC, # Number of age classes
     
     Survs1 = d_cmr$Survs1, # Season 1 releases & survivors (area 1)
@@ -316,7 +311,7 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
   
   ## Assembling Nimble constants
   nim.constants <- list(N_years = input.data$N_years, min_years = input.data$min_years, max_years = input.data$max_years,
-                        W = input.data$W, scale1 = scale1,
+                        W = input.data$W,
                         N_obs = input.data$N_obs, Year_obs = input.data$Year_obs,
                         N_sites = input.data$N_sites, 
                         R_obs_year = input.data$R_obs_year, N_R_obs = input.data$N_R_obs,

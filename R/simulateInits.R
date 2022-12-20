@@ -20,7 +20,6 @@ simulateInits <- function(nim.data, nim.constants){
   
   L <- nim.data$L
   W <- nim.constants$W
-  scale1 <- nim.constants$scale1
   pi <- 3.141593
   A <- nim.data$A
   
@@ -103,7 +102,7 @@ simulateInits <- function(nim.data, nim.constants){
   
   for(x in 1:N_areas){
     
-    D_x_sum <- apply(nim.data$N_a_line_year[x,,,], c(2,3), sum) / (L[x,,]*(W/scale1)*2)
+    D_x_sum <- apply(nim.data$N_a_line_year[x,,,], c(2,3), sum) / (L[x,,]*W*2)
     D_data <- D_x_sum[which(!is.na(D_x_sum) & D_x_sum > 0)]
     mu.D1[x] <- runif(1, quantile(D_data, 0.25), quantile(D_data, 0.75))  
     
@@ -112,8 +111,8 @@ simulateInits <- function(nim.data, nim.constants){
       Density[x, 1, j, 1] <- mu.D1[x]*ratio.JA1[x]
       Density[x, 2, j, 1] <- mu.D1[x]*(1-ratio.JA1[x])
       
-      N_exp[x, 1, j, 1] <- extraDistr::rtpois(1, lambda = Density[x, 1, j, 1]*L[x, j, 1]*(W/scale1)*2, a = 1)
-      N_exp[x, 2, j, 1] <- extraDistr::rtpois(1, lambda = Density[x, 2, j, 1]*L[x, j, 1]*(W/scale1)*2, a = 1)
+      N_exp[x, 1, j, 1] <- extraDistr::rtpois(1, lambda = Density[x, 1, j, 1]*L[x, j, 1]*W*2, a = 1)
+      N_exp[x, 2, j, 1] <- extraDistr::rtpois(1, lambda = Density[x, 2, j, 1]*L[x, j, 1]*W*2, a = 1)
     }
   }
 
@@ -125,7 +124,7 @@ simulateInits <- function(nim.data, nim.constants){
         Density[x, 2, j, t] <- sum(Density[x, 1:N_ageC, j, t-1])*S[x, t-1] # Adults
         Density[x, 1, j, t] <- Density[x, 2, j, t]*R_year[x, t]/2 # Juveniles
         
-        N_exp[x, 1:N_ageC, j, t] <- Density[x, 1:N_ageC, j, t]*L[x, j, t]*(W/scale1)*2
+        N_exp[x, 1:N_ageC, j, t] <- Density[x, 1:N_ageC, j, t]*L[x, j, t]*W*2
       }
     }
   }
