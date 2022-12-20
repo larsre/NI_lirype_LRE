@@ -23,8 +23,8 @@
 #' --> parentEventIDs: 33B1EEEE-0130-48F5-9973-7FB196BB8A98, 20C98FA8-AB29-43D9-BC18-90973367B080
 #'
 #' locationID DA651143-0B57-44E1-8266-C9CC169391F2, year 2014
-#' --> Does not seem to be part of the data subset at this stage
-#' --> That's because it gets dropped in the start as verbatimLocality = "Fefo" (instead of true reporting area)
+#' --> Duplicate, but no observations. Remove one.
+#' --> parentEventIDs: 1B79AFEC-A512-4407-AC18-C77A890B4088, 05E5C283-74AB-4192-8E5F-E57370DDD527
 #'
 #' @return
 #' @export
@@ -40,7 +40,8 @@ listDuplTransects <- function(){
    "B82C1256-D359-4075-B65B-4304CB086A4B",
    "443FF8B8-071C-4AEB-B834-3C43748D194F",
    "D7F9B1FA-75F9-43A7-9AD4-9479BB9B7C34",
-   "20C98FA8-AB29-43D9-BC18-90973367B080"
+   "20C98FA8-AB29-43D9-BC18-90973367B080",
+   "05E5C283-74AB-4192-8E5F-E57370DDD527"
   )
   
   return(duplTransects)  

@@ -84,7 +84,7 @@ wrangleData_LineTrans <- function(DwC_archive_list, duplTransects, localities = 
     dplyr::summarise(transectCount = dplyr::n(), .groups = 'keep') %>%
     dplyr::filter(transectCount > 1)
   
-  if(nrow(transect_duplicates) > 1){
+  if(nrow(transect_duplicates) > 0){
     stop("There are duplicate transects (> 1 transect in same location per year).")
   }
   
