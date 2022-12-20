@@ -16,7 +16,12 @@ simulateInits <- function(nim.data, nim.constants){
   N_areas <- nim.constants$N_areas
   N_ageC <- nim.constants$N_ageC
   N_years <- nim.constants$N_years
-  N_sites <- nim.constants$N_sites
+  
+  if(N_areas == 1){
+    N_sites <- nim.constants$N_sites[1]
+  }else{
+    N_sites <- nim.constants$N_sites
+  }
   
   L <- nim.data$L
   W <- nim.constants$W
@@ -98,7 +103,7 @@ simulateInits <- function(nim.data, nim.constants){
   sigma.D <- runif(N_areas, 0.05, 2)
   ratio.JA1 <- runif(N_areas, 0.2, 0.6)
   
-  N_exp <- Density <- array(0, dim = c(N_areas, N_ageC, max(nim.constants$N_sites), N_years))
+  N_exp <- Density <- array(0, dim = c(N_areas, N_ageC, max(N_sites), N_years))
   
   for(x in 1:N_areas){
     
@@ -146,7 +151,7 @@ simulateInits <- function(nim.data, nim.constants){
     
     mu.D1 = mu.D1, 
     sigma.D = sigma.D,
-    eps.D1 = matrix(0, nrow = nim.constants$N_areas, ncol = max(nim.constants$N_sites)),
+    eps.D1 = matrix(0, nrow = nim.constants$N_areas, ncol = max(N_sites)),
     ratio.JA1 = ratio.JA1,
     
     mu.R = mu.R,

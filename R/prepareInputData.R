@@ -251,8 +251,8 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
   } 
   
   ## Drop excess columns in recruitment data
-  R_obs <- R_obs[1:N_sUnits, 1:max(N_R_obs)]
-  R_obs_year <- R_obs_year[1:N_sUnits, 1:max(N_R_obs)]
+  R_obs <- R_obs[1:N_sUnits, 1:max(N_R_obs), drop = FALSE]
+  R_obs_year <- R_obs_year[1:N_sUnits, 1:max(N_R_obs), drop = FALSE]
   
   
   # Data assembly #
@@ -267,6 +267,11 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
   
   if(length(SurvAreaIdx) == 0){
     stop("No overlap in areas for line transect and survival data. The present implementation of the model requires including line transect data from Lierne.")
+  }
+  
+  ## Add dummy dimensions if running for only one spatial unit
+  if(N_sUnits == 1){
+    N_sites <- c(N_sites, NA)
   }
   
   ## Assembling all data in a list
