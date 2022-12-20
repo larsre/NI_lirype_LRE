@@ -51,6 +51,7 @@ list(
                           #localities = localities,
                           areas = areas,
                           areaAggregation = TRUE,
+                          excl_neverObs = TRUE,
                           minYear = minYear, maxYear = maxYear)
   ),
   

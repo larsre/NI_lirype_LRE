@@ -11,6 +11,7 @@
 #' @param localities vector of strings listing localities to consider. Either localities or areas must be provided. 
 #' @param areas vector of strings listing areas to consider. Either localities or areas must be provided. 
 #' @param areaAggregation logical. If TRUE, areas are used as smallest spatial unit. If FALSE, locations (within areas) are used as smallest spatial unit.
+#' @param excl_neverObs logical. If TRUE (default), transects on which ptarmigans were never observed are excluded. If FALSE, all transects are included.
 #' @param dataVSconstants logical. If TRUE (default) returns a list of 2 lists
 #' containing data and constants for analysis with Nimble. If FALSE, returns a
 #' list containing all data and constants. 
@@ -23,7 +24,7 @@
 #'
 #' @examples
 
-prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = NULL, areaAggregation, dataVSconstants = TRUE, save = TRUE){
+prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = NULL, areaAggregation, excl_neverObs = TRUE, dataVSconstants = TRUE, save = TRUE){
   
   # Multi-area setup #
   #------------------#
@@ -45,6 +46,12 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
     colnames(d_obs)[which(colnames(d_obs) == "locality")] <- "spatialUnit"
   }
   
+  ## If desired: remove all transects on which willow ptarmigans were never encountered
+  if(excl_neverObs){
+    d_trans2 <- d_trans %>%
+      dplyr::filter(locationID %in% d_obs$locationID)
+  }
+
   ## Variables shared across areas
   # Number of age classes
   N_ageC <- 2
@@ -64,6 +71,10 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
   site_count <- d_trans %>%                             
     dplyr::group_by(spatialUnit) %>%
     dplyr::summarise(count = n_distinct(locationID))
+  
+  if(length(which(site_count$count == 0)) > 0){
+    stop("One or more specified areas contain no willow ptarmigan observations")
+  }
   
   ## Count observations per area
   obs_count <- d_obs %>% 

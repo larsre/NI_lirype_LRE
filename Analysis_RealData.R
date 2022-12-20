@@ -71,6 +71,7 @@ input_data <- prepareInputData(d_trans = LT_data$d_trans,
                                #localities = localities, 
                                areas = areas,
                                areaAggregation = TRUE,
+                               excl_neverObs = TRUE,
                                dataVSconstants = TRUE,
                                save = TRUE)
 
