@@ -32,7 +32,9 @@ tidySamples <- function(IDSM.out, save = TRUE){
     IDSM.out[[i]][, Dnode_idx] <- IDSM.out[[i]][, Dnode_idx]*1000^2
     
     ## Remove unnecessary NA nodes
-    IDSM.out[[i]] <- IDSM.out[[i]][, -NAnode_idx]
+    if(length(NAnode_idx) != 0){
+      IDSM.out[[i]] <- IDSM.out[[i]][, -NAnode_idx]
+    }
   }
   
   ## Optional: save tidied samples
