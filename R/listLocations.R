@@ -8,9 +8,7 @@
 listLocations <- function(){
   
   localities <- c(
-    "Lierne Fjellst. Vest",
-    "Lierne Fjellst. øst",
-    "Middagskneppen"
+    "Lierne Fjellst. Vest"
   )
   
   Encoding(localities) <- "UTF-8"

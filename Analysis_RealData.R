@@ -37,7 +37,7 @@ if(downloadData){
 #----------------------------#
 
 ## Set localities/areas and time period of interest
-#localities <- c("Lierne Fjellst. Vest", "Lierne Fjellst. øst", "Middagskneppen")
+localities <- listLocations()
 areas <- listAreas()
 minYear <- 2007
 maxYear <- 2021
@@ -48,9 +48,9 @@ duplTransects <- listDuplTransects()
 ## Extract transect and observational data from DwC archive
 LT_data <- wrangleData_LineTrans(DwC_archive_list = Rype_arkiv, 
                                  duplTransects = duplTransects,
-                                 #localities = localities,
-                                 areas = areas,
-                                 areaAggregation = TRUE,
+                                 localities = localities,
+                                 #areas = areas,
+                                 areaAggregation = FALSE,
                                  minYear = minYear, maxYear = maxYear)
 
 
@@ -68,9 +68,9 @@ d_cmr <- wrangleData_CMR(minYear = minYear)
 input_data <- prepareInputData(d_trans = LT_data$d_trans, 
                                d_obs = LT_data$d_obs,
                                d_cmr = d_cmr,
-                               #localities = localities, 
-                               areas = areas,
-                               areaAggregation = TRUE,
+                               localities = localities, 
+                               #areas = areas,
+                               areaAggregation = FALSE,
                                excl_neverObs = TRUE,
                                dataVSconstants = TRUE,
                                save = TRUE)
@@ -118,9 +118,6 @@ IDSM.out <- nimbleMCMC(code = model_setup$modelCode,
                        setSeed = 0)
 #Sys.time() - t.start
 
-#saveRDS(IDSM.out, file = 'rypeIDSM_realData_Lierne.rds')
-#saveRDS(IDSM.out, file = 'rypeIDSM_dHN_realData_Lierne.rds')
-#saveRDS(IDSM.out, file = 'rypeIDSM_dHR_realData_Lierne.rds')
 saveRDS(IDSM.out, file = 'rypeIDSM_dHN_multiArea_realData_Lierne.rds')
 
 

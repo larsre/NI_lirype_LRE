@@ -48,9 +48,9 @@ list(
     LT_data,
     wrangleData_LineTrans(DwC_archive_list = Rype_arkiv,
                           duplTransects = duplTransects,
-                          #localities = localities,
-                          areas = areas,
-                          areaAggregation = TRUE,
+                          localities = localities,
+                          #areas = areas,
+                          areaAggregation = FALSE,
                           minYear = minYear, maxYear = maxYear)
   ),
   
@@ -64,9 +64,9 @@ list(
     prepareInputData(d_trans = LT_data$d_trans, 
                      d_obs = LT_data$d_obs,
                      d_cmr = d_cmr,
-                     #localities = localities,
-                     areas = areas,
-                     areaAggregation = TRUE,
+                     localities = localities,
+                     #areas = areas,
+                     areaAggregation = FALSE,
                      excl_neverObs = TRUE,
                      dataVSconstants = TRUE,
                      save = TRUE)
@@ -78,7 +78,7 @@ list(
                customDist = TRUE,
                nim.data = input_data$nim.data,
                nim.constants = input_data$nim.constants,
-               testRun = TRUE, nchains = 3,
+               testRun = FALSE, nchains = 3,
                initVals.seed = 0)
   ),
   

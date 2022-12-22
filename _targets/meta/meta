@@ -3,17 +3,17 @@ areas|stem|a1beb528207c4b35|925bb9d40813c514|2061bfc91666fe7c|-36357794||t19345.
 d_cmr|stem|96ee1a03bdcc1898|7ab52d732f9f8e75|2aee800b417dfeb6|-1108577928||t19334.6140806576s|029eb1f8e8dd17b3|269|rds|local|vector|||1.29|package tidyverse was built under R version 4.1.3. package ggplot2 was built under R version 4.1.3. package tibble was built under R version 4.1.3. package tidyr was built under R version 4.1.3. package readr was built under R version 4.1.3. package purrr was built under R version 4.1.3. package dplyr was built under R version 4.1.3. package stringr was built under R version 4.1.3. package forcats was built under R version 4.1.3|
 downloadLN|function|4eae7483790f31d6|||||||||||||||
 duplTransects|stem|a0af746605d89880|819e859b65466b54|7b34f34d30c3f796|-2074324173||t19346.5607797545s|fae152d00165823a|225|rds|local|vector|||1.86|package tidyverse was built under R version 4.1.3. package ggplot2 was built under R version 4.1.3. package tibble was built under R version 4.1.3. package tidyr was built under R version 4.1.3. package readr was built under R version 4.1.3. package purrr was built under R version 4.1.3. package dplyr was built under R version 4.1.3. package stringr was built under R version 4.1.3. package forcats was built under R version 4.1.3|
-IDSM.out|stem|96556a085c75218a|75e39c73f900fb32|2b821142d05a7314|-21732313||t19346.5877392031s|e6d61b825fb676e7|6236389|rds|local|vector|||1945.67||
-IDSM.out.tidy|stem|68e889b591c78f16|96b836b2f4e9c625|2454e37e1f0e87e0|-872660489||t19348.3521757752s|1740524d50cc50fa|4782837|rds|local|vector|||0.8||
-input_data|stem|a7cd85f1ef71a773|735f2060be346fff|62a96176c89b74f0|-1975194048||t19346.5651986161s|6927667dd30693e5|404526|rds|local|vector|||2.89||
+IDSM.out|stem|7222ada2d09f0c4e|75e39c73f900fb32|85ea75a3aded3487|-21732313||t19348.3932543236s|d92aba7b5aac59d9|229952407|rds|local|vector|||1056.92||
+IDSM.out.tidy|stem|8898f124a25b99e8|96b836b2f4e9c625|cb41e2e0b68d7fc1|-872660489||t19348.399464709s|886326e94785efe0|230397944|rds|local|vector|||10.98||
+input_data|stem|5ff8068308494264|5c93d6c810b55624|202e949130365e91|-1975194048||t19348.3793520957s|7f2a2e1b2edeb6d3|8793|rds|local|vector|||0.23||
 listAreas|function|d5092f5275ea3a46|||||||||||||||
 listDuplTransects|function|b8d2249aa65a7f51|||||||||||||||
-listLocations|function|bead9ed1b15a3ead|||||||||||||||
-localities|stem|042d394271e8b4e8|254e1a8f3dfc543f|990fdf9c53ec9135|-472236320||t19332.3731621971s|f43a1dad04e131de|98|rds|local|vector|||0.94|package tidyverse was built under R version 4.1.3. package ggplot2 was built under R version 4.1.3. package tibble was built under R version 4.1.3. package tidyr was built under R version 4.1.3. package readr was built under R version 4.1.3. package purrr was built under R version 4.1.3. package dplyr was built under R version 4.1.3. package stringr was built under R version 4.1.3. package forcats was built under R version 4.1.3|
-LT_data|stem|52a83df09341dfdd|d69e29748a4395cb|b957c122b5ace011|-1283079006||t19346.5651637276s|25d3f8cd82739816|3297043|rds|local|vector|||7.23|NAs introduced by coercion. NAs introduced by coercion. NAs introduced by coercion|
+listLocations|function|0cadd434f6fef641|||||||||||||||
+localities|stem|d98e39c94123039b|254e1a8f3dfc543f|20156ef219d892fe|-472236320||t19348.3793074143s|037c9cb90e92ca79|74|rds|local|vector|||1.84|package tidyverse was built under R version 4.1.3. package ggplot2 was built under R version 4.1.3. package tibble was built under R version 4.1.3. package tidyr was built under R version 4.1.3. package readr was built under R version 4.1.3. package purrr was built under R version 4.1.3. package dplyr was built under R version 4.1.3. package stringr was built under R version 4.1.3. package forcats was built under R version 4.1.3|
+LT_data|stem|34c14009129e12a7|735538044d965b57|aec9344d29c6b879|-1283079006||t19348.3793492181s|12b2b1ed1c41288f|67994|rds|local|vector|||2|NAs introduced by coercion. NAs introduced by coercion. NAs introduced by coercion|
 maxYear|object|84dbba4ed2096010|||||||||||||||
 minYear|object|d205890c22d8f089|||||||||||||||
-model_setup|stem|dd5657974f72a800|3ff918ced574a450|24b21ecc56244ad3|-945302739||t19346.5652096952s|03f33496f6b12797|951519|rds|local|vector|||0.84||
+model_setup|stem|1a9272a630703421|5ca6ec3f6b25e5cb|418cadf27b5995b1|-945302739||t19348.3809104604s|7691b0f034633bc8|19920|rds|local|vector|||0.15||
 node_stoch_dCRP|function|7f751aef04cd03cd|||||||||||||||
 node_stoch_dHN|function|7f751aef04cd03cd|||||||||||||||
 node_stoch_dHN_V|function|7f751aef04cd03cd|||||||||||||||
@@ -25,6 +25,6 @@ Rype_arkiv|stem|35158aa2e17877d3|ca6ed7fadb6b18e7|3a9ee843258875ef|905815042||t1
 setupModel|function|7e1925f377852fe2|||||||||||||||
 simulateInits|function|db833df46f340767|||||||||||||||
 sourceDir|function|a90de91c32efc2cb|||||||||||||||
-tidySamples|function|80aeded4df8a30f5|||||||||||||||
+tidySamples|function|47550c18604fb140|||||||||||||||
 wrangleData_CMR|function|0628cb91ae259aba|||||||||||||||
 wrangleData_LineTrans|function|812edfe2469b2a55|||||||||||||||
