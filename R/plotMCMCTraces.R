@@ -1,3 +1,16 @@
+#' Plot MCMC traces and posterior densities to pdf
+#'
+#' @param mcmc.out an mcmc list containing
+#' @param VitalRates logical. If TRUE (default), plots traces and posterior densities for vital rate parameters.
+#' @param DetectParams logical. If TRUE (default), plots traces and posterior densities for detection parameters.
+#' @param PopSizes logical. If TRUE (default), plots traces and posterior densities for population sizes.
+#' @param Densities logical. If TRUE (default), plots traces and posterior densities for population densities.
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' 
 plotMCMCTraces <- function(mcmc.out, VitalRates = TRUE, DetectParams = TRUE, PopSizes = TRUE, Densities = TRUE){
   
   ## Make parameter lists

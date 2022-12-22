@@ -101,6 +101,11 @@ list(
     IDSM.out.tidy,
     tidySamples(IDSM.out = IDSM.out,
                 save = TRUE)
+  ),
+  
+  tar_target(
+    mcmc.tracePlots,
+    plotMCMCTraces(mcmc.out = IDSM.out.tidy)
   )
 )
 
