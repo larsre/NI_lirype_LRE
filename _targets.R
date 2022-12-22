@@ -95,6 +95,12 @@ list(
                thin = model_setup$mcmcParams$nthin, 
                samplesAsCodaMCMC = TRUE, 
                setSeed = 0)
+  ),
+  
+  tar_target(
+    IDSM.out.tidy,
+    tidySamples(IDSM.out = IDSM.out,
+                save = TRUE)
   )
 )
 

@@ -4,6 +4,7 @@ d_cmr|stem|96ee1a03bdcc1898|7ab52d732f9f8e75|2aee800b417dfeb6|-1108577928||t1933
 downloadLN|function|4eae7483790f31d6|||||||||||||||
 duplTransects|stem|a0af746605d89880|819e859b65466b54|7b34f34d30c3f796|-2074324173||t19346.5607797545s|fae152d00165823a|225|rds|local|vector|||1.86|package tidyverse was built under R version 4.1.3. package ggplot2 was built under R version 4.1.3. package tibble was built under R version 4.1.3. package tidyr was built under R version 4.1.3. package readr was built under R version 4.1.3. package purrr was built under R version 4.1.3. package dplyr was built under R version 4.1.3. package stringr was built under R version 4.1.3. package forcats was built under R version 4.1.3|
 IDSM.out|stem|96556a085c75218a|75e39c73f900fb32|2b821142d05a7314|-21732313||t19346.5877392031s|e6d61b825fb676e7|6236389|rds|local|vector|||1945.67||
+IDSM.out.tidy|stem|68e889b591c78f16|96b836b2f4e9c625|2454e37e1f0e87e0|-872660489||t19348.3521757752s|1740524d50cc50fa|4782837|rds|local|vector|||0.8||
 input_data|stem|a7cd85f1ef71a773|735f2060be346fff|62a96176c89b74f0|-1975194048||t19346.5651986161s|6927667dd30693e5|404526|rds|local|vector|||2.89||
 listAreas|function|d5092f5275ea3a46|||||||||||||||
 listDuplTransects|function|b8d2249aa65a7f51|||||||||||||||
@@ -24,5 +25,6 @@ Rype_arkiv|stem|35158aa2e17877d3|ca6ed7fadb6b18e7|3a9ee843258875ef|905815042||t1
 setupModel|function|7e1925f377852fe2|||||||||||||||
 simulateInits|function|db833df46f340767|||||||||||||||
 sourceDir|function|a90de91c32efc2cb|||||||||||||||
+tidySamples|function|80aeded4df8a30f5|||||||||||||||
 wrangleData_CMR|function|0628cb91ae259aba|||||||||||||||
 wrangleData_LineTrans|function|812edfe2469b2a55|||||||||||||||
