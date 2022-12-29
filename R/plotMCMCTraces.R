@@ -18,7 +18,7 @@ plotMCMCTraces <- function(mcmc.out, VitalRates = TRUE, DetectParams = TRUE, Pop
                   "mu.D1", "sigma.D", "ratio.JA1",
                   "Mu.S1", "Mu.S2", "h.Mu.S1", "h.Mu.S2", "h.sigma.S1", "h.sigma.S2")
   
-  tVR_params <- c("R_year")
+  tVR_params <- c("R_year", "S")
   
   mDet_params <- c("mu.dd", "sigmaT.dd")
   
