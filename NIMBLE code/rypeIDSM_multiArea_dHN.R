@@ -109,7 +109,7 @@ rypeIDSM <- nimbleCode({
       eps.D1[x, j] ~ dnorm(0, sd = sigma.D[x])
     }
     
-    mu.D1[x] ~ dunif(-3, 30)
+    mu.D1[x] ~ dunif(-10, 30)
     sigma.D[x] ~ dunif(0, 20)
     
     ratio.JA1[x] ~ dunif(0, 1)
