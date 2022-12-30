@@ -1,32 +1,32 @@
 name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
-areas|stem|a1beb528207c4b35|925bb9d40813c514|2061bfc91666fe7c|-36357794||t19345.6647670072s|0977458ffb5bf098|441|rds|local|vector|||2.39|package tidyverse was built under R version 4.1.3. package ggplot2 was built under R version 4.1.3. package tibble was built under R version 4.1.3. package tidyr was built under R version 4.1.3. package readr was built under R version 4.1.3. package purrr was built under R version 4.1.3. package dplyr was built under R version 4.1.3. package stringr was built under R version 4.1.3. package forcats was built under R version 4.1.3|
-d_cmr|stem|96ee1a03bdcc1898|7ab52d732f9f8e75|2aee800b417dfeb6|-1108577928||t19334.6140806576s|029eb1f8e8dd17b3|269|rds|local|vector|||1.29|package tidyverse was built under R version 4.1.3. package ggplot2 was built under R version 4.1.3. package tibble was built under R version 4.1.3. package tidyr was built under R version 4.1.3. package readr was built under R version 4.1.3. package purrr was built under R version 4.1.3. package dplyr was built under R version 4.1.3. package stringr was built under R version 4.1.3. package forcats was built under R version 4.1.3|
+areas|stem|a1beb528207c4b35|925bb9d40813c514|2061bfc91666fe7c|-36357794||t19354.5802388718s|0977458ffb5bf098|441|rds|local|vector|||2.39|package tidyverse was built under R version 4.1.3. package ggplot2 was built under R version 4.1.3. package tibble was built under R version 4.1.3. package tidyr was built under R version 4.1.3. package readr was built under R version 4.1.3. package purrr was built under R version 4.1.3. package dplyr was built under R version 4.1.3. package stringr was built under R version 4.1.3. package forcats was built under R version 4.1.3|
+d_cmr|stem|96ee1a03bdcc1898|7ab52d732f9f8e75|2aee800b417dfeb6|-1108577928||t19354.5802460835s|029eb1f8e8dd17b3|269|rds|local|vector|||1.29|package tidyverse was built under R version 4.1.3. package ggplot2 was built under R version 4.1.3. package tibble was built under R version 4.1.3. package tidyr was built under R version 4.1.3. package readr was built under R version 4.1.3. package purrr was built under R version 4.1.3. package dplyr was built under R version 4.1.3. package stringr was built under R version 4.1.3. package forcats was built under R version 4.1.3|
 downloadLN|function|4eae7483790f31d6|||||||||||||||
-duplTransects|stem|a0af746605d89880|819e859b65466b54|7b34f34d30c3f796|-2074324173||t19346.5607797545s|fae152d00165823a|225|rds|local|vector|||1.86|package tidyverse was built under R version 4.1.3. package ggplot2 was built under R version 4.1.3. package tibble was built under R version 4.1.3. package tidyr was built under R version 4.1.3. package readr was built under R version 4.1.3. package purrr was built under R version 4.1.3. package dplyr was built under R version 4.1.3. package stringr was built under R version 4.1.3. package forcats was built under R version 4.1.3|
-IDSM.out|stem|7eebd34c73d35742|75e39c73f900fb32|7bce16594171230c|-21732313||t19348.5055344894s|324496f742219ffa|231295080|rds|local|vector|||2928.11||
-IDSM.out.tidy|stem|f4c87a086fb32e47|96b836b2f4e9c625|5814bbeede741d01|-872660489||t19348.5057520587s|92a1ceb96197fb22|231727599|rds|local|vector|||9.31||
-input_data|stem|5ff8068308494264|5c93d6c810b55624|202e949130365e91|-1975194048||t19348.3793520957s|7f2a2e1b2edeb6d3|8793|rds|local|vector|||0.23||
+duplTransects|stem|a0af746605d89880|819e859b65466b54|7b34f34d30c3f796|-2074324173||t19354.5802388859s|fae152d00165823a|225|rds|local|vector|||1.86|package tidyverse was built under R version 4.1.3. package ggplot2 was built under R version 4.1.3. package tibble was built under R version 4.1.3. package tidyr was built under R version 4.1.3. package readr was built under R version 4.1.3. package purrr was built under R version 4.1.3. package dplyr was built under R version 4.1.3. package stringr was built under R version 4.1.3. package forcats was built under R version 4.1.3|
+IDSM.out|stem|b6effae2ea45f6dd|75e39c73f900fb32|c8fd70d0faddbb4b|-21732313||t19356.506396688s|0fd1bd63bd28b00d|231255657|rds|local|vector|||1874.5||
+IDSM.out.tidy|stem|b7088d2577cc07f4|96b836b2f4e9c625|ccda24df694d688b|-872660489||t19356.5066852664s|4da6d26dcf7341e3|231289346|rds|local|vector|||14.31||
+input_data|stem|5ff8068308494264|5c93d6c810b55624|202e949130365e91|-1975194048||t19354.5802460778s|7f2a2e1b2edeb6d3|8793|rds|local|vector|||0.23||
 listAreas|function|d5092f5275ea3a46|||||||||||||||
 listDuplTransects|function|b8d2249aa65a7f51|||||||||||||||
 listLocations|function|0cadd434f6fef641|||||||||||||||
-localities|stem|d98e39c94123039b|254e1a8f3dfc543f|20156ef219d892fe|-472236320||t19348.3793074143s|037c9cb90e92ca79|74|rds|local|vector|||1.84|package tidyverse was built under R version 4.1.3. package ggplot2 was built under R version 4.1.3. package tibble was built under R version 4.1.3. package tidyr was built under R version 4.1.3. package readr was built under R version 4.1.3. package purrr was built under R version 4.1.3. package dplyr was built under R version 4.1.3. package stringr was built under R version 4.1.3. package forcats was built under R version 4.1.3|
-LT_data|stem|34c14009129e12a7|735538044d965b57|aec9344d29c6b879|-1283079006||t19348.3793492181s|12b2b1ed1c41288f|67994|rds|local|vector|||2|NAs introduced by coercion. NAs introduced by coercion. NAs introduced by coercion|
+localities|stem|d98e39c94123039b|254e1a8f3dfc543f|20156ef219d892fe|-472236320||t19354.5802460893s|037c9cb90e92ca79|74|rds|local|vector|||1.84|package tidyverse was built under R version 4.1.3. package ggplot2 was built under R version 4.1.3. package tibble was built under R version 4.1.3. package tidyr was built under R version 4.1.3. package readr was built under R version 4.1.3. package purrr was built under R version 4.1.3. package dplyr was built under R version 4.1.3. package stringr was built under R version 4.1.3. package forcats was built under R version 4.1.3|
+LT_data|stem|34c14009129e12a7|735538044d965b57|aec9344d29c6b879|-1283079006||t19354.5802461085s|12b2b1ed1c41288f|67994|rds|local|vector|||2|NAs introduced by coercion. NAs introduced by coercion. NAs introduced by coercion|
 maxYear|object|84dbba4ed2096010|||||||||||||||
-mcmc.tracePlots|stem|31f6a1964e89bee1|7ee2b1bac5f9c9f6|37bf8d84cb7a9e99|1405499975||t19348.5127194522s|25edcc1f7bb1c960|85|rds|local|vector|||112.05||
+mcmc.tracePlots|stem|31f6a1964e89bee1|7ee2b1bac5f9c9f6|3ccc40f462276738|1405499975||t19356.5079106779s|25edcc1f7bb1c960|85|rds|local|vector|||105.5||
 minYear|object|d205890c22d8f089|||||||||||||||
-model_setup|stem|b46bb311b2f3691b|5ca6ec3f6b25e5cb|bb6a842406d66d6d|-945302739||t19348.4715401493s|b34f19e127d78ff7|19923|rds|local|vector|||0.3||
+model_setup|stem|1fc1d75d7f04a959|5ca6ec3f6b25e5cb|240e71475949af74|-945302739||t19356.4845303991s|4019061fab8badaf|19947|rds|local|vector|||0.15||
 node_stoch_dCRP|function|7f751aef04cd03cd|||||||||||||||
 node_stoch_dHN|function|7f751aef04cd03cd|||||||||||||||
 node_stoch_dHN_V|function|7f751aef04cd03cd|||||||||||||||
 node_stoch_dHR|function|7f751aef04cd03cd|||||||||||||||
 node_stoch_dHR_V|function|7f751aef04cd03cd|||||||||||||||
-plotMCMCTraces|function|8cebe128917cc2a5|||||||||||||||
+plotMCMCTraces|function|020c6583becae3b6|||||||||||||||
 plotModelComparison|function|cf1772f706f8abf0|||||||||||||||
 prepareInputData|function|e0258401058b5382|||||||||||||||
-Rype_arkiv|stem|35158aa2e17877d3|ca6ed7fadb6b18e7|3a9ee843258875ef|905815042||t19345.6654479304s|e3e9adf4a0b5f549|17448014|rds|local|vector|||17.14|package tidyverse was built under R version 4.1.3. package ggplot2 was built under R version 4.1.3. package tibble was built under R version 4.1.3. package tidyr was built under R version 4.1.3. package readr was built under R version 4.1.3. package purrr was built under R version 4.1.3. package dplyr was built under R version 4.1.3. package stringr was built under R version 4.1.3. package forcats was built under R version 4.1.3. C\Users\CHLOE1.NAT\AppData\Local\Temp\RtmpO2Mp8D\LNimportDir already exists. C\Users\CHLOE1.NAT\AppData\Local\Temp\RtmpO2Mp8D\LNimportDir already exists|
-setupModel|function|c9c05f2e388acce2|||||||||||||||
-simulateInits|function|db833df46f340767|||||||||||||||
+Rype_arkiv|stem|35158aa2e17877d3|ca6ed7fadb6b18e7|3a9ee843258875ef|905815042||t19354.5802491763s|e3e9adf4a0b5f549|17448014|rds|local|vector|||17.14|package tidyverse was built under R version 4.1.3. package ggplot2 was built under R version 4.1.3. package tibble was built under R version 4.1.3. package tidyr was built under R version 4.1.3. package readr was built under R version 4.1.3. package purrr was built under R version 4.1.3. package dplyr was built under R version 4.1.3. package stringr was built under R version 4.1.3. package forcats was built under R version 4.1.3. C\Users\CHLOE1.NAT\AppData\Local\Temp\RtmpO2Mp8D\LNimportDir already exists. C\Users\CHLOE1.NAT\AppData\Local\Temp\RtmpO2Mp8D\LNimportDir already exists|
+setupModel|function|dff626bc6c88594a|||||||||||||||
+simulateInits|function|d3bffe78204c9a9d|||||||||||||||
 sourceDir|function|a90de91c32efc2cb|||||||||||||||
-tidySamples|function|47550c18604fb140|||||||||||||||
+tidySamples|function|049f7eef06b359df|||||||||||||||
 wrangleData_CMR|function|0628cb91ae259aba|||||||||||||||
 wrangleData_LineTrans|function|812edfe2469b2a55|||||||||||||||
