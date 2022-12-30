@@ -99,7 +99,7 @@ simulateInits <- function(nim.data, nim.constants){
   #------------------#
   
   ## Initial densities / population sizes
-  mu.D1 <- rep(NA, N_areas)
+  Mu.D1 <- rep(NA, N_areas)
   sigma.D <- runif(N_areas, 0.05, 2)
   ratio.JA1 <- runif(N_areas, 0.2, 0.6)
   
@@ -109,12 +109,12 @@ simulateInits <- function(nim.data, nim.constants){
     
     D_x_sum <- apply(nim.data$N_a_line_year[x,,,], c(2,3), sum) / (L[x,,]*W*2)
     D_data <- D_x_sum[which(!is.na(D_x_sum) & D_x_sum > 0)]
-    mu.D1[x] <- runif(1, quantile(D_data, 0.25), quantile(D_data, 0.75))  
+    Mu.D1[x] <- runif(1, quantile(D_data, 0.25), quantile(D_data, 0.75))  
     
     for(j in 1:N_sites[x]){
       
-      Density[x, 1, j, 1] <- mu.D1[x]*ratio.JA1[x]
-      Density[x, 2, j, 1] <- mu.D1[x]*(1-ratio.JA1[x])
+      Density[x, 1, j, 1] <- Mu.D1[x]*ratio.JA1[x]
+      Density[x, 2, j, 1] <- Mu.D1[x]*(1-ratio.JA1[x])
       
       N_exp[x, 1, j, 1] <- extraDistr::rtpois(1, lambda = Density[x, 1, j, 1]*L[x, j, 1]*W*2, a = 1)
       N_exp[x, 2, j, 1] <- extraDistr::rtpois(1, lambda = Density[x, 2, j, 1]*L[x, j, 1]*W*2, a = 1)
@@ -149,7 +149,7 @@ simulateInits <- function(nim.data, nim.constants){
   list(
     #b = runif(1, 1, 50), 
     
-    mu.D1 = mu.D1, 
+    Mu.D1 = Mu.D1, 
     sigma.D = sigma.D,
     eps.D1 = matrix(0, nrow = nim.constants$N_areas, ncol = max(N_sites)),
     ratio.JA1 = ratio.JA1,

@@ -128,7 +128,7 @@ MCMCvis::MCMCtrace(IDSM.out,
                    params = c("esw", "p", "D",
                               "R_year", "mu.R", "h.mu.R", "h.sigma.R", "sigmaT.R",
                               "sigma", "mu.dd", "sigma.dd",
-                              "mu.D1", "sigma.D",
+                              "Mu.D1", "sigma.D",
                               "Mu.S1", "Mu.S2", "h.Mu.S1", "h.Mu.S2", "h.sigma.S1", "h.sigma.S2",
                               "ratio.JA1"))
 

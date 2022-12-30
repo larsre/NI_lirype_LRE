@@ -109,7 +109,7 @@ rypeIDSM <- nimbleCode({
       eps.D1[x, j] ~ dnorm(0, sd = sigma.D[x])
     }
     
-    mu.D1[x] ~ dunif(-10, 30)
+    Mu.D1[x] ~ dunif(0, 10)
     sigma.D[x] ~ dunif(0, 20)
     
     ratio.JA1[x] ~ dunif(0, 1)
@@ -124,8 +124,8 @@ rypeIDSM <- nimbleCode({
       N_exp[x, 1, j, 1] ~ dpois(Density[x, 1, j, 1]*L[x, j, 1]*W*2) 
       N_exp[x, 2, j, 1] ~ dpois(Density[x, 2, j, 1]*L[x, j, 1]*W*2) 
       
-      Density[x, 1, j, 1] <- exp(mu.D1[x] + eps.D1[x, j])*ratio.JA1[x]             ## random effects model for spatial variation in density for year 1
-      Density[x, 2, j, 1] <- exp(mu.D1[x] + eps.D1[x, j])*(1-ratio.JA1[x])
+      Density[x, 1, j, 1] <- exp(log(Mu.D1[x]) + eps.D1[x, j])*ratio.JA1[x]             ## random effects model for spatial variation in density for year 1
+      Density[x, 2, j, 1] <- exp(log(Mu.D1[x]) + eps.D1[x, j])*(1-ratio.JA1[x])
       
       ## Detection model year 1
       for(a in 1:N_ageC){
