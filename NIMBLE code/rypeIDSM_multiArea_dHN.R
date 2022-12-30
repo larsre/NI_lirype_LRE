@@ -66,8 +66,7 @@ rypeIDSM <- nimbleCode({
   
   ## Priors; 
 
-  
-  h.mu.R  ~ dunif(-5, 5)
+  h.Mu.R  ~ dunif(0, 15)
   h.sigma.R ~ dunif(0, 5)
   
   sigmaT.R ~ dunif(0, 5)
@@ -79,11 +78,11 @@ rypeIDSM <- nimbleCode({
   
   for(x in 1:N_areas){
     
-    mu.R[x]  ~ dnorm(mean = h.mu.R, sd = h.sigma.R)
+    Mu.R[x]  ~ dlnorm(meanlog = log(h.Mu.R), sdlog = h.sigma.R)
     
     ## Constraints;
-    R_year[x, 1:N_years] <- exp(mu.R[x] + epsT.R[1:N_years])
-    #R_year[x, 1:N_years] <- exp(mu.R[x] + epsT.R[x, 1:N_years])
+    R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + epsT.R[1:N_years])
+    #R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + epsT.R[x, 1:N_years])
     
     ## Likelihood;
     for (i in 1:N_R_obs[x]){

@@ -54,10 +54,10 @@ simulateInits <- function(nim.data, nim.constants){
   S <- S1*S2
   
   ## Area-specific reproductive parameters
-  h.mu.R  <- runif(1, 0, 0.5)
+  h.Mu.R  <- runif(1, 2, 8)
   h.sigma.R <- runif(1, 0, 0.05)
   
-  mu.R <- rnorm(N_areas, h.mu.R, sd =  h.sigma.R)
+  Mu.R <- rlnorm(N_areas, meanlog = log(h.Mu.R), sdlog =  h.sigma.R)
   sigmaT.R <- runif(1, 0, 2)
   
   epsT.R <- rep(0, N_years)
@@ -66,7 +66,7 @@ simulateInits <- function(nim.data, nim.constants){
   R_year <- matrix(NA, nrow = N_areas, ncol = N_years)
   
   for(x in 1:N_areas){
-    R_year[x, 1:N_years] <- exp(mu.R[x] + epsT.R[1:N_years])
+    R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + epsT.R[1:N_years])
   }
   
   
@@ -154,8 +154,8 @@ simulateInits <- function(nim.data, nim.constants){
     eps.D1 = matrix(0, nrow = nim.constants$N_areas, ncol = max(N_sites)),
     ratio.JA1 = ratio.JA1,
     
-    mu.R = mu.R,
-    h.mu.R = h.mu.R, h.sigma.R = h.sigma.R,
+    Mu.R = Mu.R,
+    h.Mu.R = h.Mu.R, h.sigma.R = h.sigma.R,
     sigmaT.R = sigmaT.R,
     epsT.R = epsT.R, 
     R_year = R_year,
