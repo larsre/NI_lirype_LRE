@@ -21,7 +21,7 @@
 
 setupModel <- function(modelCode.path, customDist,
                        nim.data, nim.constants,
-                       niter = 25000, nthin = 5, nburn = 5000, nchains = 3,
+                       niter = 50000, nthin = 10, nburn = 10000, nchains = 3,
                        testRun = FALSE, initVals.seed){
 
   
@@ -38,11 +38,11 @@ setupModel <- function(modelCode.path, customDist,
   
   ## Set parameters to monitor
   params <- c("esw", "p", #"D",
-              "R_year", "mu.R", "h.mu.R", "h.sigma.R", "sigmaT.R",
+              "R_year", "Mu.R", "h.Mu.R", "h.sigma.R", "sigmaT.R",
               "sigma", "mu.dd", "sigmaT.dd",
-              "Density", "N_exp",
-              "mu.D1", "sigma.D",
-              "Mu.S1", "Mu.S2", "h.Mu.S1", "h.Mu.S2", "h.sigma.S1", "h.sigma.S2",
+              "Density", "N_exp", "N_tot_exp",
+              "Mu.D1", "sigma.D",
+              "S", "Mu.S1", "Mu.S2", "h.Mu.S1", "h.Mu.S2", "h.sigma.S1", "h.sigma.S2",
               "ratio.JA1")
   
   if(grepl('dHR', modelCode.path, fixed = TRUE)){
