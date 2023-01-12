@@ -22,11 +22,13 @@ node_stoch_dHR|function|7f751aef04cd03cd|||||||||||||||
 node_stoch_dHR_V|function|7f751aef04cd03cd|||||||||||||||
 plotMCMCTraces|function|96d5ee5e1f14503d|||||||||||||||
 plotModelComparison|function|cf1772f706f8abf0|||||||||||||||
+plotTimeSeries|function|ec9ec04cca9fb0bb|||||||||||||||
 prepareInputData|function|e0258401058b5382|||||||||||||||
 Rype_arkiv|stem|35158aa2e17877d3|ca6ed7fadb6b18e7|3a9ee843258875ef|905815042||t19354.5802491763s|e3e9adf4a0b5f549|17448014|rds|local|vector|||17.14|package tidyverse was built under R version 4.1.3. package ggplot2 was built under R version 4.1.3. package tibble was built under R version 4.1.3. package tidyr was built under R version 4.1.3. package readr was built under R version 4.1.3. package purrr was built under R version 4.1.3. package dplyr was built under R version 4.1.3. package stringr was built under R version 4.1.3. package forcats was built under R version 4.1.3. C\Users\CHLOE1.NAT\AppData\Local\Temp\RtmpO2Mp8D\LNimportDir already exists. C\Users\CHLOE1.NAT\AppData\Local\Temp\RtmpO2Mp8D\LNimportDir already exists|
 setupModel|function|7f93841722a3574c|||||||||||||||
 simulateInits|function|97f8a6f02d145db6|||||||||||||||
 sourceDir|function|a90de91c32efc2cb|||||||||||||||
 tidySamples|function|049f7eef06b359df|||||||||||||||
+time.seriesPlots|stem|31f6a1964e89bee1|ad7491e58f79d968|1851df4364ac1113|-325026360||t19369.508757677s|25edcc1f7bb1c960|85|rds|local|vector|||1.17||
 wrangleData_CMR|function|0628cb91ae259aba|||||||||||||||
 wrangleData_LineTrans|function|812edfe2469b2a55|||||||||||||||

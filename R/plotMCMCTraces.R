@@ -1,6 +1,6 @@
 #' Plot MCMC traces and posterior densities to pdf
 #'
-#' @param mcmc.out an mcmc list containing
+#' @param mcmc.out an mcmc list containing posterior samples from a model run.
 #' @param VitalRates logical. If TRUE (default), plots traces and posterior densities for vital rate parameters.
 #' @param DetectParams logical. If TRUE (default), plots traces and posterior densities for detection parameters.
 #' @param PopSizes logical. If TRUE (default), plots traces and posterior densities for population sizes.

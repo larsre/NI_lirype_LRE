@@ -106,6 +106,19 @@ list(
   tar_target(
     mcmc.tracePlots,
     plotMCMCTraces(mcmc.out = IDSM.out.tidy)
+  ),
+  
+  tar_target(
+    time.seriesPlots,
+    plotTimeSeries(mcmc.out = IDSM.out.tidy, 
+                   N_areas = input_data$nim.constant$N_areas, 
+                   area_names = input_data$nim.constant$area_names, 
+                   N_sites = input_data$nim.constant$N_sites, 
+                   N_years = input_data$nim.constant$N_years, 
+                   min_years = input_data$nim.constant$min_years, 
+                   max_years = input_data$nim.constant$max_years, 
+                   minYear = minYear,
+                   VitalRates = TRUE, DetectParams = TRUE, Densities = TRUE)
   )
 )
 
