@@ -20,7 +20,10 @@ maxYear <- 2021
 
 
 ## Set target-specific options such as packages.
-tar_option_set(packages = c("LivingNorwayR", "tidyverse"))
+tar_option_set(packages = c("LivingNorwayR", "tidyverse", "qs"),
+               format = "qs",
+               memory = "transient", 
+               garbage_collection = TRUE)
 
 ## Define Targets List
 list(
