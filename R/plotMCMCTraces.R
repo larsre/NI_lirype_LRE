@@ -32,6 +32,7 @@ plotMCMCTraces <- function(mcmc.out, VitalRates = TRUE, DetectParams = TRUE, Pop
   
   
   ## Make plots and print to pdf
+  plot.paths <- c()
   
   # Vital rates
   if(VitalRates){
@@ -48,6 +49,8 @@ plotMCMCTraces <- function(mcmc.out, VitalRates = TRUE, DetectParams = TRUE, Pop
                        ind = TRUE,
                        pdf = FALSE)
     dev.off()
+    
+    plot.paths <- c(plot.paths, "Plots/MCMCTraces/MCMCtrace_mVR.pdf", "Plots/MCMCTraces/MCMCtrace_tVR.pdf")
   }
   
   # Detection parameters
@@ -65,6 +68,8 @@ plotMCMCTraces <- function(mcmc.out, VitalRates = TRUE, DetectParams = TRUE, Pop
                        ind = TRUE,
                        pdf = FALSE)
     dev.off()
+    
+    plot.paths <- c(plot.paths, "Plots/MCMCTraces/MCMCtrace_mDet.pdf", "Plots/MCMCTraces/MCMCtrace_tDet.pdf")
   }
   
   # Population sizes
@@ -82,6 +87,8 @@ plotMCMCTraces <- function(mcmc.out, VitalRates = TRUE, DetectParams = TRUE, Pop
                        ind = TRUE,
                        pdf = FALSE)
     dev.off()
+    
+    plot.paths <- c(plot.paths, "Plots/MCMCTraces/MCMCtrace_Ntot.pdf", "Plots/MCMCTraces/MCMCtrace_N.pdf")
   }
   
   # Population densities
@@ -92,6 +99,9 @@ plotMCMCTraces <- function(mcmc.out, VitalRates = TRUE, DetectParams = TRUE, Pop
                        ind = TRUE,
                        pdf = FALSE)
     dev.off()
+    
+    plot.paths <- c(plot.paths, "Plots/MCMCTraces/MCMCtrace_Dens.pdf")
   }
   
+  return(plot.paths)
 }

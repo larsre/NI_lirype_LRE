@@ -105,7 +105,8 @@ list(
   
   tar_target(
     mcmc.tracePlots,
-    plotMCMCTraces(mcmc.out = IDSM.out.tidy)
+    plotMCMCTraces(mcmc.out = IDSM.out.tidy),
+    format = "file"
   ),
   
   tar_target(
@@ -117,7 +118,8 @@ list(
                    min_years = input_data$nim.constant$min_years, 
                    max_years = input_data$nim.constant$max_years, 
                    minYear = minYear, maxYear = maxYear,
-                   VitalRates = TRUE, DetectParams = TRUE, Densities = TRUE)
+                   VitalRates = TRUE, DetectParams = TRUE, Densities = TRUE),
+    format = "file"
   )
 )
 

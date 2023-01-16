@@ -91,6 +91,7 @@ plotTimeSeries <- function(mcmc.out,
   
 
   ## Make plots and print to pdf
+  plot.paths <- c()
   
   # Reproductive rates
   if(VitalRates){
@@ -106,6 +107,7 @@ plotTimeSeries <- function(mcmc.out,
                              limits = c(minYear, maxYear)) + 
           ylim(min(rRep$lCI), max(rRep$uCI)) + 
           ylab("Reproductive rate") +
+          ggtitle(area_names[i]) + 
           theme_bw() + 
           theme(panel.grid.minor = element_blank(), 
                 axis.text.x = element_text(angle = 45, vjust = 0.75))
@@ -113,6 +115,8 @@ plotTimeSeries <- function(mcmc.out,
       
     }
     dev.off()
+    
+    plot.paths <- c(plot.paths, "Plots/TimeSeries/TimeSeries_rRep.pdf")
   }
   
   # Survival probabilities
@@ -129,6 +133,7 @@ plotTimeSeries <- function(mcmc.out,
                              limits = c(minYear, maxYear)) +
           ylim(min(pSurv$lCI), max(pSurv$uCI)) + 
           ylab("Annual survival probability") +
+          ggtitle(area_names[i]) + 
           theme_bw() + 
           theme(panel.grid.minor = element_blank(), 
                 axis.text.x = element_text(angle = 45, vjust = 0.75))
@@ -136,6 +141,8 @@ plotTimeSeries <- function(mcmc.out,
       
     }
     dev.off()
+    
+    plot.paths <- c(plot.paths, "Plots/TimeSeries/TimeSeries_pSurv.pdf")
   }
   
   # Detection probabilities
@@ -152,6 +159,7 @@ plotTimeSeries <- function(mcmc.out,
                              limits = c(minYear, maxYear)) + 
           ylim(min(pDetect$lCI), max(pDetect$uCI)) + 
           ylab("Detection probability") +
+          ggtitle(area_names[i]) + 
           theme_bw() + 
           theme(panel.grid.minor = element_blank(), 
                 axis.text.x = element_text(angle = 45, vjust = 0.75))
@@ -159,6 +167,7 @@ plotTimeSeries <- function(mcmc.out,
       
     }
     dev.off()
+    plot.paths <- c(plot.paths, "Plots/TimeSeries/TimeSeries_pDetect.pdf")
   }
   
   # Average population densities
@@ -174,6 +183,7 @@ plotTimeSeries <- function(mcmc.out,
           scale_x_continuous(breaks = c(min_years[i]:max_years[i]) + minYear - 1, 
                              limits = c(minYear, maxYear)) + 
           ylab(bquote("Average population density " (birds/km^2))) + 
+          ggtitle(area_names[i]) + 
           theme_bw() + 
           theme(panel.grid.minor = element_blank(), 
                 axis.text.x = element_text(angle = 45, vjust = 0.75))
@@ -193,6 +203,7 @@ plotTimeSeries <- function(mcmc.out,
                              limits = c(minYear, maxYear)) + 
           ylim(min(popDens$lCI), max(popDens$uCI)) + 
           ylab(bquote("Average population density " (birds/km^2))) + 
+          ggtitle(area_names[i]) + 
           theme_bw() + 
           theme(panel.grid.minor = element_blank(), 
                 axis.text.x = element_text(angle = 45, vjust = 0.75))
@@ -200,6 +211,9 @@ plotTimeSeries <- function(mcmc.out,
       
     }
     dev.off()
+    
+    plot.paths <- c(plot.paths, "Plots/TimeSeries/TimeSeries_popDens1.pdf", "Plots/TimeSeries/TimeSeries_popDens2.pdf")
   }
   
+  return(plot.paths)
 }

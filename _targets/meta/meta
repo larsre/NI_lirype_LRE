@@ -3,32 +3,32 @@ areas|stem|a1beb528207c4b35|925bb9d40813c514|2061bfc91666fe7c|-36357794||t19354.
 d_cmr|stem|96ee1a03bdcc1898|7ab52d732f9f8e75|2aee800b417dfeb6|-1108577928||t19354.5802460835s|029eb1f8e8dd17b3|269|rds|local|vector|||1.29|package tidyverse was built under R version 4.1.3. package ggplot2 was built under R version 4.1.3. package tibble was built under R version 4.1.3. package tidyr was built under R version 4.1.3. package readr was built under R version 4.1.3. package purrr was built under R version 4.1.3. package dplyr was built under R version 4.1.3. package stringr was built under R version 4.1.3. package forcats was built under R version 4.1.3|
 downloadLN|function|4eae7483790f31d6|||||||||||||||
 duplTransects|stem|a0af746605d89880|819e859b65466b54|7b34f34d30c3f796|-2074324173||t19354.5802388859s|fae152d00165823a|225|rds|local|vector|||1.86|package tidyverse was built under R version 4.1.3. package ggplot2 was built under R version 4.1.3. package tibble was built under R version 4.1.3. package tidyr was built under R version 4.1.3. package readr was built under R version 4.1.3. package purrr was built under R version 4.1.3. package dplyr was built under R version 4.1.3. package stringr was built under R version 4.1.3. package forcats was built under R version 4.1.3|
-IDSM.out|stem|a54cd164bdfe4922|75e39c73f900fb32|6317e358f9114a00|-21732313||t19369.5925212999s|60ec955084efa0d7|67945399|rds|local|vector|||2347.13||
-IDSM.out.tidy|stem|94a6300503ebc203|96b836b2f4e9c625|495af5c9628edec1|-872660489||t19369.5928710377s|e9912fe357a20db4|63252997|rds|local|vector|||15.3||
-input_data|stem|a7cd85f1ef71a773|735f2060be346fff|62a96176c89b74f0|-1975194048||t19369.5244214524s|6927667dd30693e5|404526|rds|local|vector|||2.82||
+IDSM.out|stem|a54cd164bdfe4922|75e39c73f900fb32|6317e358f9114a00|-21732313||t19370.379282757s|60ec955084efa0d7|67945399|rds|local|vector|||1708.98||
+IDSM.out.tidy|stem|94a6300503ebc203|96b836b2f4e9c625|495af5c9628edec1|-872660489||t19370.3794477462s|e9912fe357a20db4|63252997|rds|local|vector|||9.89||
+input_data|stem|a7cd85f1ef71a773|735f2060be346fff|62a96176c89b74f0|-1975194048||t19370.359409773s|6927667dd30693e5|404526|rds|local|vector|||3.2||
 listAreas|function|d5092f5275ea3a46|||||||||||||||
 listDuplTransects|function|b8d2249aa65a7f51|||||||||||||||
 listLocations|function|0cadd434f6fef641|||||||||||||||
 localities|stem|d98e39c94123039b|254e1a8f3dfc543f|20156ef219d892fe|-472236320||t19354.5802460893s|037c9cb90e92ca79|74|rds|local|vector|||1.84|package tidyverse was built under R version 4.1.3. package ggplot2 was built under R version 4.1.3. package tibble was built under R version 4.1.3. package tidyr was built under R version 4.1.3. package readr was built under R version 4.1.3. package purrr was built under R version 4.1.3. package dplyr was built under R version 4.1.3. package stringr was built under R version 4.1.3. package forcats was built under R version 4.1.3|
-LT_data|stem|52a83df09341dfdd|d69e29748a4395cb|b957c122b5ace011|-1283079006||t19369.5243870477s|25d3f8cd82739816|3297043|rds|local|vector|||7.22|NAs introduced by coercion. NAs introduced by coercion. NAs introduced by coercion|
+LT_data|stem|52a83df09341dfdd|d69e29748a4395cb|b957c122b5ace011|-1283079006||t19370.3593706626s|25d3f8cd82739816|3297043|rds|local|vector|||9.11|NAs introduced by coercion. NAs introduced by coercion. NAs introduced by coercion|
 maxYear|object|84dbba4ed2096010|||||||||||||||
-mcmc.tracePlots|stem|31f6a1964e89bee1|7ee2b1bac5f9c9f6|1ba60cc077ba350e|1405499975||t19369.611127162s|25edcc1f7bb1c960|85|rds|local|vector|||1577.17||
+mcmc.tracePlots|stem|09e69a851015223e|7ee2b1bac5f9c9f6|239c2f5e9eb2dec5|1405499975|Plots/MCMCTraces/MCMCtrace_mVR.pdf*Plots/MCMCTraces/MCMCtrace_tVR.pdf*Plots/MCMCTraces/MCMCtrace_mDet.pdf*Plots/MCMCTraces/MCMCtrace_tDet.pdf*Plots/MCMCTraces/MCMCtrace_Ntot.pdf*Plots/MCMCTraces/MCMCtrace_N.pdf*Plots/MCMCTraces/MCMCtrace_Dens.pdf|t19373.3448906599s|763a1dff0903c04c|957531248|file|local|vector|||242422.53||
 minYear|object|d205890c22d8f089|||||||||||||||
-model_setup|stem|e775835f784f90b2|3ff918ced574a450|be83a353aaa9abe9|-945302739||t19369.5652174826s|a472c8452685d6dd|949393|rds|local|vector|||1.58||
+model_setup|stem|e775835f784f90b2|3ff918ced574a450|be83a353aaa9abe9|-945302739||t19370.3594235254s|a472c8452685d6dd|949393|rds|local|vector|||1.04||
 node_stoch_dCRP|function|7f751aef04cd03cd|||||||||||||||
 node_stoch_dHN|function|7f751aef04cd03cd|||||||||||||||
 node_stoch_dHN_V|function|7f751aef04cd03cd|||||||||||||||
 node_stoch_dHR|function|7f751aef04cd03cd|||||||||||||||
 node_stoch_dHR_V|function|7f751aef04cd03cd|||||||||||||||
-plotMCMCTraces|function|96d5ee5e1f14503d|||||||||||||||
+plotMCMCTraces|function|6a849f09d8c02450|||||||||||||||
 plotModelComparison|function|cf1772f706f8abf0|||||||||||||||
-plotTimeSeries|function|8f73d6d1bb17bbb8|||||||||||||||
+plotTimeSeries|function|b1844cdce9b27c6b|||||||||||||||
 prepareInputData|function|e0258401058b5382|||||||||||||||
 Rype_arkiv|stem|35158aa2e17877d3|ca6ed7fadb6b18e7|3a9ee843258875ef|905815042||t19354.5802491763s|e3e9adf4a0b5f549|17448014|rds|local|vector|||17.14|package tidyverse was built under R version 4.1.3. package ggplot2 was built under R version 4.1.3. package tibble was built under R version 4.1.3. package tidyr was built under R version 4.1.3. package readr was built under R version 4.1.3. package purrr was built under R version 4.1.3. package dplyr was built under R version 4.1.3. package stringr was built under R version 4.1.3. package forcats was built under R version 4.1.3. C\Users\CHLOE1.NAT\AppData\Local\Temp\RtmpO2Mp8D\LNimportDir already exists. C\Users\CHLOE1.NAT\AppData\Local\Temp\RtmpO2Mp8D\LNimportDir already exists|
 setupModel|function|6e9bd315a4f06f79|||||||||||||||
 simulateInits|function|97f8a6f02d145db6|||||||||||||||
 sourceDir|function|a90de91c32efc2cb|||||||||||||||
 tidySamples|function|049f7eef06b359df|||||||||||||||
-time.seriesPlots|stem|31f6a1964e89bee1|9e270eb1d798f81b|7eff7802a259f9c5|-325026360||t19370.3129254816s|25edcc1f7bb1c960|85|rds|local|vector|||26.4||
+time.seriesPlots|stem|1d4215e4a1c82395|9e270eb1d798f81b|19126e6bbf39af9f|-325026360|Plots/TimeSeries/TimeSeries_rRep.pdf*Plots/TimeSeries/TimeSeries_pSurv.pdf*Plots/TimeSeries/TimeSeries_pDetect.pdf*Plots/TimeSeries/TimeSeries_popDens1.pdf*Plots/TimeSeries/TimeSeries_popDens2.pdf|t19373.3456684995s|26f407039b14227b|273006|file|local|vector|||66.64||
 wrangleData_CMR|function|0628cb91ae259aba|||||||||||||||
 wrangleData_LineTrans|function|812edfe2469b2a55|||||||||||||||
