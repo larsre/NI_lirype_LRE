@@ -38,7 +38,8 @@ plotTimeSeries <- function(mcmc.out,
     popDens.sum <-  data.frame()
   
     # Determine area-specific year range
-    area_yearIdxs <- (min_years[i]:max_years[i])
+    #area_yearIdxs <- (min_years[i]:max_years[i])
+    area_yearIdxs <- (1:(maxYear-minYear+1))
     area_years <- area_yearIdxs + (minYear - 1)
     
     for(t in 1:length(area_years)){
@@ -101,9 +102,13 @@ plotTimeSeries <- function(mcmc.out,
       
       print(
         ggplot(subset(rRep, Area == area_names[i]), aes(x = Year)) + 
+          geom_rect(xmin = min_years[i] + minYear - 1, xmax = max_years[i] + minYear - 1,
+                    ymin = min(rRep$lCI), ymax = max(rRep$uCI), 
+                    alpha = 0.01, fill = "cornflowerblue") + 
           geom_line(aes(y = Median), color = "#67008A") + 
-          geom_ribbon(aes(ymin = lCI, ymax = uCI), alpha = 0.5, fill = "#67008A") + 
-          scale_x_continuous(breaks = c(min_years[i]:max_years[i]) + minYear - 1, 
+          geom_ribbon(aes(ymin = lCI, ymax = uCI), alpha = 0.5, fill = "#67008A") +
+          scale_x_continuous(#breaks = c(min_years[i]:max_years[i]) + minYear - 1,
+                             breaks = c(minYear:maxYear),
                              limits = c(minYear, maxYear)) + 
           ylim(min(rRep$lCI), max(rRep$uCI)) + 
           ylab("Reproductive rate") +
@@ -127,10 +132,14 @@ plotTimeSeries <- function(mcmc.out,
       
       print(
         ggplot(subset(pSurv, Area == area_names[i]), aes(x = Year)) + 
+          geom_rect(xmin = min_years[i] + minYear - 1, xmax = max_years[i] + minYear - 1,
+                    ymin = min(pSurv$lCI), ymax = max(pSurv$uCI), 
+                    alpha = 0.01, fill = "cornflowerblue") + 
           geom_line(aes(y = Median), color = "#9A42B8") + 
           geom_ribbon(aes(ymin = lCI, ymax = uCI), alpha = 0.5, fill = "#9A42B8") + 
-          scale_x_continuous(breaks = c(min_years[i]:max_years[i]) + minYear - 1, 
-                             limits = c(minYear, maxYear)) +
+          scale_x_continuous(#breaks = c(min_years[i]:max_years[i]) + minYear - 1,
+                             breaks = c(minYear:maxYear),
+                             limits = c(minYear, maxYear)) + 
           ylim(min(pSurv$lCI), max(pSurv$uCI)) + 
           ylab("Annual survival probability") +
           ggtitle(area_names[i]) + 
@@ -153,10 +162,14 @@ plotTimeSeries <- function(mcmc.out,
       
       print(
         ggplot(subset(pDetect, Area == area_names[i]), aes(x = Year)) + 
+          geom_rect(xmin = min_years[i] + minYear - 1, xmax = max_years[i] + minYear - 1,
+                    ymin = min(pDetect$lCI), ymax = max(pDetect$uCI), 
+                    alpha = 0.01, fill = "cornflowerblue") + 
           geom_line(aes(y = Median), color = "#856CEB") + 
           geom_ribbon(aes(ymin = lCI, ymax = uCI), alpha = 0.5, fill = "#856CEB") + 
-          scale_x_continuous(breaks = c(min_years[i]:max_years[i]) + minYear - 1, 
-                             limits = c(minYear, maxYear)) + 
+          scale_x_continuous(#breaks = c(min_years[i]:max_years[i]) + minYear - 1,
+                              breaks = c(minYear:maxYear),
+                              limits = c(minYear, maxYear)) + 
           ylim(min(pDetect$lCI), max(pDetect$uCI)) + 
           ylab("Detection probability") +
           ggtitle(area_names[i]) + 
@@ -178,10 +191,14 @@ plotTimeSeries <- function(mcmc.out,
       
       print(
         ggplot(subset(popDens, Area == area_names[i]), aes(x = Year)) + 
+          geom_rect(xmin = min_years[i] + minYear - 1, xmax = max_years[i] + minYear - 1,
+                    ymin = min(subset(popDens, Area == area_names[i])$lCI), ymax = max(subset(popDens, Area == area_names[i])$uCI), 
+                    alpha = 0.01, fill = "cornflowerblue") + 
           geom_line(aes(y = Median), color = "#C2B391") + 
           geom_ribbon(aes(ymin = lCI, ymax = uCI), alpha = 0.5, fill = "#C2B391") + 
-          scale_x_continuous(breaks = c(min_years[i]:max_years[i]) + minYear - 1, 
-                             limits = c(minYear, maxYear)) + 
+          scale_x_continuous(#breaks = c(min_years[i]:max_years[i]) + minYear - 1,
+                              breaks = c(minYear:maxYear),
+                              limits = c(minYear, maxYear)) + 
           ylab(bquote("Average population density " (birds/km^2))) + 
           ggtitle(area_names[i]) + 
           theme_bw() + 
@@ -197,10 +214,14 @@ plotTimeSeries <- function(mcmc.out,
       
       print(
         ggplot(subset(popDens, Area == area_names[i]), aes(x = Year)) + 
+          geom_rect(xmin = min_years[i] + minYear - 1, xmax = max_years[i] + minYear - 1,
+                    ymin = min(popDens$lCI), ymax = max(popDens$uCI), 
+                    alpha = 0.01, fill = "cornflowerblue") + 
           geom_line(aes(y = Median), color = "#C2B391") + 
           geom_ribbon(aes(ymin = lCI, ymax = uCI), alpha = 0.5, fill = "#C2B391") + 
-          scale_x_continuous(breaks = c(min_years[i]:max_years[i]) + minYear - 1, 
-                             limits = c(minYear, maxYear)) + 
+          scale_x_continuous(#breaks = c(min_years[i]:max_years[i]) + minYear - 1,
+                              breaks = c(minYear:maxYear),
+                              limits = c(minYear, maxYear)) + 
           ylim(min(popDens$lCI), max(popDens$uCI)) + 
           ylab(bquote("Average population density " (birds/km^2))) + 
           ggtitle(area_names[i]) + 
