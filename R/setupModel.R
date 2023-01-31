@@ -21,7 +21,7 @@
 
 setupModel <- function(modelCode.path, customDist,
                        nim.data, nim.constants,
-                       niter = 50000, nthin = 10, nburn = 10000, nchains = 3,
+                       niter = 100000, nthin = 20, nburn = 40000, nchains = 3,
                        testRun = FALSE, initVals.seed){
 
   
