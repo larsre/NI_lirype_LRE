@@ -33,25 +33,23 @@ simulateInits <- function(nim.data, nim.constants){
   #-------------#
   
   ## Area-specific survival parameters
-  h.Mu.S1 <- runif(1, 0.6, 0.7) 
-  h.Mu.S2 <- runif(1, 0.6, 0.7)
-  h.sigma.S1 <- runif(1, 0, 0.1)
-  h.sigma.S2 <- runif(1, 0, 0.1)
+  h.Mu.S <- runif(1, 0.3, 0.5) 
+  h.sigma.S <- runif(1, 0, 0.1)
+  Mu.S1 <- runif(1, 0.6, 0.7)
   
-  mu.S1 <- rnorm(N_areas, plogis(h.Mu.S1), sd = h.sigma.S1)
-  mu.S2 <- rnorm(N_areas, plogis(h.Mu.S2), sd = h.sigma.S2)
-  
-  Mu.S1 <- Mu.S2 <- rep(NA, N_areas)
-  S1 <- S2 <- matrix(NA, nrow = N_areas, ncol = N_years)
+  mu.S <- EnvStats::rnormTrunc(N_areas, qlogis(h.Mu.S), sd = h.sigma.S, max = qlogis(Mu.S1))
+
+  Mu.S <- rep(NA, N_areas)
+  S <-  matrix(NA, nrow = N_areas, ncol = N_years)
+  S1 <- S2 <- rep(NA, N_years)
   
   for(x in 1:N_areas){
-    Mu.S1[x] <- plogis(mu.S1[x])
-    Mu.S2[x] <- plogis(mu.S2[x])
-    
-    S1[x, 1:N_years] <- Mu.S1[x]
-    S2[x, 1:N_years] <- Mu.S2[x]
+    Mu.S[x] <- plogis(mu.S[x])
+    S[x, 1:N_years] <- Mu.S[x]
   }
-  S <- S1*S2
+
+  S1[1:N_years] <- Mu.S1
+  S2[1:N_years] <- S[nim.constants$SurvAreaIdx, 1:N_years]/S1[1:N_years]
   
   ## Area-specific reproductive parameters
   h.Mu.R  <- runif(1, 2, 8)
@@ -168,9 +166,10 @@ simulateInits <- function(nim.data, nim.constants){
     esw = esw,
     p = p,
     
-    h.Mu.S1 = h.Mu.S1, h.Mu.S2 = h.Mu.S2,
-    h.sigma.S1 = h.sigma.S1, h.sigma.S2 = h.sigma.S2,
-    mu.S1 = mu.S1, mu.S2 = mu.S2,
+    h.Mu.S = h.Mu.S,
+    h.sigma.S = h.sigma.S,
+    mu.S = mu.S, Mu.S = Mu.S, 
+    Mu.S1 = Mu.S1,
     S1 = S1, S2 = S2, S = S,
 
     Density = Density,

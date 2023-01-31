@@ -16,7 +16,7 @@ plotMCMCTraces <- function(mcmc.out, VitalRates = TRUE, DetectParams = TRUE, Pop
   ## Make parameter lists
   mVR_params <- c("Mu.R", "h.Mu.R", "h.sigma.R", "sigmaT.R",
                   "Mu.D1", "sigma.D", "ratio.JA1",
-                  "Mu.S1", "Mu.S2", "h.Mu.S1", "h.Mu.S2", "h.sigma.S1", "h.sigma.S2")
+                  "Mu.S", "Mu.S1", "h.Mu.S", "h.sigma.S")
   
   tVR_params <- c("R_year", "S")
   

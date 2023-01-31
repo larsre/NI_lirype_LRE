@@ -139,34 +139,30 @@ rypeIDSM <- nimbleCode({
   ## Model for survival; 
   
   ## Priors
-  h.Mu.S1 ~ dunif(0.25, 0.9)
-  h.Mu.S2 ~ dunif(0.25, 0.9)
+  h.Mu.S ~ dunif(0, 1)
+  h.sigma.S ~ dunif(0, 5)
   
-  h.sigma.S1 ~ dunif(0, 5)
-  h.sigma.S2 ~ dunif(0, 5)
+  Mu.S1 ~ dunif(0, 1) # Season 1 survival for Lierne
   
   for(x in 1:N_areas){
-    mu.S1[x] ~ dnorm(logit(h.Mu.S1), sd = h.sigma.S1)
-    mu.S2[x] ~ dnorm(logit(h.Mu.S2), sd = h.sigma.S2)
+    mu.S[x] ~ dnorm(logit(h.Mu.S), sd = h.sigma.S)
     #TODO: Implement spatial correlation in survival averages
     
-    logit(Mu.S1[x]) <- mu.S1[x]
-    logit(Mu.S2[x]) <- mu.S2[x]
-    
     ## Constraints
-    S1[x, 1:N_years] <- Mu.S1[x]
-    S2[x, 1:N_years] <- Mu.S2[x]
+    logit(Mu.S[x]) <- mu.S[x]
+    S[x, 1:N_years] <- Mu.S[x]
     #TODO: Consider implementing spatially correlated random year variation
     
-    S[x, 1:N_years] <- S1[x, 1:N_years]*S2[x, 1:N_years]
-    
   }
-   
+  
+  S1[1:N_years] <- Mu.S1
+  S2[1:N_years] <- S[SurvAreaIdx, 1:N_years]/S1[1:N_years]
+  
   ## Data likelihoods
   for (t in 1:5){
     
-    Survs1[t, 2] ~ dbinom(S1[SurvAreaIdx, t], Survs1[t, 1])
-    Survs2[t, 2] ~ dbinom(S2[SurvAreaIdx, t], Survs2[t, 1])
+    Survs1[t, 2] ~ dbinom(S1[t], Survs1[t, 1])
+    Survs2[t, 2] ~ dbinom(S2[t], Survs2[t, 1])
     
   }
   
