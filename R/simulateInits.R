@@ -2,13 +2,14 @@
 #'
 #' @param nim.data list of input objects representing data
 #' @param nim.constants list of input objects representing constants
-#'
+#' @param shareRE logical. If TRUE, temporal random effects are shared across locations.
+#' 
 #' @return A list containing one complete set of initial values for the model.
 #' @export
 #'
 #' @examples
 
-simulateInits <- function(nim.data, nim.constants){
+simulateInits <- function(nim.data, nim.constants, shareRE){
   
   # Limits and constants #
   #----------------------#
@@ -58,14 +59,24 @@ simulateInits <- function(nim.data, nim.constants){
   Mu.R <- rlnorm(N_areas, meanlog = log(h.Mu.R), sdlog =  h.sigma.R)
   sigmaT.R <- runif(1, 0, 2)
   
-  epsT.R <- rep(0, N_years)
-  #epsT.T <- rnorm(N_year, 0, sigmaT.R)
-  
   R_year <- matrix(NA, nrow = N_areas, ncol = N_years)
   
-  for(x in 1:N_areas){
-    R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + epsT.R[1:N_years])
+  if(shareRE){
+    epsT.R <- rep(0, N_years)
+    #epsT.R <- rnorm(N_year, 0, sigmaT.R)
+    
+    for(x in 1:N_areas){
+      R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + epsT.R[1:N_years])
+    }
+  }else{
+    epsT.R <- matrix(0, nrow = N_areas, ncol = N_years)
+    #epsT.R <- matrix(rnorm(N_areas*N_years, 0, sigmaT.R), nrow = N_areas, ncol = N_years)
+    
+    for(x in 1:N_areas){
+      R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + epsT.R[x, 1:N_years])
+    }
   }
+
   
   
   # Detection parameters #
@@ -79,17 +90,30 @@ simulateInits <- function(nim.data, nim.constants){
   mu.dd <- rep(h.mu.dd, N_areas)
   sigmaT.dd <- runif(1, 1, 10)
   
-  epsT.dd <- rep(0, N_years)
-  #epsT.dd <- rnorm(N_years, 0, sd = sigmaT.dd)
-  
   sigma <- esw <- p <- matrix(NA, nrow = N_areas, ncol = N_years)
   
-  for(x in 1:N_areas){
-    for(t in 1:N_years){
-      sigma[x, t] <- exp(mu.dd[x] + epsT.dd[t])
-      esw[x, t] <- sqrt(pi * sigma[x, t]^2 / 2) 
-      p[x, t] <- min(esw[x, t], W) / W
+  
+  if(shareRE){
+    epsT.dd <- rep(0, N_years)
+    #epsT.dd <- rnorm(N_years, 0, sd = sigmaT.dd)
+    
+    for(x in 1:N_areas){
+      sigma[x, 1:N_years] <- exp(mu.dd[x] + epsT.dd[1:N_years])
     }
+    
+  }else{
+    epsT.dd <- matrix(0, nrow = N_areas, ncol = N_years)
+    #epsT.dd <- matrix(rnorm(N_areas*N_years, 0, sigmaT.dd), nrow = N_areas, ncol = N_years)
+    
+    for(x in 1:N_areas){
+      sigma[x, 1:N_years] <- exp(mu.dd[x] + epsT.dd[x, 1:N_years])
+    }
+  }
+
+  
+  for(x in 1:N_areas){
+    esw[x, 1:N_years] <- sqrt(pi * sigma[x, 1:N_years]^2 / 2) 
+    p[x, 1:N_years] <- min(esw[x, 1:N_years], W) / W
   }
   
   
