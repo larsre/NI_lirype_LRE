@@ -3,13 +3,14 @@
 #' @param nim.data list of input objects representing data
 #' @param nim.constants list of input objects representing constants
 #' @param shareRE logical. If TRUE, temporal random effects are shared across locations.
+#' @param survVarT logical. If TRUE, survival is simulated including annual variation.
 #' 
 #' @return A list containing one complete set of initial values for the model.
 #' @export
 #'
 #' @examples
 
-simulateInits <- function(nim.data, nim.constants, shareRE){
+simulateInits <- function(nim.data, nim.constants, shareRE, survVarT){
   
   # Limits and constants #
   #----------------------#
@@ -40,16 +41,28 @@ simulateInits <- function(nim.data, nim.constants, shareRE){
   
   mu.S <- EnvStats::rnormTrunc(N_areas, qlogis(h.Mu.S), sd = h.sigma.S, max = qlogis(Mu.S1))
 
+  sigmaT.S <- runif(1, 0, 0.05)
+  
   Mu.S <- rep(NA, N_areas)
   S <-  matrix(NA, nrow = N_areas, ncol = N_years)
   S1 <- S2 <- rep(NA, N_years)
   
+  epsT.S1.prop <- runif(1, 0.3, 0.8)
+  
+  if(survVarT){
+    epsT.S <- matrix(0, nrow = N_areas, ncol = N_years)
+    #epsT.S <- matrix(rnorm(N_areas*N_years, 0, sigmaS.R), nrow = N_areas, ncol = N_years)
+    
+  }else{
+    epsT.S <- matrix(0, nrow = N_areas, ncol = N_years)
+  }
+  
   for(x in 1:N_areas){
     Mu.S[x] <- plogis(mu.S[x])
-    S[x, 1:N_years] <- Mu.S[x]
+    S[x, 1:N_years] <- plogis(qlogis(Mu.S[x]) + epsT.S[x, 1:N_years])
   }
 
-  S1[1:N_years] <- Mu.S1
+  S1[1:N_years] <- plogis(qlogis(Mu.S1) + epsT.S1.prop*epsT.S[nim.constants$SurvAreaIdx, 1:N_years])
   S2[1:N_years] <- S[nim.constants$SurvAreaIdx, 1:N_years]/S1[1:N_years]
   
   ## Area-specific reproductive parameters
@@ -193,7 +206,9 @@ simulateInits <- function(nim.data, nim.constants, shareRE){
     h.Mu.S = h.Mu.S,
     h.sigma.S = h.sigma.S,
     mu.S = mu.S, Mu.S = Mu.S, 
+    epsT.S = epsT.S,
     Mu.S1 = Mu.S1,
+    epsT.S1.prop = epsT.S1.prop,
     S1 = S1, S2 = S2, S = S,
 
     Density = Density,

@@ -4,8 +4,8 @@ d_cmr|stem|cd956580698ad327|7ab52d732f9f8e75|2aee800b417dfeb6|-1108577928||t1937
 downloadLN|function|4eae7483790f31d6|||||||||||||||
 duplTransects|stem|a6b9c070885aa5dc|819e859b65466b54|7b34f34d30c3f796|-2074324173||t19373.4088526947s|4eb9a67a7652a441|213|qs|local|vector|||0||
 findHighP|function|997d07c621a1cfcb|||||||||||||||
-IDSM.out|stem|64bcfb74ba892492|75e39c73f900fb32|92f201510306d9a4|-21732313||t19395.5613371788s|db049fe6f156b789|95574788|qs|local|vector|||5893.86||
-IDSM.out.tidy|stem|7d957410d9475843|79f446048746207d|f86c71261b0cd46a|-872660489||t19395.561410458s|1c62cbd56a2c2552|89754520|qs|local|vector|||2.46||
+IDSM.out|stem|a5bb0aa78de5a67e|75e39c73f900fb32|45a657d9979ddc74|-21732313||t19397.419414856s|5f023da7d0269196|102090594|qs|local|vector|||2288.05||
+IDSM.out.tidy|stem|e3a741ab20049dbd|79f446048746207d|e3f279a39133f4f5|-872660489||t19397.4195020037s|c54513606a82dc3e|97135622|qs|local|vector|||2.89||
 input_data|stem|9d51092c5eac9456|735f2060be346fff|167f2440e166fa2f|-1975194048||t19373.409229559s|72f1a83151c5708b|285444|qs|local|vector|||3||
 listAreas|function|d5092f5275ea3a46|||||||||||||||
 listDuplTransects|function|b8d2249aa65a7f51|||||||||||||||
@@ -13,9 +13,9 @@ listLocations|function|0cadd434f6fef641|||||||||||||||
 localities|stem|50f66f808bc83082|254e1a8f3dfc543f|20156ef219d892fe|-472236320||t19373.4088505149s|7db3a3265500c98f|59|qs|local|vector|||0||
 LT_data|stem|9e980308a19826ef|d69e29748a4395cb|8f8862c9c9e8a240|-1283079006||t19373.4091845728s|6bc2ff9308582a7c|2478278|qs|local|vector|||9.55|NAs introduced by coercion. NAs introduced by coercion. NAs introduced by coercion|
 maxYear|object|84dbba4ed2096010|||||||||||||||
-mcmc.tracePlots|stem|c83f45f9764b47ef|7ee2b1bac5f9c9f6|29a59de0c6c7bd10|1405499975|Plots/MCMCTraces/MCMCtrace_mVR.pdf*Plots/MCMCTraces/MCMCtrace_tVR.pdf*Plots/MCMCTraces/MCMCtrace_mDet.pdf*Plots/MCMCTraces/MCMCtrace_tDet.pdf*Plots/MCMCTraces/MCMCtrace_Ntot.pdf*Plots/MCMCTraces/MCMCtrace_N.pdf*Plots/MCMCTraces/MCMCtrace_Dens.pdf|t19395.5713943001s|37c0f3f20eded640|955989212|file|local|vector|||861.14|collapsing to unique x values. collapsing to unique x values. collapsing to unique x values. collapsing to unique x values. collapsing to unique x values. collapsing to unique x values. collapsing to unique x values. collapsing to unique x values. collapsing to unique x values. collapsing to unique x values. collapsing to unique x values. collapsing to unique x values. collapsing to unique x values. collapsing to unique x values. collapsing to unique x values. collapsing to unique x values. collapsing to unique x values|
+mcmc.tracePlots|stem|436f901cf453e371|7ee2b1bac5f9c9f6|f1941f0b7976e64d|1405499975|Plots/MCMCTraces/MCMCtrace_mVR.pdf*Plots/MCMCTraces/MCMCtrace_tVR.pdf*Plots/MCMCTraces/MCMCtrace_mDet.pdf*Plots/MCMCTraces/MCMCtrace_tDet.pdf*Plots/MCMCTraces/MCMCtrace_Ntot.pdf*Plots/MCMCTraces/MCMCtrace_N.pdf*Plots/MCMCTraces/MCMCtrace_Dens.pdf|t19397.4304053674s|dfcb9946388e9e25|966602004|file|local|vector|||940.5||
 minYear|object|d205890c22d8f089|||||||||||||||
-model_setup|stem|c6b5f62a0d5151df|8f6f86d709aa9ec1|a95f5190edba38a0|-945302739||t19395.4642986704s|6b52a6ec65246f5c|1299050|qs|local|vector|||0.86||
+model_setup|stem|ff156eab5d37819f|4c53cb77de0e2dc0|31f5ff8622187292|-945302739||t19397.3929078892s|aeec045201d82101|1304609|qs|local|vector|||0.8||
 node_stoch_dCRP|function|7f751aef04cd03cd|||||||||||||||
 node_stoch_dHN|function|7f751aef04cd03cd|||||||||||||||
 node_stoch_dHN_V|function|7f751aef04cd03cd|||||||||||||||
@@ -27,10 +27,10 @@ plotRepDist|function|f7064b6cebab3dc7|||||||||||||||
 plotTimeSeries|function|254427d883b92b24|||||||||||||||
 prepareInputData|function|e0258401058b5382|||||||||||||||
 Rype_arkiv|stem|a511c2a281d0e5f0|ca6ed7fadb6b18e7|3a9ee843258875ef|905815042||t19373.4090581594s|481fe7dbe93fe97a|11732270|qs|local|vector|||15.85|C\Users\CHLOE1.NAT\AppData\Local\Temp\RtmpUNV6av\LNimportDir already exists. C\Users\CHLOE1.NAT\AppData\Local\Temp\RtmpUNV6av\LNimportDir already exists|
-setupModel|function|9011f80fc052e6db|||||||||||||||
-simulateInits|function|61c78e94de207dc7|||||||||||||||
+setupModel|function|bbf32f2c482aefe2|||||||||||||||
+simulateInits|function|32ce0758a10b4885|||||||||||||||
 sourceDir|function|a90de91c32efc2cb|||||||||||||||
 tidySamples|function|049f7eef06b359df|||||||||||||||
-time.seriesPlots|stem|809e10e75b9c351c|9e270eb1d798f81b|01856493e4f17501|-325026360|Plots/TimeSeries/TimeSeries_rRep.pdf*Plots/TimeSeries/TimeSeries_pSurv.pdf*Plots/TimeSeries/TimeSeries_pDetect.pdf*Plots/TimeSeries/TimeSeries_popDens1.pdf*Plots/TimeSeries/TimeSeries_popDens2.pdf|t19395.5717626253s|38731b0898bfa59f|307254|file|local|vector|||29.37||
+time.seriesPlots|stem|628315e88b76ca98|9e270eb1d798f81b|528b73535bfdf165|-325026360|Plots/TimeSeries/TimeSeries_rRep.pdf*Plots/TimeSeries/TimeSeries_pSurv.pdf*Plots/TimeSeries/TimeSeries_pDetect.pdf*Plots/TimeSeries/TimeSeries_popDens1.pdf*Plots/TimeSeries/TimeSeries_popDens2.pdf|t19397.4309762414s|6458d91e2dd2556c|311059|file|local|vector|||45.63||
 wrangleData_CMR|function|0628cb91ae259aba|||||||||||||||
 wrangleData_LineTrans|function|812edfe2469b2a55|||||||||||||||

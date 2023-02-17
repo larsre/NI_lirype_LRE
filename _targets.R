@@ -77,11 +77,12 @@ list(
   
   tar_target(
     model_setup,
-    setupModel(modelCode.path = "NIMBLE Code/RypeIDSM_multiArea_dHN_sepRE.R",
+    setupModel(modelCode.path = "NIMBLE Code/RypeIDSM_multiArea_dHN_sepRE_survT.R",
                customDist = TRUE,
                nim.data = input_data$nim.data,
                nim.constants = input_data$nim.constants,
                shareRE = FALSE,
+               survVarT = TRUE,
                testRun = TRUE, nchains = 3,
                initVals.seed = 0)
   ),

@@ -18,7 +18,7 @@ rypeIDSM <- nimbleCode({
   ## Priors for hyper-parameters
   h.mu.dd ~ dunif(-10, 100)
   h.sigma.dd ~ dunif(0, 5)
-
+  
   for(x in 1:N_areas){
     mu.dd[x] ~ dnorm(h.mu.dd, sd = h.sigma.dd)
     
@@ -37,7 +37,7 @@ rypeIDSM <- nimbleCode({
     for(t in 1:N_years){
       
       log(sigma[x, t]) <- mu.dd[x] + epsT.dd[x, t]
-
+      
       sigma2[x, t] <- sigma[x, t] * sigma[x, t]
       
       # effective strip width
@@ -54,7 +54,7 @@ rypeIDSM <- nimbleCode({
       y[x, i] ~ dHN(sigma = sigma[x, Year_obs[x, i]], Xmax = W, point = 0)
     }
   }
-
+  
   ###################################################
   ## Random effects model for R (i.e. )
   ## Data: 
@@ -65,7 +65,7 @@ rypeIDSM <- nimbleCode({
   # Year_obs <- vector with years for each observation. 
   
   ## Priors; 
-
+  
   h.Mu.R  ~ dunif(0, 15)
   h.sigma.R ~ dunif(0, 5)
   
@@ -141,7 +141,10 @@ rypeIDSM <- nimbleCode({
   h.Mu.S ~ dunif(0, 1)
   h.sigma.S ~ dunif(0, 5)
   
+  sigmaT.S ~ dunif(0, 5)
+  
   Mu.S1 ~ dunif(0, 1) # Season 1 survival for Lierne
+  epsT.S1.prop ~ dunif(0, 1) # Proportion of random year effect that will be allocated to season 1
   
   for(x in 1:N_areas){
     mu.S[x] ~ dnorm(logit(h.Mu.S), sd = h.sigma.S)
@@ -149,12 +152,16 @@ rypeIDSM <- nimbleCode({
     
     ## Constraints
     logit(Mu.S[x]) <- mu.S[x]
-    S[x, 1:N_years] <- Mu.S[x]
+    logit(S[x, 1:N_years]) <- logit(Mu.S[x]) + epsT.S[x, 1:N_years]
+    
+    for(t in 1:N_years){
+      epsT.S[x, t] ~ dnorm(0, sd = sigmaT.S) # Temporal RE
+    }
     #TODO: Consider implementing spatially correlated random year variation
     
   }
   
-  S1[1:N_years] <- Mu.S1
+  logit(S1[1:N_years]) <- logit(Mu.S1) + epsT.S1.prop*epsT.S[SurvAreaIdx, 1:N_years]
   S2[1:N_years] <- S[SurvAreaIdx, 1:N_years]/S1[1:N_years]
   
   ## Data likelihoods
@@ -203,5 +210,5 @@ rypeIDSM <- nimbleCode({
       #D[x, t] <- N_tot_exp[x, t] / A[x, t]       ## Deriving density as N/A     
     }
   }
-
+  
 })
