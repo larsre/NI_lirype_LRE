@@ -13,7 +13,7 @@
 wrangleData_CMR <- function(minYear){
   
   ## Load CMR data
-  CMR_data <- tibble::as_tibble(read.csv("Demographic_data/CMR_Data.csv", header = T, sep = ",")) 
+  CMR_data <- tibble::as_tibble(read.csv("Demographic_Data/CMR_Data.csv", header = T, sep = ",")) 
   
   ## Divide data between time periods
   

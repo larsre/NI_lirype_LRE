@@ -77,7 +77,7 @@ list(
   
   tar_target(
     model_setup,
-    setupModel(modelCode.path = "NIMBLE Code/RypeIDSM_multiArea_dHN_sepRE_survT.R",
+    setupModel(modelCode.path = "NIMBLE code/rypeIDSM_multiArea_dHN_sepRE_survT.R",
                customDist = TRUE,
                nim.data = input_data$nim.data,
                nim.constants = input_data$nim.constants,
