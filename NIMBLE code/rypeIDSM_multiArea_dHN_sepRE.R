@@ -84,8 +84,8 @@ rypeIDSM <- nimbleCode({
     R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + epsT.R[x, 1:N_years])
     
     ## Likelihood;
-    for (i in 1:N_R_obs[x]){
-      R_obs[x, i] ~ dpois(R_year[x, R_obs_year[x, i]])
+    for (i in 1:N_sumR_obs[x]){
+      sumR_obs[x, i] ~ dpois(R_year[x, sumR_obs_year[x, i]]*sumAd_obs[x, i])
     }
   }
   
