@@ -30,6 +30,11 @@ R_parent_drop0 <- TRUE
 # NOTE: if this is not defined, will default to group level
 sumR.Level <- "line" # Summing at the line level
 
+# Random effects shared across areas
+shareRE <- TRUE
+
+# Time variation in survival
+survVarT <- FALSE
 
 # DOWNLOAD/FETCH DATA #
 #---------------------#
@@ -102,6 +107,7 @@ input_data <- prepareInputData(d_trans = LT_data$d_trans,
 # Updated version (nimbleDistance::dHN)
 model_setup <- setupModel(modelCode.path = "NIMBLE Code/RypeIDSM_multiArea_dHN.R",
                           customDist = TRUE,
+                          shareRE = shareRE, survVarT = survVarT,
                           nim.data = input_data$nim.data,
                           nim.constants = input_data$nim.constants,
                           testRun = TRUE, nchains = 3,
