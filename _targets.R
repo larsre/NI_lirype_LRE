@@ -71,6 +71,9 @@ list(
                      areas = areas,
                      areaAggregation = TRUE,
                      excl_neverObs = TRUE,
+                     R_perF = FALSE,
+                     R_parent_drop0 = TRUE,
+                     sumR.Level = "line",
                      dataVSconstants = TRUE,
                      save = TRUE)
   ),
