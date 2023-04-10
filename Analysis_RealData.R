@@ -26,6 +26,11 @@ R_perF <- TRUE
 # Drop observations of juveniles with no adults present
 R_parent_drop0 <- FALSE
 
+# Aggregation level for reproduction data
+# NOTE: if this is not defined, will default to group level
+sumR.Level <- "line" # Summing at the line level
+
+
 # DOWNLOAD/FETCH DATA #
 #---------------------#
 
@@ -79,6 +84,7 @@ input_data <- prepareInputData(d_trans = LT_data$d_trans,
                                excl_neverObs = TRUE,
                                R_perF = R_perF,
                                R_parent_drop0 = R_parent_drop0,
+                               sumR.Level = "line",
                                dataVSconstants = TRUE,
                                save = TRUE)
 

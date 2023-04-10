@@ -17,6 +17,9 @@
 #' @param R_parent_drop0 logical. If TRUE, removes observations of juveniles without adults
 #' from recruitment data. If FALSE, sets 1 as the number of adults/adults females when none
 #' are observed. 
+#' @param sumR.Level character string. Default ("group") summarises reproduction/recruitment
+#' data at the group/observation level. Setting to "line" summarises data at the 
+#' transect line level instead. 
 #' @param dataVSconstants logical. If TRUE (default) returns a list of 2 lists
 #' containing data and constants for analysis with Nimble. If FALSE, returns a
 #' list containing all data and constants. 
@@ -252,6 +255,15 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
                     sumAdF = FemaleAdult) %>%
       dplyr::mutate(Year2 = Year - (min(Year)) + 1)
   
+    # Optional: summarise data at line level (per year)
+    if(sumR.Level == "line"){
+      temp_Rec <- temp_Rec %>%
+        dplyr::group_by(locationID, Year, Year2) %>%
+        dplyr::summarise(sumR = sum(sumR),
+                         sumAd = sum(sumAd),
+                         sumAdF = sum(sumAdF), .groups = "keep")
+    }
+    
     # Set which adult measure to use
     if(R_perF){
       temp_Rec$sumAd_use <- temp_Rec$sumAdF
