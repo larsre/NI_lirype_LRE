@@ -12,6 +12,11 @@
 #' @param areas vector of strings listing areas to consider. Either localities or areas must be provided. 
 #' @param areaAggregation logical. If TRUE, areas are used as smallest spatial unit. If FALSE, locations (within areas) are used as smallest spatial unit.
 #' @param excl_neverObs logical. If TRUE (default), transects on which ptarmigans were never observed are excluded. If FALSE, all transects are included.
+#' @param R_perF logical. If TRUE, treats recruitment rate as juvenile per adult female.
+#' If FALSE, treats recruitment rate as juvenile per adult (sum of both sexes).
+#' @param R_parent_drop0 logical. If TRUE, removes observations of juveniles without adults
+#' from recruitment data. If FALSE, sets 1 as the number of adults/adults females when none
+#' are observed. 
 #' @param dataVSconstants logical. If TRUE (default) returns a list of 2 lists
 #' containing data and constants for analysis with Nimble. If FALSE, returns a
 #' list containing all data and constants. 
@@ -24,8 +29,8 @@
 #'
 #' @examples
 
-prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = NULL, areaAggregation, excl_neverObs = TRUE, dataVSconstants = TRUE, save = TRUE){
-  
+prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = NULL, areaAggregation, excl_neverObs = TRUE, R_perF, R_parent_drop0, sumR.Level = "group", dataVSconstants = TRUE, save = TRUE){
+
   # Multi-area setup #
   #------------------#
   
@@ -80,11 +85,11 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
     dplyr::summarise(count = n())
     
   ## Set up arrays for area-specific data
-  N_sites <- N_years <- min_years <- max_years <- N_obs <- N_R_obs <- rep(NA, N_sUnits)
+  N_sites <- N_years <- min_years <- max_years <- N_obs <- N_sumR_obs <- rep(NA, N_sUnits)
   
   A <- matrix(NA, nrow = N_sUnits, ncol = N_yearsTot)
   y <- Year_obs <- zeros_dist <- matrix(NA, nrow = N_sUnits, ncol = max(obs_count$count))
-  R_obs <- R_obs_year <- matrix(NA, nrow = N_sUnits, ncol = max(obs_count$count))
+  sumR_obs <- sumR_obs_year <- sumAd_obs<- matrix(NA, nrow = N_sUnits, ncol = max(obs_count$count))
   
   L <- N_line_year <- N_J_line_year <- N_A_line_year <- array(0, dim = c(N_sUnits, max(site_count$count), N_yearsTot))
   
@@ -237,22 +242,46 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
     # Recruitment #
     #-------------#
     
-    temp_Rec <- d_obs_sub %>% filter(between(DistanceToTransectLine, -0.1, W)) %>%
-      dplyr::mutate(R = unknownJuvenile + unknownunknown) %>%
-      dplyr::mutate(Maletemp = unknownJuvenile + unknownunknown + FemaleAdult, MaleIndeks = if_else(Maletemp == 0, 1, 0)) %>%
-      dplyr::select(Year, R, MaleIndeks) %>%
-      dplyr::mutate(Year2 = Year - (min(Year)) + 1) %>%
-      dplyr::filter(MaleIndeks == 0) # --> drop all observations of only males
+    # NOTE: For consistency with the population model, we need to define R as the number of recruits
+    # per adult (female)
     
-    N_R_obs[x] <- length(temp_Rec$R)
-    R_obs[x, 1:N_R_obs[x]] <- temp_Rec$R
-    R_obs_year[x, 1:N_R_obs[x]] <- temp_Rec$Year2
+    # Reformat data
+    temp_Rec <- d_obs_sub %>% filter(between(DistanceToTransectLine, -0.1, W)) %>%
+      dplyr::mutate(sumR = unknownJuvenile + unknownunknown,
+                    sumAd = MaleAdult + FemaleAdult,
+                    sumAdF = FemaleAdult) %>%
+      dplyr::mutate(Year2 = Year - (min(Year)) + 1)
+  
+    # Set which adult measure to use
+    if(R_perF){
+      temp_Rec$sumAd_use <- temp_Rec$sumAdF
+    }else{
+      temp_Rec$sumAd_use <- temp_Rec$sumAd
+    }
+    
+    # Deal with instances of 0 adults observed
+    if(R_parent_drop0){ # --> Drop all cases of 0 adults observed
+      temp_Rec <- temp_Rec %>%
+        dplyr::filter(sumAd_use != 0)
+      
+    }else{ # --> Drop only cases when neither adult (females) nor juveniles were observed and add +1 to adults otherwise
+      
+      temp_Rec <- temp_Rec %>%
+        dplyr::filter(sumAd_use + sumR != 0) %>%
+        dplyr::mutate(sumAd_use = ifelse(sumAd_use == 0, 1, sumAd_use))
+    }
 
-  } 
+    # Extract relevant data vectors
+    N_sumR_obs[x] <- length(temp_Rec$sumR)
+    sumR_obs[x, 1:N_sumR_obs[x]] <- temp_Rec$sumR
+    sumAd_obs[x, 1:N_sumR_obs[x]] <- temp_Rec$sumAd_use
+    sumR_obs_year[x, 1:N_sumR_obs[x]] <- temp_Rec$Year2
+  }
   
   ## Drop excess columns in recruitment data
-  R_obs <- R_obs[1:N_sUnits, 1:max(N_R_obs), drop = FALSE]
-  R_obs_year <- R_obs_year[1:N_sUnits, 1:max(N_R_obs), drop = FALSE]
+  sumR_obs <- sumR_obs[1:N_sUnits, 1:max(N_sumR_obs), drop = FALSE]
+  sumAd_obs <- sumAd_obs[1:N_sUnits, 1:max(N_sumR_obs), drop = FALSE]
+  sumR_obs_year <- sumR_obs_year[1:N_sUnits, 1:max(N_sumR_obs), drop = FALSE]
   
   
   # Data assembly #
@@ -274,11 +303,16 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
     N_sites <- c(N_sites, NA)
   }
   
+  
+  # Data assembly #
+  #---------------#
+  
   ## Assembling all data in a list
   input.data <- list(
-    R_obs = R_obs, # Observed numbers of recruits
-    R_obs_year = R_obs_year, # Year of observed numbers of recruits
-    N_R_obs = N_R_obs, # Total number of observations of numbers of recruits
+    sumR_obs = sumR_obs, # Observed numbers of recruits
+    sumAd_obs = sumAd_obs, # Observed numbers of adults/adult females
+    sumR_obs_year = sumR_obs_year, # Year of observed numbers of recruits
+    N_sumR_obs = N_sumR_obs, # Total number of observations of numbers of recruits
     
     y = y, # Distance to transect line for each individual observation
     zeros_dist = zeros_dist, # Vector of 0's of same length as y
@@ -307,7 +341,8 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
   )
   
   ## Assembling Nimble data
-  nim.data <- list(R_obs = input.data$R_obs, y = input.data$y, 
+  nim.data <- list(sumR_obs = input.data$sumR_obs, sumAd_obs = sumAd_obs,
+                   y = input.data$y, 
                    zeros.dist = input.data$zeros_dist, L = input.data$L, 
                    N_line_year = input.data$N_line_year, 
                    N_a_line_year = input.data$N_a_line_year, 
@@ -322,7 +357,9 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
                         R_obs_year = input.data$R_obs_year, N_R_obs = input.data$N_R_obs,
                         N_ageC = N_ageC,
                         N_areas = input.data$N_areas, area_names = input.data$area_names,
-                        SurvAreaIdx = input.data$SurvAreaIdx)
+                        SurvAreaIdx = input.data$SurvAreaIdx,
+                        sumR_obs_year = input.data$sumR_obs_year, N_sumR_obs = input.data$N_sumR_obs,
+                        N_ageC = N_ageC)
   
   ## Make final data list to return
   if(dataVSconstants){
