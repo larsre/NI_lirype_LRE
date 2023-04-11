@@ -206,6 +206,7 @@ simulateInits <- function(nim.data, nim.constants, shareRE, survVarT){
     h.Mu.S = h.Mu.S,
     h.sigma.S = h.sigma.S,
     mu.S = mu.S, Mu.S = Mu.S, 
+    sigmaT.S = sigmaT.S,
     epsT.S = epsT.S,
     Mu.S1 = Mu.S1,
     epsT.S1.prop = epsT.S1.prop,
