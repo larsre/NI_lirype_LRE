@@ -2,6 +2,13 @@
 library(targets)
 library(nimble)
 library(nimbleDistance)
+library(tidyverse)
+library(ggplot2)
+library(LivingNorwayR)
+library(rgdal)
+library(rgeos)
+library(maptools)
+library(tmap)
 
 ## Source all functions in "R" folder
 sourceDir <- function(path, trace = TRUE, ...) {
@@ -108,7 +115,7 @@ list(
   tar_target(
     IDSM.out.tidy,
     tidySamples(IDSM.out = IDSM.out,
-                save = FALSE)
+                save = TRUE)
   ),
   
   tar_target(
@@ -128,6 +135,25 @@ list(
                    minYear = minYear, maxYear = maxYear,
                    VitalRates = TRUE, DetectParams = TRUE, Densities = TRUE),
     format = "file"
+  ),
+  
+  tar_target(
+    NorwayMunic.map,
+    setupMap_NorwayMunic(shp.path = "data/Kommuner_2018_WGS84/Kommuner_2018_WGS84.shp",
+                        d_trans = LT_data$d_trans,
+                        areas = areas, areaAggregation = TRUE)
+  ),
+  
+  tar_target(
+    mapPlots,
+    plotMaps(mcmc.out = IDSM.out.tidy, 
+             mapNM = NorwayMunic.map,
+             N_areas = input_data$nim.constant$N_areas, 
+             area_names = input_data$nim.constant$area_names, 
+             N_sites = input_data$nim.constant$N_sites, 
+             min_years = input_data$nim.constant$min_years, 
+             max_years = input_data$nim.constant$max_years, 
+             minYear = minYear, maxYear = maxYear)
   )
 )
 
