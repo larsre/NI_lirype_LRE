@@ -21,13 +21,14 @@ rypeIDSM <- nimbleCode({
 
   for(x in 1:N_areas){
     mu.dd[x] ~ dnorm(h.mu.dd, sd = h.sigma.dd)
+    
+    for(t in 1:N_years){
+      epsT.dd[x, t] ~ dnorm(0, sd = sigmaT.dd)
+    }
   }
   
   sigmaT.dd ~ dunif(0, 20)
   
-  for(t in 1:N_years){
-    epsT.dd[t] ~ dnorm(0, sd = sigmaT.dd)
-  }
   #TODO: Implement spatial correlation in temporal RE (epsT.dd[x, t])
   
   
@@ -35,9 +36,8 @@ rypeIDSM <- nimbleCode({
   for(x in 1:N_areas){
     for(t in 1:N_years){
       
-      log(sigma[x, t]) <- mu.dd[x] + epsT.dd[t]
-      #log(sigma[x, t]) <- mu.dd[x] + epsT.dd[x, t]
-      
+      log(sigma[x, t]) <- mu.dd[x] + epsT.dd[x, t]
+
       sigma2[x, t] <- sigma[x, t] * sigma[x, t]
       
       # effective strip width
@@ -71,18 +71,17 @@ rypeIDSM <- nimbleCode({
   
   sigmaT.R ~ dunif(0, 5)
   
-  for (t in 1:N_years){
-    epsT.R[t] ~ dnorm(0, sd = sigmaT.R) # Temporal RE (shared across areas)
-  }
-  #TODO: Implement spatial correlation in temporal RE (epsT.R[x, t])
-  
   for(x in 1:N_areas){
+    
+    for (t in 1:N_years){
+      epsT.R[x, t] ~ dnorm(0, sd = sigmaT.R) # Temporal RE
+    }
+    #TODO: Implement spatial correlation in temporal RE (epsT.R[x, t])
     
     Mu.R[x]  ~ dlnorm(meanlog = log(h.Mu.R), sdlog = h.sigma.R)
     
     ## Constraints;
-    R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + epsT.R[1:N_years])
-    #R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + epsT.R[x, 1:N_years])
+    R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + epsT.R[x, 1:N_years])
     
     ## Likelihood;
     for (i in 1:N_sumR_obs[x]){

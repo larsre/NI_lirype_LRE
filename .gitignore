@@ -12,6 +12,9 @@ data/
 # PDF files
 *.pdf
 
+# Shape files
+*.shp
+
 # Others
 1b_Data_from_Hønsefuglportalen_wrangling.R
 manuscript

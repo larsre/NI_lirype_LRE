@@ -1,34 +1,42 @@
 name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
-areas|stem|ede624b4fa1a88ec|925bb9d40813c514|2061bfc91666fe7c|-36357794||t19373.408848559s|ae57f8f85db7130e|399|qs|local|vector|||0||
-d_cmr|stem|cd956580698ad327|7ab52d732f9f8e75|2aee800b417dfeb6|-1108577928||t19373.4088461667s|110bf1c30da531aa|205|qs|local|vector|||2.17|package tidyverse was built under R version 4.1.3. package ggplot2 was built under R version 4.1.3. package tibble was built under R version 4.1.3. package tidyr was built under R version 4.1.3. package readr was built under R version 4.1.3. package purrr was built under R version 4.1.3. package dplyr was built under R version 4.1.3. package stringr was built under R version 4.1.3. package forcats was built under R version 4.1.3. package qs was built under R version 4.1.3|
+.Random.seed|object|1ef3dfc6f43f771f|||||||||||||||
+areas|stem|ede624b4fa1a88ec|925bb9d40813c514|f8e04445c59162cd|-36357794||t19457.689659981s|cc4528f9dbd291e7|399|qs|local|vector|||0||
+d_cmr|stem|cd956580698ad327|7ab52d732f9f8e75|cb8f00def56c53d9|-1108577928||t19457.6896577603s|ed0b2f97180e0b86|205|qs|local|vector|||0.86|package tidyverse was built under R version 4.2.3. package tibble was built under R version 4.2.3. package tidyr was built under R version 4.2.3. package readr was built under R version 4.2.3. package purrr was built under R version 4.2.3. package dplyr was built under R version 4.2.3. package stringr was built under R version 4.2.3. package forcats was built under R version 4.2.3. package lubridate was built under R version 4.2.3. package qs was built under R version 4.2.3|
 downloadLN|function|4eae7483790f31d6|||||||||||||||
-duplTransects|stem|a6b9c070885aa5dc|819e859b65466b54|7b34f34d30c3f796|-2074324173||t19373.4088526947s|4eb9a67a7652a441|213|qs|local|vector|||0||
-IDSM.out|stem|8ad3b77924ba3db6|75e39c73f900fb32|cb02c655565cc7b7|-21732313||t19388.3474691364s|fcd9e11fdc508a3a|94071786|qs|local|vector|||1868.82||
-IDSM.out.tidy|stem|7fe375fd7e08e56a|96b836b2f4e9c625|38df3ae08b9c3fef|-872660489||t19388.3476114373s|2b0374ee6d4da498|87998811|qs|local|vector|||6.41||
-input_data|stem|9d51092c5eac9456|735f2060be346fff|167f2440e166fa2f|-1975194048||t19373.409229559s|72f1a83151c5708b|285444|qs|local|vector|||3||
-listAreas|function|d5092f5275ea3a46|||||||||||||||
+duplTransects|stem|a6b9c070885aa5dc|819e859b65466b54|7b34f34d30c3f796|-2074324173||t19457.6896636253s|6c088a07ec7dbe69|213|qs|local|vector|||0||
+findHighP|function|997d07c621a1cfcb|||||||||||||||
+IDSM.out|stem|ae389d01b8137890|75e39c73f900fb32|91f6fd571f2c3bc2|-21732313||t19458.5245049277s|9820a02eeb02ad13|102927371|qs|local|vector|||2875.01||
+IDSM.out.tidy|stem|fad657df4071d34b|96b836b2f4e9c625|e7c48eb215a15377|-872660489||t19458.5246309698s|985a1a799de067a0|98149755|qs|local|vector|||6.78||
+input_data|stem|4b8a48e931da71e0|6fcd3317275439af|f5877f5db2e858e4|-1975194048||t19457.691608733s|815f9a6f51b02762|262758|qs|local|vector|||2.48||
+listAreas|function|8bf5f1eef0016856|||||||||||||||
 listDuplTransects|function|b8d2249aa65a7f51|||||||||||||||
 listLocations|function|0cadd434f6fef641|||||||||||||||
-localities|stem|50f66f808bc83082|254e1a8f3dfc543f|20156ef219d892fe|-472236320||t19373.4088505149s|7db3a3265500c98f|59|qs|local|vector|||0||
-LT_data|stem|9e980308a19826ef|d69e29748a4395cb|8f8862c9c9e8a240|-1283079006||t19373.4091845728s|6bc2ff9308582a7c|2478278|qs|local|vector|||9.55|NAs introduced by coercion. NAs introduced by coercion. NAs introduced by coercion|
-maxYear|object|84dbba4ed2096010|||||||||||||||
-mcmc.tracePlots|stem|b8f18acaa834f440|7ee2b1bac5f9c9f6|7cb7b4817d1a0687|1405499975|Plots/MCMCTraces/MCMCtrace_mVR.pdf*Plots/MCMCTraces/MCMCtrace_tVR.pdf*Plots/MCMCTraces/MCMCtrace_mDet.pdf*Plots/MCMCTraces/MCMCtrace_tDet.pdf*Plots/MCMCTraces/MCMCtrace_Ntot.pdf*Plots/MCMCTraces/MCMCtrace_N.pdf*Plots/MCMCTraces/MCMCtrace_Dens.pdf|t19388.3626082993s|cad7072cd020ed05|894008171|file|local|vector|||1294.03|collapsing to unique x values. collapsing to unique x values. collapsing to unique x values. collapsing to unique x values. collapsing to unique x values. collapsing to unique x values. collapsing to unique x values. collapsing to unique x values. collapsing to unique x values. collapsing to unique x values. collapsing to unique x values. collapsing to unique x values. collapsing to unique x values. collapsing to unique x values. collapsing to unique x values. collapsing to unique x values. collapsing to unique x values. collapsing to unique x values. collapsing to unique x values. collapsing to unique x values|
-minYear|object|d205890c22d8f089|||||||||||||||
-model_setup|stem|e57da93306dfc875|3ff918ced574a450|96d371bce4f9a9f9|-945302739||t19388.3258138962s|ae16fb4acfc58f06|1300065|qs|local|vector|||1.05||
+localities|stem|50f66f808bc83082|254e1a8f3dfc543f|20156ef219d892fe|-472236320||t19457.6896618443s|cc81a7537cb02258|59|qs|local|vector|||0||
+LT_data|stem|9e980308a19826ef|d69e29748a4395cb|a5a02cd797584467|-1283079006||t19457.6899704519s|cfaf23af1e94dae3|2478278|qs|local|vector|||9.23|1m22mThere was 1 warning in dplyrmutate.1m22m36mℹ39m In argument sampleSizeValue  as.numericsampleSizeValue.Caused by warning33m39m NAs introduced by coercion. 1m22mThere was 1 warning in dplyrmutate.1m22m36mℹ39m In argument sampleSizeValue  as.numericsampleSizeValue.Caused by warning33m39m NAs introduced by coercion. 1m22mThere was 1 warning in dplyrmutate.1m22m36mℹ39m In argument sampleSizeValue  as.numericsampleSizeValue.Caused by warning33m39m NAs introduced by coercion|
+mapPlots|stem|582c84fa59878369|f50efb21ebd15bd5|be23aa12f5dac169|1117573651||t19459.5695030267s|c1aa9ca10fc19154|116|qs|local|vector|||247.63||
+maxYear|object|950c0ed63d9d204a|||||||||||||||
+mcmc.tracePlots|stem|a9c781337e179c93|7ee2b1bac5f9c9f6|fc6d3c8f59b55504|1405499975|Plots/MCMCTraces/MCMCtrace_mVR.pdf*Plots/MCMCTraces/MCMCtrace_tVR.pdf*Plots/MCMCTraces/MCMCtrace_mDet.pdf*Plots/MCMCTraces/MCMCtrace_tDet.pdf*Plots/MCMCTraces/MCMCtrace_Ntot.pdf*Plots/MCMCTraces/MCMCtrace_N.pdf*Plots/MCMCTraces/MCMCtrace_Dens.pdf|t19458.5355588271s|e6de6ac2a22a6b29|965559828|file|local|vector|||942.66||
+minYear|object|1907c516d7547367|||||||||||||||
+model_setup|stem|fe7a2beffda93071|83a44dfb25a5f42c|f2bdfafef95d2333|-945302739||t19458.4912025614s|0e13ec3b31b57893|1304685|qs|local|vector|||0.75||
 node_stoch_dCRP|function|7f751aef04cd03cd|||||||||||||||
 node_stoch_dHN|function|7f751aef04cd03cd|||||||||||||||
 node_stoch_dHN_V|function|7f751aef04cd03cd|||||||||||||||
 node_stoch_dHR|function|7f751aef04cd03cd|||||||||||||||
 node_stoch_dHR_V|function|7f751aef04cd03cd|||||||||||||||
+NorwayMunic.map|stem|e55ee6e7e152175a|b19abce2e01a56c2|0e1c837df1933971|-6935441||t19459.4988715477s|d8f99e643e6d0294|10965509|qs|local|vector|||0.72|shapelib support is provided by GDAL through the sf and terra packages among others. shapelib support is provided by GDAL through the sf and terra paackages among others. shapelib support is provided by GDAL through the sf and terra packages among others|
+plotMaps|function|e445bf2df41628ac|||||||||||||||
 plotMCMCTraces|function|35f91c56343053d8|||||||||||||||
 plotModelComparison|function|cf1772f706f8abf0|||||||||||||||
+plotRepDist|function|29128f183e579d76|||||||||||||||
 plotTimeSeries|function|254427d883b92b24|||||||||||||||
-prepareInputData|function|e0258401058b5382|||||||||||||||
-Rype_arkiv|stem|a511c2a281d0e5f0|ca6ed7fadb6b18e7|3a9ee843258875ef|905815042||t19373.4090581594s|481fe7dbe93fe97a|11732270|qs|local|vector|||15.85|C\Users\CHLOE1.NAT\AppData\Local\Temp\RtmpUNV6av\LNimportDir already exists. C\Users\CHLOE1.NAT\AppData\Local\Temp\RtmpUNV6av\LNimportDir already exists|
-setupModel|function|a11d03665ab8e986|||||||||||||||
-simulateInits|function|3012e9266286ec4d|||||||||||||||
+prepareInputData|function|c857dcbf673492bc|||||||||||||||
+readMap_NorwayMunic|function|5eda61e0f6f079f9|||||||||||||||
+Rype_arkiv|stem|2e2d6370195bacee|ca6ed7fadb6b18e7|3a9ee843258875ef|905815042||t19457.6898501168s|74591a654699694f|11732221|qs|local|vector|||14.68|C\Users\CHLOE1.NAT\AppData\Local\Temp\RtmpKYfjNg\LNimportDir already exists. C\Users\CHLOE1.NAT\AppData\Local\Temp\RtmpKYfjNg\LNimportDir already exists|
+setupMap_NorwayMunic|function|27f8f6cb64f64fb1|||||||||||||||
+setupModel|function|6ff4de278c186055|||||||||||||||
+simulateInits|function|a06158bd04485ef6|||||||||||||||
 sourceDir|function|a90de91c32efc2cb|||||||||||||||
 tidySamples|function|049f7eef06b359df|||||||||||||||
-time.seriesPlots|stem|f554c4bcc4b95c5a|9e270eb1d798f81b|60c0aaed71f279ec|-325026360|Plots/TimeSeries/TimeSeries_rRep.pdf*Plots/TimeSeries/TimeSeries_pSurv.pdf*Plots/TimeSeries/TimeSeries_pDetect.pdf*Plots/TimeSeries/TimeSeries_popDens1.pdf*Plots/TimeSeries/TimeSeries_popDens2.pdf|t19388.3632624796s|1f4bf72d9278d347|298639|file|local|vector|||51.92||
-wrangleData_CMR|function|0628cb91ae259aba|||||||||||||||
+time.seriesPlots|stem|2a592742e6385685|9e270eb1d798f81b|355907dc3b275f65|-325026360|Plots/TimeSeries/TimeSeries_rRep.pdf*Plots/TimeSeries/TimeSeries_pSurv.pdf*Plots/TimeSeries/TimeSeries_pDetect.pdf*Plots/TimeSeries/TimeSeries_popDens1.pdf*Plots/TimeSeries/TimeSeries_popDens2.pdf|t19458.5360558212s|1728e09f2780cac0|304417|file|local|vector|||39.47||
+wrangleData_CMR|function|e7fc4d0d0641b4d3|||||||||||||||
 wrangleData_LineTrans|function|812edfe2469b2a55|||||||||||||||

@@ -5,6 +5,8 @@
 #' nimbleDistance package.  
 #' @param nim.data list of input objects representing data
 #' @param nim.constants list of input objects representing constants
+#' @param shareRE logical. If TRUE, temporal random effects are shared across locations.
+#' @param survVarT logical. If TRUE, survival is simulated including annual variation.
 #' @param niter integer. Number of MCMC iterations (default = 25000)
 #' @param nthin integer. Thinning factor (default = 5)
 #' @param nburn integer. Number of iterations to discard as burn-in (default = 5000)
@@ -21,6 +23,7 @@
 
 setupModel <- function(modelCode.path, customDist,
                        nim.data, nim.constants,
+                       shareRE, survVarT,
                        niter = 100000, nthin = 20, nburn = 40000, nchains = 3,
                        testRun = FALSE, initVals.seed){
 
@@ -42,18 +45,23 @@ setupModel <- function(modelCode.path, customDist,
               "sigma", "mu.dd", "sigmaT.dd",
               "Density", "N_exp", "N_tot_exp",
               "Mu.D1", "sigma.D",
-              "S", "Mu.S", "Mu.S1", "h.Mu.S", "h.sigma.S",
+              "S", "Mu.S", "h.Mu.S", "h.sigma.S",
+              "Mu.S1", 
               "ratio.JA1")
   
   if(grepl('dHR', modelCode.path, fixed = TRUE)){
     params <- c(params, "b")
   }
   
+  if(survVarT){
+    params <- c(params, "sigmaT.S", "epsT.S1.prop")
+  }
+  
   ## Simulate initial values
   set.seed(initVals.seed)
   initVals <- list()
   for(c in 1:nchains){
-    initVals[[c]] <- simulateInits(nim.data = nim.data, nim.constants = nim.constants)
+    initVals[[c]] <- simulateInits(nim.data = nim.data, nim.constants = nim.constants, shareRE = shareRE, survVarT = survVarT)
   }
   
   ## Adjust MCMC parameters if doing a test run

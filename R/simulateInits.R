@@ -2,13 +2,15 @@
 #'
 #' @param nim.data list of input objects representing data
 #' @param nim.constants list of input objects representing constants
-#'
+#' @param shareRE logical. If TRUE, temporal random effects are shared across locations.
+#' @param survVarT logical. If TRUE, survival is simulated including annual variation.
+#' 
 #' @return A list containing one complete set of initial values for the model.
 #' @export
 #'
 #' @examples
 
-simulateInits <- function(nim.data, nim.constants){
+simulateInits <- function(nim.data, nim.constants, shareRE, survVarT){
   
   # Limits and constants #
   #----------------------#
@@ -39,16 +41,28 @@ simulateInits <- function(nim.data, nim.constants){
   
   mu.S <- EnvStats::rnormTrunc(N_areas, qlogis(h.Mu.S), sd = h.sigma.S, max = qlogis(Mu.S1))
 
+  sigmaT.S <- runif(1, 0, 0.05)
+  
   Mu.S <- rep(NA, N_areas)
   S <-  matrix(NA, nrow = N_areas, ncol = N_years)
   S1 <- S2 <- rep(NA, N_years)
   
+  epsT.S1.prop <- runif(1, 0.3, 0.8)
+  
+  if(survVarT){
+    epsT.S <- matrix(0, nrow = N_areas, ncol = N_years)
+    #epsT.S <- matrix(rnorm(N_areas*N_years, 0, sigmaS.R), nrow = N_areas, ncol = N_years)
+    
+  }else{
+    epsT.S <- matrix(0, nrow = N_areas, ncol = N_years)
+  }
+  
   for(x in 1:N_areas){
     Mu.S[x] <- plogis(mu.S[x])
-    S[x, 1:N_years] <- Mu.S[x]
+    S[x, 1:N_years] <- plogis(qlogis(Mu.S[x]) + epsT.S[x, 1:N_years])
   }
 
-  S1[1:N_years] <- Mu.S1
+  S1[1:N_years] <- plogis(qlogis(Mu.S1) + epsT.S1.prop*epsT.S[nim.constants$SurvAreaIdx, 1:N_years])
   S2[1:N_years] <- S[nim.constants$SurvAreaIdx, 1:N_years]/S1[1:N_years]
   
   ## Area-specific reproductive parameters
@@ -58,14 +72,24 @@ simulateInits <- function(nim.data, nim.constants){
   Mu.R <- rlnorm(N_areas, meanlog = log(h.Mu.R), sdlog =  h.sigma.R)
   sigmaT.R <- runif(1, 0, 2)
   
-  epsT.R <- rep(0, N_years)
-  #epsT.T <- rnorm(N_year, 0, sigmaT.R)
-  
   R_year <- matrix(NA, nrow = N_areas, ncol = N_years)
   
-  for(x in 1:N_areas){
-    R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + epsT.R[1:N_years])
+  if(shareRE){
+    epsT.R <- rep(0, N_years)
+    #epsT.R <- rnorm(N_year, 0, sigmaT.R)
+    
+    for(x in 1:N_areas){
+      R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + epsT.R[1:N_years])
+    }
+  }else{
+    epsT.R <- matrix(0, nrow = N_areas, ncol = N_years)
+    #epsT.R <- matrix(rnorm(N_areas*N_years, 0, sigmaT.R), nrow = N_areas, ncol = N_years)
+    
+    for(x in 1:N_areas){
+      R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + epsT.R[x, 1:N_years])
+    }
   }
+
   
   
   # Detection parameters #
@@ -79,17 +103,30 @@ simulateInits <- function(nim.data, nim.constants){
   mu.dd <- rep(h.mu.dd, N_areas)
   sigmaT.dd <- runif(1, 1, 10)
   
-  epsT.dd <- rep(0, N_years)
-  #epsT.dd <- rnorm(N_years, 0, sd = sigmaT.dd)
-  
   sigma <- esw <- p <- matrix(NA, nrow = N_areas, ncol = N_years)
   
-  for(x in 1:N_areas){
-    for(t in 1:N_years){
-      sigma[x, t] <- exp(mu.dd[x] + epsT.dd[t])
-      esw[x, t] <- sqrt(pi * sigma[x, t]^2 / 2) 
-      p[x, t] <- min(esw[x, t], W) / W
+  
+  if(shareRE){
+    epsT.dd <- rep(0, N_years)
+    #epsT.dd <- rnorm(N_years, 0, sd = sigmaT.dd)
+    
+    for(x in 1:N_areas){
+      sigma[x, 1:N_years] <- exp(mu.dd[x] + epsT.dd[1:N_years])
     }
+    
+  }else{
+    epsT.dd <- matrix(0, nrow = N_areas, ncol = N_years)
+    #epsT.dd <- matrix(rnorm(N_areas*N_years, 0, sigmaT.dd), nrow = N_areas, ncol = N_years)
+    
+    for(x in 1:N_areas){
+      sigma[x, 1:N_years] <- exp(mu.dd[x] + epsT.dd[x, 1:N_years])
+    }
+  }
+
+  
+  for(x in 1:N_areas){
+    esw[x, 1:N_years] <- sqrt(pi * sigma[x, 1:N_years]^2 / 2) 
+    p[x, 1:N_years] <- min(esw[x, 1:N_years], W) / W
   }
   
   
@@ -169,7 +206,10 @@ simulateInits <- function(nim.data, nim.constants){
     h.Mu.S = h.Mu.S,
     h.sigma.S = h.sigma.S,
     mu.S = mu.S, Mu.S = Mu.S, 
+    sigmaT.S = sigmaT.S,
+    epsT.S = epsT.S,
     Mu.S1 = Mu.S1,
+    epsT.S1.prop = epsT.S1.prop,
     S1 = S1, S2 = S2, S = S,
 
     Density = Density,
