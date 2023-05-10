@@ -132,16 +132,48 @@ IDSM.out <- nimbleMCMC(code = model_setup$modelCode,
 saveRDS(IDSM.out, file = 'rypeIDSM_dHN_multiArea_realData_Lierne.rds')
 
 
+# TIDY UP POSTERIOR SAMPLES #
+#---------------------------#
+
+IDSM.out.tidy <- tidySamples(IDSM.out = IDSM.out, save = TRUE)
+
+
 # OPTIONAL: MCMC TRACE PLOTS #
 #----------------------------#
 
-MCMCvis::MCMCtrace(IDSM.out,
-                   params = c("esw", "p", "D",
-                              "R_year", "mu.R", "h.mu.R", "h.sigma.R", "sigmaT.R",
-                              "sigma", "mu.dd", "sigma.dd",
-                              "Mu.D1", "sigma.D",
-                              "Mu.S1", "Mu.S2", "h.Mu.S1", "h.Mu.S2", "h.sigma.S1", "h.sigma.S2",
-                              "ratio.JA1"))
+plotMCMCTraces(mcmc.out = IDSM.out.tidy)
+
+
+# OPTIONAL: TIME SERIES PLOTS #
+#-----------------------------#
+
+plotTimeSeries(mcmc.out = IDSM.out.tidy, 
+               N_areas = input_data$nim.constant$N_areas, 
+               area_names = input_data$nim.constant$area_names, 
+               N_sites = input_data$nim.constant$N_sites, 
+               min_years = input_data$nim.constant$min_years, 
+               max_years = input_data$nim.constant$max_years, 
+               minYear = minYear, maxYear = maxYear,
+               VitalRates = TRUE, DetectParams = TRUE, Densities = TRUE)
+
+
+# OPTIONAL: MAP PLOTS #
+#---------------------#
+
+## Make map of Norwegian municipalities ("fylke")
+NorwayMunic.map <- setupMap_NorwayMunic(shp.path = "data/Kommuner_2018_WGS84/Kommuner_2018_WGS84.shp",
+                                        d_trans = LT_data$d_trans,
+                                        areas = areas, areaAggregation = TRUE)
+
+## Plot population growth rate, density, and vital rates on map
+plotMaps(mcmc.out = IDSM.out.tidy, 
+         mapNM = NorwayMunic.map,
+         N_areas = input_data$nim.constant$N_areas, 
+         area_names = input_data$nim.constant$area_names, 
+         N_sites = input_data$nim.constant$N_sites, 
+         min_years = input_data$nim.constant$min_years, 
+         max_years = input_data$nim.constant$max_years, 
+         minYear = minYear, maxYear = maxYear)
 
 
 # OPTIONAL: MODEL COMPARISON (PLOTS) #
@@ -153,3 +185,4 @@ MCMCvis::MCMCtrace(IDSM.out,
 #                                  N_sites = 58, N_years = 6,
 #                                  plotPath = "Plots/ModelCompTest",
 #                                  returnData = FALSE)
+
