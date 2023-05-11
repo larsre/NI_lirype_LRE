@@ -97,6 +97,7 @@ plotTimeSeries <- function(mcmc.out,
   # Reproductive rates
   if(VitalRates){
     
+    ifelse(!dir.exists("Plots/TimeSeries"), dir.create("Plots/TimeSeries"), FALSE) ## Check if folder exists, if not create folder
     pdf("Plots/TimeSeries/TimeSeries_rRep.pdf", width = 8, height = 5)
     for(i in 1:N_areas){
       
