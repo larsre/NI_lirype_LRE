@@ -90,7 +90,7 @@ rypeIDSM <- nimbleCode({
     
     ## Constraints;
     if(fitRodentCov){
-      R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + betaR.R*rodentOcc[x, 1:N_years] + epsT.R[1:N_years])
+      R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + betaR.R[x]*RodentOcc[x, 1:N_years] + epsT.R[1:N_years])
     }else{
       R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + epsT.R[1:N_years])
       #R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + epsT.R[x, 1:N_years])
