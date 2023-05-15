@@ -4,13 +4,15 @@
 #' @param nim.constants list of input objects representing constants
 #' @param shareRE logical. If TRUE, temporal random effects are shared across locations.
 #' @param survVarT logical. If TRUE, survival is simulated including annual variation.
+#' @param fitRodentCov logical. If TRUE, initial values are generated for rodent 
+#' covariate (effect) and covariate is included in data simulation.
 #' 
 #' @return A list containing one complete set of initial values for the model.
 #' @export
 #'
 #' @examples
 
-simulateInits <- function(nim.data, nim.constants, shareRE, survVarT){
+simulateInits <- function(nim.data, nim.constants, shareRE, survVarT, fitRodentCov){
   
   # Limits and constants #
   #----------------------#
@@ -29,6 +31,18 @@ simulateInits <- function(nim.data, nim.constants, shareRE, survVarT){
   W <- nim.constants$W
   pi <- 3.141593
   A <- nim.data$A
+  
+  
+  # Missing covariate values #
+  #--------------------------#
+  
+  RodentOcc <- nim.data$RodentOcc
+  if(NA %in% RodentOcc){
+    RodentOcc[which(is.na(RodentOcc))] <- runif(length(which(is.na(RodentOcc))), 0, 1)
+  }
+  
+  Inits_RodentOcc <- RodentOcc
+  Inits_RodentOcc[which(!is.na(nim.data$RodentOcc))] <- NA
   
   
   # Vital rates #
@@ -69,7 +83,17 @@ simulateInits <- function(nim.data, nim.constants, shareRE, survVarT){
   h.Mu.R  <- runif(1, 2, 8)
   h.sigma.R <- runif(1, 0, 0.05)
   
+  h.Mu.betaR.R <- runif(1, 0, 0.1)
+  h.sigma.betaR.R <- runif(1, 0, 0.05)
+  
   Mu.R <- rlnorm(N_areas, meanlog = log(h.Mu.R), sdlog =  h.sigma.R)
+  
+  if(fitRodentCov){
+    betaR.R <- rnorm(N_areas, mean = h.Mu.betaR.R, sd = h.sigma.betaR.R)
+  }else{
+    betaR.R <- rep(0, N_areas)
+  }
+    
   sigmaT.R <- runif(1, 0, 2)
   
   R_year <- matrix(NA, nrow = N_areas, ncol = N_years)
@@ -79,14 +103,14 @@ simulateInits <- function(nim.data, nim.constants, shareRE, survVarT){
     #epsT.R <- rnorm(N_year, 0, sigmaT.R)
     
     for(x in 1:N_areas){
-      R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + epsT.R[1:N_years])
+      R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + betaR.R[x]*RodentOcc[1:N_years] + epsT.R[1:N_years])
     }
   }else{
     epsT.R <- matrix(0, nrow = N_areas, ncol = N_years)
     #epsT.R <- matrix(rnorm(N_areas*N_years, 0, sigmaT.R), nrow = N_areas, ncol = N_years)
     
     for(x in 1:N_areas){
-      R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + epsT.R[x, 1:N_years])
+      R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + betaR.R[x]*RodentOcc[1:N_years] + epsT.R[x, 1:N_years])
     }
   }
 
@@ -181,7 +205,7 @@ simulateInits <- function(nim.data, nim.constants, shareRE, survVarT){
   # Assembly #
   #----------#
   
-  list(
+  InitVals <- list(
     #b = runif(1, 1, 50), 
     
     Mu.D1 = Mu.D1, 
@@ -211,9 +235,18 @@ simulateInits <- function(nim.data, nim.constants, shareRE, survVarT){
     Mu.S1 = Mu.S1,
     epsT.S1.prop = epsT.S1.prop,
     S1 = S1, S2 = S2, S = S,
-
+    
     Density = Density,
     N_exp = N_exp,
     N_tot_exp = N_tot_exp
   )
+  
+  if(fitRodentCov){
+    InitVals$h.Mu.betaR.R <- h.Mu.betaR.R
+    InitVals$h.sigma.betaR.R <- h.sigma.betaR.R
+    InitVals$betaR.R <- betaR.R
+    InitVals$RodentOcc <- Inits_RodentOcc
+  }
+  
+  return(InitVals)
 }
