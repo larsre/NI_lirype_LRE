@@ -36,6 +36,9 @@ shareRE <- TRUE
 # Time variation in survival
 survVarT <- FALSE
 
+# Rodent covariate on reproduction
+fitRodentCov <- TRUE
+
 # DOWNLOAD/FETCH DATA #
 #---------------------#
 
