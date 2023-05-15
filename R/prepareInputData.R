@@ -110,7 +110,7 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
     #   d_obs_sub <- subset(d_obs, spatialUnit == localities[x])
     # }
     if(!(sUnits[x] %in% d_trans$spatialUnit)){
-      stop(paste0("Spatial unit ", sUnits[x], " (idex ", x, ") is not in the data."))
+      stop(paste0("Spatial unit ", sUnits[x], " (index ", x, ") is not in the data."))
     }
     
     d_trans_sub <- subset(d_trans, spatialUnit == sUnits[x])
@@ -314,10 +314,6 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
   if(N_sUnits == 1){
     N_sites <- c(N_sites, NA)
   }
-  
-  
-  # Data assembly #
-  #---------------#
   
   ## Assembling all data in a list
   input.data <- list(
