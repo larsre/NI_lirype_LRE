@@ -9,7 +9,7 @@
 #' @param minYear integer. Earliest year of data to extract.
 #' @param maxYear integer. Latest year of data to extract.  
 #'
-#' @return
+#' @return a matrix containing the average number of transects with rodent observations per area and year.
 #' @export
 #'
 #' @examples
