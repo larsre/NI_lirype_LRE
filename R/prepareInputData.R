@@ -1,4 +1,4 @@
-#' Prepare line transect and known fate CMR data for integrated analysis
+#' Prepare line transect, known fate CMR, and rodent covariate data for integrated analysis
 #'
 #' @param d_trans tibble containing information on transects (events). Output of
 #' wrangleData_LineTrans(). 
@@ -8,6 +8,7 @@
 #' @param d_cmr list with 2 elements. Surv1 and Surv2 are matrices of individuals 
 #' released (column 1) and known to have survived (column 2) in each year (row)
 #' for season 1 and season 2, respectively. Output of wrangleData_CMR().
+#' @param d_rodent matrix containing the average number of transects with rodent observations per area and year.
 #' @param localities vector of strings listing localities to consider. Either localities or areas must be provided. 
 #' @param areas vector of strings listing areas to consider. Either localities or areas must be provided. 
 #' @param areaAggregation logical. If TRUE, areas are used as smallest spatial unit. If FALSE, locations (within areas) are used as smallest spatial unit.
@@ -32,7 +33,7 @@
 #'
 #' @examples
 
-prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = NULL, areaAggregation, excl_neverObs = TRUE, R_perF, R_parent_drop0, sumR.Level = "group", dataVSconstants = TRUE, save = TRUE){
+prepareInputData <- function(d_trans, d_obs, d_cmr, d_rodent, localities = NULL, areas = NULL, areaAggregation, excl_neverObs = TRUE, R_perF, R_parent_drop0, sumR.Level = "group", dataVSconstants = TRUE, save = TRUE){
 
   # Multi-area setup #
   #------------------#
@@ -344,6 +345,8 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
     Survs2 = d_cmr$Survs2, # Season 2 releases & survivors (area 1)
     SurvAreaIdx = SurvAreaIdx,
     
+    RodentOcc = d_rodent,
+    
     N_areas = N_sUnits,
     area_names = sUnits
   )
@@ -355,7 +358,8 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, localities = NULL, areas = N
                    N_line_year = input.data$N_line_year, 
                    N_a_line_year = input.data$N_a_line_year, 
                    A = input.data$A,
-                   Survs1 = input.data$Survs1, Survs2 = input.data$Survs2)
+                   Survs1 = input.data$Survs1, Survs2 = input.data$Survs2,
+                   RodentOcc = input.data$RodentOcc)
   
   ## Assembling Nimble constants
   nim.constants <- list(N_years = input.data$N_years, min_years = input.data$min_years, max_years = input.data$max_years,
