@@ -76,6 +76,17 @@ LT_data <- wrangleData_LineTrans(DwC_archive_list = Rype_arkiv,
 d_cmr <- wrangleData_CMR(minYear = minYear)
 
 
+# WRANGLE RODENT DATA #
+#---------------------#
+
+## Load and reformat rodent data
+d_rodent <- wrangleData_Rodent(duplTransects = duplTransects,
+                               #localities = localities,
+                               areas = areas,
+                               areaAggregation = TRUE,
+                               minYear = minYear, maxYear = maxYear)
+
+
 # PREPARE INPUT DATA FOR INTEGRATED MODEL #
 #-----------------------------------------#
 
