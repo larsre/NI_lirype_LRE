@@ -1,7 +1,8 @@
 
 plotMaps <- function(mcmc.out, mapNM,
                      N_areas, area_names, N_sites, 
-                     min_years, max_years, minYear, maxYear){
+                     min_years, max_years, minYear, maxYear,
+                     fitRodentCov){
   
   ## Convert posterior samples to matrix format
   out.mat <- as.matrix(mcmc.out)
@@ -70,7 +71,7 @@ plotMaps <- function(mcmc.out, mapNM,
   ## Summarize posteriors for relevant parameters
   
   # Prepare matrices for storage of results
-  rRep.sum <- pSurv.sum <- data.frame()
+  rRep.sum <- pSurv.sum <- betaR.sum <- data.frame()
   popDens.sum <- lambda.sum <- data.frame()
   
   for(i in 1:N_areas){
@@ -96,6 +97,20 @@ plotMaps <- function(mcmc.out, mapNM,
                             SD = sd(out.mat[, pSurv_name])
     )
     pSurv.sum <- rbind(pSurv.sum, pSurv_add)
+    
+    # Summarize rodent effects
+    if(fitRodentCov){
+      betaR_name <- paste0("betaR.R[",  i, "]")
+      betaR_add <- data.frame(Area = area_names[i],
+                              Median = median(out.mat[, betaR_name]),
+                              lCI = unname(quantile(out.mat[, betaR_name], probs = 0.025)),
+                              uCI = unname(quantile(out.mat[, betaR_name], probs = 0.975)),
+                              Mean = mean(out.mat[, betaR_name]),
+                              SD = sd(out.mat[, betaR_name])
+      )
+      betaR.sum <- rbind(betaR.sum, betaR_add)
+    }
+
     
     # Summarize average population densities
     Dens_names <- c(paste0("densAvg_tot[",  i, "]"), paste0("densAvg_shared[",  i, "]"))
@@ -155,6 +170,15 @@ plotMaps <- function(mcmc.out, mapNM,
   
   mapNM.pSurv@data <- as.data.frame(matchData)
   
+  # Rodent effects 
+  if(fitRodentCov){
+    mapNM.betaR <- mapNM
+    matchData <- as_tibble(mapNM@data) %>%
+      dplyr::left_join(., betaR.sum, by = "Area") 
+    
+    mapNM.betaR@data <- as.data.frame(matchData)
+  }
+  
   # Average population densities
   mapNM.popDens1 <- mapNM
   matchData <- as_tibble(mapNM@data) %>%
@@ -208,6 +232,22 @@ plotMaps <- function(mcmc.out, mapNM,
   )
   
   dev.off()
+  
+  # Rodent effects
+  if(fitRodentCov){
+    pdf("Plots/AreaMaps/betaR_Map.pdf", width = 5, height = 6)
+    
+    print(
+      tm_shape(mapNM.betaR) + tm_polygons("Median", palette = "plasma", style = "cont", colorNA = "grey80")
+    )
+    
+    print(
+      tm_shape(mapNM.betaR) + tm_polygons("SD", palette = rev("BuGn"), style = "cont", colorNA = "grey80")
+    )
+    
+    dev.off()
+  }
+ 
   
   # Average population densities
   pdf("Plots/AreaMaps/Avg_popDens_Map.pdf", width = 5, height = 6)
@@ -265,6 +305,10 @@ plotMaps <- function(mcmc.out, mapNM,
                   "Plots/AreaMaps/Avg_pSurv_Map.pdf",
                   "Plots/AreaMaps/Avg_popDens_Map.pdf",
                   "Plots/AreaMaps/Avg_lambda_Map.pdf")
+  
+  if(fitRodentCov){
+    plot.paths <- c(plot.paths, "Plots/AreaMaps/betaR_Map.pdf")
+  }
   
   return(plot.paths)
 }

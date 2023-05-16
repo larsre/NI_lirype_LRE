@@ -26,6 +26,16 @@ minYear <- 2007
 maxYear <- 2021
 
 
+## Set model toggles
+areaAggregation <- TRUE # Area- vs. locality aggregation
+R_perF <- FALSE # Recruitment per adult or per adult female
+R_parent_drop0 <- TRUE # Drop observations of juveniles with no adults present
+sumR.Level <- "line" # Aggregation level for reproduction data (line vs. group)
+shareRE <- FALSE # Random effects shared across areas
+survVarT <- TRUE # Time variation in survival
+fitRodentCov <- TRUE # Rodent covariate on reproduction
+
+
 ## Set target-specific options such as packages.
 tar_option_set(packages = c("LivingNorwayR", "tidyverse", "qs"),
                format = "qs",
@@ -60,7 +70,7 @@ list(
                           duplTransects = duplTransects,
                           #localities = localities,
                           areas = areas,
-                          areaAggregation = TRUE,
+                          areaAggregation = areaAggregation,
                           minYear = minYear, maxYear = maxYear)
   ),
   
@@ -70,17 +80,27 @@ list(
   ),
   
   tar_target(
+    d_rodent,
+    wrangleData_Rodent(duplTransects = duplTransects,
+                       #localities = localities,
+                       areas = areas,
+                       areaAggregation = TRUE,
+                       minYear = minYear, maxYear = maxYear)
+  ),
+  
+  tar_target(
     input_data,
     prepareInputData(d_trans = LT_data$d_trans, 
                      d_obs = LT_data$d_obs,
                      d_cmr = d_cmr,
+                     d_rodent = d_rodent,
                      #localities = localities,
                      areas = areas,
-                     areaAggregation = TRUE,
+                     areaAggregation = areaAggregation,
                      excl_neverObs = TRUE,
-                     R_perF = FALSE,
-                     R_parent_drop0 = TRUE,
-                     sumR.Level = "line",
+                     R_perF = R_perF,
+                     R_parent_drop0 = R_parent_drop0,
+                     sumR.Level = sumR.Level,
                      dataVSconstants = TRUE,
                      save = TRUE)
   ),
@@ -91,8 +111,9 @@ list(
                customDist = TRUE,
                nim.data = input_data$nim.data,
                nim.constants = input_data$nim.constants,
-               shareRE = FALSE,
-               survVarT = TRUE,
+               shareRE = shareRE,
+               survVarT = survVarT,
+               fitRodentCov = fitRodentCov,
                testRun = TRUE, nchains = 3,
                initVals.seed = 0)
   ),
@@ -120,7 +141,8 @@ list(
   
   tar_target(
     mcmc.tracePlots,
-    plotMCMCTraces(mcmc.out = IDSM.out.tidy),
+    plotMCMCTraces(mcmc.out = IDSM.out.tidy,
+                   fitRodentCov = fitRodentCov),
     format = "file"
   ),
   
@@ -141,7 +163,7 @@ list(
     NorwayMunic.map,
     setupMap_NorwayMunic(shp.path = "data/Kommuner_2018_WGS84/Kommuner_2018_WGS84.shp",
                         d_trans = LT_data$d_trans,
-                        areas = areas, areaAggregation = TRUE)
+                        areas = areas, areaAggregation = areaAggregation)
   ),
   
   tar_target(
@@ -153,7 +175,8 @@ list(
              N_sites = input_data$nim.constant$N_sites, 
              min_years = input_data$nim.constant$min_years, 
              max_years = input_data$nim.constant$max_years, 
-             minYear = minYear, maxYear = maxYear)
+             minYear = minYear, maxYear = maxYear,
+             fitRodentCov = fitRodentCov)
   )
 )
 
