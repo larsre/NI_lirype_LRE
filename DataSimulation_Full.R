@@ -13,29 +13,20 @@ set.seed(mySeed)
 
 Amax <- 2 # Number of age classes
 Tmax <- 15 # Number of years
+#Tmax <- 30 # Number of years
 Jmax <- 50 # Number of sites/transect lines
-
-# Population parameters #
-#-----------------------#
-
-# Initial population numbers per site
-N1 <- matrix(NA, ncol = Amax, nrow = Jmax)
-for(j in 1:Jmax){
-  N1[j,1] <- round(runif(1, 100, 300)) # Number of juveniles
-  N1[j,2] <- rpois(1, 0.5*N1[j,1]) # Number of adults
-}
 
 
 # Vital rate parameters #
 #-----------------------#
 
 ## Annual survival
-Mu.S <- 0.4 # Average annual survival probability
+Mu.S <- 0.35 # Average annual survival probability
 sigmaT.S <- 0 # SD of random year variation in survival
 sigmaJ.S <- 0 # SD of random site variation in survival
 
 ## Reproduction
-Mu.R <- 3 # Average number of chicks in August
+Mu.R <- 2 # Average number of chicks in August
 sigmaT.R <- 0.5 # SD of random year variation in number of chicks
 sigmaJ.R <- 0 # SD of random site variation in number of chicks
 
@@ -43,6 +34,20 @@ sigmaJ.R <- 0 # SD of random site variation in number of chicks
 #Mu.sJ <- 0.2 # Average summer survival of chicks
 #sigmaT.sJ <- 0 # SD of random year variation in chick survival
 #sigmaJ.sJ <- 0 # SD of random site variation in survival
+
+
+# Population parameters #
+#-----------------------#
+
+# Initial population numbers per site
+N1 <- matrix(NA, ncol = Amax, nrow = Jmax)
+for(j in 1:Jmax){
+  N1[j,2] <- round(runif(1, 3, 8)) # Number of adults
+  N1[j,1] <- rpois(1, N1[j,2]*Mu.R) # Number of juveniles
+}
+
+# Average group size
+avg_Gsize <- 5.6
 
 
 # Data & observation parameters #
@@ -56,9 +61,9 @@ W <- 200 # Truncation distance (max. distance at which observation is possible)
   
 #pi <- 3.141593 # Approximation of pi
 
-Mu.dd <- 50 # Average width parameter for half-normal detection function
+Mu.dd <- 75 # Average width parameter for half-normal detection function
 sigmaT.dd <- 0 # SD of random year variation in detection probability
-sigmaJ.dd <- 0 # SD of random year variation in detection probability
+sigmaJ.dd <- 0 # SD of random line variation in detection probability
 
 ## Known-fate radio-telemetry
 Tmin.RT <- 5 # First year for which radio-telemetry data has been collected
@@ -151,7 +156,7 @@ simulate.pop <- function(Amax, Tmax, Jmax, VR.list, N1, stochastic = TRUE, plot 
         N[j,2,t+1] <- rbinom(1, size = sum(N[j,1:Amax,t]), prob = VR.list$S[j,t])
       
         # - Reproduction of survivors
-        N[j,1,t+1] <- rpois(1, lambda = N[j,2,t+1]*(VR.list$R[j,t+1])/2)
+        N[j,1,t+1] <- rpois(1, lambda = N[j,2,t+1]*(VR.list$R[j,t+1]))
       
         # - Young-of-the-year recruiting in the end of summer
        # N[j,1,t+1] <- rbinom(1, size = Chicks[j,t+1], prob = VR.list$sJ[j,t+1])
@@ -163,7 +168,7 @@ simulate.pop <- function(Amax, Tmax, Jmax, VR.list, N1, stochastic = TRUE, plot 
         N[j,2,t+1] <- sum(N[j,1:Amax,t])*VR.list$S[j,t]
       
         # - Reproduction of survivors
-        N[j,1,t+1] <- N[j,2,t+1]*(VR.list$R[j,t+1]/2)
+        N[j,1,t+1] <- N[j,2,t+1]*(VR.list$R[j,t+1])
       
         # - Young-of-the-year recruiting in the end of summer
         #N[j,1,t+1] <- Chicks[j,t+1]*VR.list$sJ[j,t+1]
@@ -192,20 +197,69 @@ simulate.pop <- function(Amax, Tmax, Jmax, VR.list, N1, stochastic = TRUE, plot 
 SimData <- simulate.pop(Amax, Tmax, Jmax, VR.list, N1, stochastic = TRUE, plot = TRUE)
 
 
+################################
+# GROUP AGGREGATION SIMULATION #
+################################
+
+## Function for simulating group aggregation of population
+simulate.groups <- function(Jmax, Tmax, N.age, avg_Gsize, discard0 = TRUE){
+  
+  # Set up group data frame and matrix
+  G.age <- data.frame()
+  G.no <- matrix(0, nrow = Jmax, ncol = Tmax)
+  
+  for(j in 1:Jmax){
+    for(t in 1:Tmax){
+      
+      if(sum(N.age[j, 1:2, t]) > 0){
+        # Set number of groups to simulate
+        G.noTot <- sum(N.age[j, 1:2, t])/avg_Gsize
+        G.noTot <- ifelse(G.noTot < 1, 1, round(G.noTot))
+        
+        # Distribute juveniles among groups
+        G.juv <- rmultinom(1, size = N.age[j, 1, t], prob = rep(1/G.noTot, G.noTot))
+        
+        # Distribute adults among groups
+        G.ad <- rmultinom(1, size = N.age[j, 2, t], prob = rep(1/G.noTot, G.noTot))
+        
+        # Remove any potential 0 observations
+        if(discard0){
+          obs0 <- which(G.juv + G.ad == 0)
+          if(length(obs0) > 0){
+            G.juv <- G.juv[-obs0]
+            G.ad <- G.ad[-obs0]
+          }
+        }
+        
+        
+        # Collate in data frame
+        G.data <- data.frame(site = j,
+                             year = t,
+                             no_juv = G.juv,
+                             no_ad = G.ad)
+        G.age <- rbind(G.age, G.data)
+        
+        # Set number of groups for site-year
+        G.no[j, t] <- nrow(G.data)
+      }
+    }
+  }    
+  
+  return(G.age)
+}
+
+## Simulate group aggregation of population
+G.age <- simulate.groups(Jmax, Tmax, N.age = SimData$N, avg_Gsize, discard0 = TRUE)
+
 #################################
 # LINE TRANSECT DATA SIMULATION #
 #################################
 
-# NOTE: As of now, the simulated DS data assumes independent observation of 
-#       single animals, i.e. each observation = 1 individual. 
-#       In the real ptarmigan data, an observation may pertain to single animals
-#       or groups of multiple animals. Extension of the data simulation to 
-#       accommodate group sampling will have to be made later. 
-
 ## Function for simulating hierarchical distance sampling data
-simulate.HDSdata <- function(Jmax, Tmax, N.age,
+simulate.HDSdata <- function(Jmax, Tmax, G.age,
                              Mu.dd, sigmaT.dd, sigmaJ.dd,
-                             w, discard0 = TRUE, min.Tlength, max.Tlength){
+                             W, min.Tlength, max.Tlength,
+                             discard0){
   
   # Set site-specific transect lengths
   # NOTE: These are not currently influencing the data simulation in any way
@@ -218,83 +272,74 @@ simulate.HDSdata <- function(Jmax, Tmax, N.age,
   # Calculate year- and site-specific sigma parameter
   Sigma <- exp(log(Mu.dd) + outer(epsilonJ, epsilonT, FUN = '+'))
   
-  # Sum up true population sizes (adults + YOY) per year-site combination
-  N.tot <- apply(N.age, c(1,3), sum)
+  # Copy group data
+  data <- G.age
   
+  # Sample distance from transect line for each group (assuming uniform distribution)
+  data$distance <- round(runif(nrow(data), 0, W))
   
-  # Simulate line transect data (observation distances)
-  data <- data.frame()
-  for(t in 1:Tmax){
-    for(j in 1:Jmax){
-      
-      if(N.tot[j,t] == 0){
-        data <- rbind(data, c(j, NA, NA, NA))
-        next
-      }
-      
-      # - Sample distance from transect line for each individual (assuming uniform distribution)
-      #d <- runif(N.tot[j,t], 0, W) 
-      d_juv <- runif(N.age[j, 1, t], 0, W)
-      d_ad <- runif(N.age[j, 2, t], 0, W) 
-      d <- as.matrix(cbind(c(d_ad, d_juv), c(rep(1, length(d_juv)), rep(2, length(d_ad)))))
-      
-      
-      # - Calculate individual detection probabilities p based on distances d
-      p <- exp(-d * d/(2 * (Sigma[j,t]^2)))
-      
-      # - Simulate observation process (whether each individual was observed or not)
-      #y <- rbinom(n = N.tot[j,t], size = 1, prob = p)
-      y_juv <- rbinom(n = N.age[j, 1, t], size = 1, prob = p)
-      y_ad <- rbinom(n = N.age[j, 2, t], size = 1, prob = p)
-      y <- as.matrix(cbind(c(y_ad, y_juv), c(rep(1, length(y_juv)), rep(2, length(y_ad)))))
-      
-      
-      # - Retain only data from observations if "discard0"
-      if(discard0){
-        d <- d[y[,1] == 1,]
-        # d_juv <- d_juv[y == 1]
-        # d_ad <- d_ad[y == 1]
-        y <- y[y[,1] == 1,]
-        # y_juv <- y_juv[y == 1]
-        # y_ad <- y_ad[y == 1]
-        
-      }
-      
-      
-      # - Arrange data
-      if(sum(y[,1]) > 0){
-        data <- rbind(data, cbind(rep(j, sum(y[,1])), rep(t, sum(y[,1])), y[,1], d[,1], d[,2]))
-      }else{
-        data <- rbind(data, c(j, NA, NA, NA))
-      } 
-    }
+  # Calculate group detection probabilities p based on distances d & simulate observation process
+  data$p <- NA
+  data$obs <- NA
+  for(i in 1:nrow(data)){
+    data$p[i] <- exp(-data$distance[i] * data$distance[i]/(2 * (Sigma[data$site[i], data$year[i]]^2)))
+    data$obs[i] <- rbinom(n = 1, size = 1, prob = data$p[i])
   }
-  colnames(data) <- c("site", "year", "obs", "distance", "age")
+  
+  # Retain only data from observations if "discard0"
+  if(discard0){
+    data <- subset(data, obs == 1)
+  }
   
   # Summarise number of individuals observed per year-site combination
   #DS.count <- array(NA, nrow = Jmax, ncol = Tmax)
-  DS.count <- array(NA, c(Jmax, 2, Tmax))
+  DS.count <- array(NA, c(2, Jmax, Tmax))
   for(t in 1:Tmax){
     for(j in 1:Jmax){
-      for(a in 1:2){
-        data.sub <- subset(data, year == t & site == j & age == a)
-        DS.count[j, a, t] <- nrow(data.sub)
-      }
+      data.sub <- subset(data, year == t & site == j)
+      DS.count[1, j, t] <- sum(data.sub$no_juv)
+      DS.count[2, j, t] <- sum(data.sub$no_ad)
     }
   }
   
   # Collate and return data
-  DS.data <- list(d = data$d, d_year = data$year, d_site = data$site, d_age=data$age, 
+  DS.data <- list(d = data$distance, d_year = data$year, d_site = data$site,
                   DS.count = DS.count, L = L)
   return(DS.data)
 }
 
 ## Simulate hierarchical distance sampling data
-DS.data <- simulate.HDSdata(Jmax, Tmax, N.age = SimData$N, 
+DS.data <- simulate.HDSdata(Jmax, Tmax, G.age = G.age, 
                             Mu.dd, sigmaT.dd, sigmaJ.dd,
                             W, discard0 = TRUE, 
                             min.Tlength, max.Tlength)
 
+## Function to extract reproductive data from distance sampling data
+extract.RepData <- function(Jmax, Tmax, DS.count){
+  
+  # Extract necessary data from DS counts
+  sumR_obs <- c(DS.count[1,,])
+  sumAd_obs <- c(DS.count[2,,])
+  sumR_obs_year <- rep(1:Tmax, each = Jmax)
+  
+  # Discard entries with 0 adults present
+  drop.idx <- which(sumAd_obs == 0)
+  sumR_obs <- sumR_obs[-drop.idx]
+  sumAd_obs <- sumAd_obs[-drop.idx]
+  sumR_obs_year <- sumR_obs_year[-drop.idx]
+  
+  # Count observations
+  N_sumR_obs <- length(sumR_obs)
+  
+  # Collate and return data
+  Rep.data <- list(sumR_obs = sumR_obs, sumAd_obs = sumAd_obs,
+                   sumR_obs_year = sumR_obs_year, N_sumR_obs = N_sumR_obs)
+  return(Rep.data)
+  
+}
+
+## Extract reproductive data
+Rep.data <- extract.RepData(Jmax, Tmax, DS.count = DS.data$DS.count)
 
 
 ########################################
@@ -309,19 +354,23 @@ DS.data <- simulate.HDSdata(Jmax, Tmax, N.age = SimData$N,
 simulate.RTdata <- function(nind.avg.RT, Tmin.RT, Tmax.RT, Tmax, SurvProbs){
   
   # Make vectors for storing data
-  n.rel <- n.surv <- rep(NA, Tmax)
+  n.rel.S1 <- n.surv.S1 <- rep(NA, Tmax)
+  n.rel.S2 <- n.surv.S2 <- rep(NA, Tmax)
   
   for(t in Tmin.RT:Tmax.RT){
     
     # Sample number of individuals fitted with transmitters each year
-    n.rel[t] <- rpois(1, nind.avg.RT)
+    n.rel.S1[t] <- rpois(1, nind.avg.RT)
+    n.rel.S2[t] <- rpois(1, nind.avg.RT)
     
     # Simulate survivors to the next year
-    n.surv[t] <- rbinom(1, size = n.rel[t], prob = SurvProbs[t])
+    n.surv.S1[t] <- rbinom(1, size = n.rel.S1[t], prob = sqrt(SurvProbs[t]))
+    n.surv.S2[t] <- rbinom(1, size = n.rel.S2[t], prob = sqrt(SurvProbs[t]))
   }
   
   # Assemble data in a list and return
-  RT.data <- list(n.rel = n.rel, n.surv = n.surv)
+  RT.data <- list(Survs1 = cbind(n.rel.S1, n.surv.S1),
+                  Survs2 = cbind(n.rel.S2, n.surv.S2))
   return(RT.data)
 }
 
@@ -376,6 +425,7 @@ RT.data <- simulate.RTdata(nind.avg.RT, Tmin.RT, Tmax.RT, Tmax, SurvProbs = VR.l
 SimParams <- list(
   Seed = mySeed,
   Amax = Amax, Tmax = Tmax, Jmax = Jmax,
+  avg_Gsize = avg_Gsize,
   N1 = N1,
   Mu.S = Mu.S, Mu.R = Mu.R, 
   sigmaT.S = sigmaT.S, sigmaT.R = sigmaT.R, 
@@ -394,7 +444,11 @@ SimParams <- list(
 AllSimData <- list(
   SimParams = SimParams,
   VR.list = VR.list,
+  N.data = SimData$N,
+  group.data = G.age,
   DS.data = DS.data,
+  Rep.data = Rep.data,
   RT.data = RT.data
 )
 
+saveRDS(AllSimData, "SimData_Full.rds")
