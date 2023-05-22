@@ -24,6 +24,14 @@ R_perF <- FALSE
 # Drop observations of juveniles with no adults present
 R_parent_drop0 <- TRUE
 
+# Random effects shared across areas
+shareRE <- TRUE
+
+# Time variation in survival
+survVarT <- FALSE
+
+# Rodent covariate on reproduction
+fitRodentCov <- FALSE
 
 
 # SET SIMUALATION PARAMETERS #
@@ -121,30 +129,42 @@ if(resimulate){
 # PREPARE INPUT DATA FOR INTEGRATED MODEL #
 #-----------------------------------------#
 
+## Add dummy dimensions to observational data
+N_a_line_year <- addDummyDimension(AllSimData$DS.data$DS.count)
+L <- addDummyDimension(AllSimData$DS.data$L)
+y <- addDummyDimension(AllSimData$DS.data$d)
+Year_obs <- addDummyDimension(AllSimData$DS.data$d_year)
+sumR_obs <- addDummyDimension(AllSimData$Rep.data$sumR_obs)
+sumAd_obs <- addDummyDimension(AllSimData$Rep.data$sumAd_obs)
+sumR_obs_year <- addDummyDimension(AllSimData$Rep.data$sumR_obs_year)
+N_sites <- c(AllSimData$SimParams$Jmax, NA)
+N_obs <- c(length(AllSimData$DS.data$d), NA)
+N_sumR_obs <- c(AllSimData$Rep.data$N_sumR_obs, NA)
+
 ## Reformat data into vector/array list for analysis with Nimble
 input_data <- list(
   nim.data = list(
-    sumR_obs = AllSimData$Rep.data$sumR_obs,
-    sumAd_obs = AllSimData$Rep.data$sumAd_obs,
-    y = AllSimData$DS.data$d,
-    L = AllSimData$DS.data$L,
-    N_a_line_year = AllSimData$DS.data$DS.count,
+    sumR_obs = sumR_obs,
+    sumAd_obs = sumAd_obs,
+    y = y,
+    L = L,
+    N_a_line_year = N_a_line_year,
     Survs1 = AllSimData$RT.data$Survs1,
     Survs2 = AllSimData$RT.data$Survs2
   ),
   
   nim.constants = list(
+    N_areas = 1,
+    SurvAreaIdx = 1,
     N_years = AllSimData$SimParams$Tmax,
     year_Survs = AllSimData$RT.data$year_Survs,
     N_years_RT = AllSimData$RT.data$N_years_RT,
     W = AllSimData$SimParams$W,
-    scale1 = scale1,
-    A = colSums(AllSimData$DS.data$L)*(AllSimData$SimParams$W/scale1)*2,
-    N_obs = length(AllSimData$DS.data$d),
-    Year_obs = AllSimData$DS.data$d_year,
-    N_sites = AllSimData$SimParams$Jmax,
-    sumR_obs_year = AllSimData$Rep.data$sumR_obs_year,
-    N_sumR_obs = AllSimData$Rep.data$N_sumR_obs,
+    N_obs = N_obs,
+    Year_obs = Year_obs,
+    N_sites = N_sites,
+    sumR_obs_year = sumR_obs_year,
+    N_sumR_obs = N_sumR_obs,
     N_ageC = AllSimData$SimParams$Amax
   )
 )
@@ -153,16 +173,18 @@ input_data <- list(
 # MODEL SETUP #
 #-------------#
   
-model_setup <- setupModel(modelCode.path = "NIMBLE Code/RypeIDSM_dHN.R",
+model_setup <- setupModel(modelCode.path = "NIMBLE Code/RypeIDSM_multiArea_dHN.R",
                           customDist = TRUE,
+                          shareRE = shareRE, survVarT = survVarT, fitRodentCov = fitRodentCov,
                           nim.data = input_data$nim.data,
                           nim.constants = input_data$nim.constants,
-                          testRun = FALSE, initVals.seed = 0)
+                          testRun = FALSE, nchains = 3,
+                          initVals.seed = mySeed)
 
 # MODEL (TEST) RUN #
 #------------------#
 t.start <- Sys.time()
-IDSM.out <- nimbleMCMC(code = model_setup$modelCode, 
+IDSM.out <- nimbleMCMC(code = model_setup$modelCode,
                        data = input_data$nim.data, 
                        constants = input_data$nim.constants,
                        inits = model_setup$initVals, 
@@ -175,8 +197,15 @@ IDSM.out <- nimbleMCMC(code = model_setup$modelCode,
                        setSeed = 0)
 Sys.time() - t.start
 
-#saveRDS(IDSM.out, file = 'rypeIDSM_dHN_simData_t15.rds')
-#saveRDS(IDSM.out, file = 'rypeIDSM_dHN_simData_t30.rds')
-saveRDS(IDSM.out, file = 'rypeIDSM_dHN_simData_t15_MuR.rds')
-#saveRDS(IDSM.out, file = 'rypeIDSM_dHN_simData_t30_MuR.rds')
+saveRDS(IDSM.out, file = paste0("rypeIDSM_dHN_simData_t", Tmax, ".rds"))
+
+
+
+# MCMC TRACE PLOTS #
+#------------------#
+
+plotMCMCTraces(mcmc.out = IDSM.out,
+               fitRodentCov = fitRodentCov)
+
+
 
