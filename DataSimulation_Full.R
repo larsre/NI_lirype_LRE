@@ -40,11 +40,7 @@ sigmaJ.R <- 0 # SD of random site variation in number of chicks
 #-----------------------#
 
 # Initial population numbers per site
-N1 <- matrix(NA, ncol = Amax, nrow = Jmax)
-for(j in 1:Jmax){
-  N1[j,2] <- round(runif(1, 3, 8)) # Number of adults
-  N1[j,1] <- rpois(1, N1[j,2]*Mu.R) # Number of juveniles
-}
+N1_juv_limits <- c(3, 8)
 
 # Average group size
 avg_Gsize <- 5.6
@@ -86,7 +82,7 @@ nind.avg.RT <- 30
 #########################
 
 ## Function to simulate year- and site-specific vital rates
-simulate.VRs <- function(Tmax, Jmax,
+simulateVRs <- function(Tmax, Jmax,
                          Mu.S, Mu.R, 
                          sigmaT.S, sigmaT.R, 
                          sigmaJ.S, sigmaJ.R){
@@ -119,10 +115,10 @@ simulate.VRs <- function(Tmax, Jmax,
 }
 
 ## Simulate vital rates
-VR.list <- simulate.VRs(Tmax, Jmax,
-                        Mu.S, Mu.R, 
-                        sigmaT.S, sigmaT.R,
-                        sigmaJ.S, sigmaJ.R)
+VR.list <- simulateVRs(Tmax, Jmax,
+                       Mu.S, Mu.R, 
+                       sigmaT.S, sigmaT.R,
+                       sigmaJ.S, sigmaJ.R)
 
 
 #########################
@@ -130,15 +126,18 @@ VR.list <- simulate.VRs(Tmax, Jmax,
 #########################
 
 ## Function for simulating temporal population dynamics in each site
-simulate.pop <- function(Amax, Tmax, Jmax, VR.list, N1, stochastic = TRUE, plot = FALSE){
+simulatePopDyn <- function(Amax, Tmax, Jmax, VR.list, stochastic = TRUE, plot = FALSE){
   
   # Prepare arrays for storing population projections
   N <- array(NA, dim = c(Jmax, Amax, Tmax))
   #Chicks <- matrix(NA, nrow = Jmax, ncol = Tmax)
   
   # Initialize population projection
-  N[,,1] <- N1
-  
+  for(j in 1:Jmax){
+    N[j,2,1] <- round(runif(1, N1_juv_limits[1], N1_juv_limits[2])) # Number of adults
+    N[j,1,1] <- rpois(1, N[j,2,1]*VR.list$R[1]) # Number of juveniles
+  }
+
   # Print simulation info
   if(stochastic){
     message('Simulating population dynamics with demographic stochasticity...')
@@ -194,7 +193,7 @@ simulate.pop <- function(Amax, Tmax, Jmax, VR.list, N1, stochastic = TRUE, plot 
 }
 
 ## Simulate population trajectories for all sites
-SimData <- simulate.pop(Amax, Tmax, Jmax, VR.list, N1, stochastic = TRUE, plot = TRUE)
+SimData <- simulatePopDyn(Amax, Tmax, Jmax, VR.list, N1, stochastic = TRUE, plot = TRUE)
 
 
 ################################
@@ -202,7 +201,7 @@ SimData <- simulate.pop(Amax, Tmax, Jmax, VR.list, N1, stochastic = TRUE, plot =
 ################################
 
 ## Function for simulating group aggregation of population
-simulate.groups <- function(Jmax, Tmax, N.age, avg_Gsize, discard0 = TRUE){
+simulateGroups <- function(Jmax, Tmax, N.age, avg_Gsize, discard0 = TRUE){
   
   # Set up group data frame and matrix
   G.age <- data.frame()
@@ -249,14 +248,14 @@ simulate.groups <- function(Jmax, Tmax, N.age, avg_Gsize, discard0 = TRUE){
 }
 
 ## Simulate group aggregation of population
-G.age <- simulate.groups(Jmax, Tmax, N.age = SimData$N, avg_Gsize, discard0 = TRUE)
+G.age <- simulateGroups(Jmax, Tmax, N.age = SimData$N, avg_Gsize, discard0 = TRUE)
 
 #################################
 # LINE TRANSECT DATA SIMULATION #
 #################################
 
 ## Function for simulating hierarchical distance sampling data
-simulate.HDSdata <- function(Jmax, Tmax, G.age,
+simulateData_HDS <- function(Jmax, Tmax, G.age,
                              Mu.dd, sigmaT.dd, sigmaJ.dd,
                              W, min.Tlength, max.Tlength,
                              discard0){
@@ -309,13 +308,13 @@ simulate.HDSdata <- function(Jmax, Tmax, G.age,
 }
 
 ## Simulate hierarchical distance sampling data
-DS.data <- simulate.HDSdata(Jmax, Tmax, G.age = G.age, 
+DS.data <- simulateData_HDS(Jmax, Tmax, G.age = G.age, 
                             Mu.dd, sigmaT.dd, sigmaJ.dd,
                             W, discard0 = TRUE, 
                             min.Tlength, max.Tlength)
 
 ## Function to extract reproductive data from distance sampling data
-extract.RepData <- function(Jmax, Tmax, DS.count){
+extractSimData_Rep <- function(Jmax, Tmax, DS.count){
   
   # Extract necessary data from DS counts
   sumR_obs <- c(DS.count[1,,])
@@ -339,7 +338,7 @@ extract.RepData <- function(Jmax, Tmax, DS.count){
 }
 
 ## Extract reproductive data
-Rep.data <- extract.RepData(Jmax, Tmax, DS.count = DS.data$DS.count)
+Rep.data <- extractSimData_Rep(Jmax, Tmax, DS.count = DS.data$DS.count)
 
 
 ########################################
@@ -351,7 +350,7 @@ Rep.data <- extract.RepData(Jmax, Tmax, DS.count = DS.data$DS.count)
 #       seasonal periods (as in the real data) is straightforward. 
 
 ## Function for simulating known-fate telemetry data
-simulate.RTdata <- function(nind.avg.RT, Tmin.RT, Tmax.RT, Tmax, SurvProbs){
+simulateData_RT <- function(nind.avg.RT, Tmin.RT, Tmax.RT, Tmax, SurvProbs){
   
   # Make vectors for storing data
   n.rel.S1 <- n.surv.S1 <- rep(NA, Tmax)
@@ -375,7 +374,7 @@ simulate.RTdata <- function(nind.avg.RT, Tmin.RT, Tmax.RT, Tmax, SurvProbs){
 }
 
 ## Simulate known-fate telemetry data
-RT.data <- simulate.RTdata(nind.avg.RT, Tmin.RT, Tmax.RT, Tmax, SurvProbs = VR.list$S[1,])
+RT.data <- simulateData_RT(nind.avg.RT, Tmin.RT, Tmax.RT, Tmax, SurvProbs = VR.list$S[1,])
 
 
 ###############################
@@ -383,7 +382,7 @@ RT.data <- simulate.RTdata(nind.avg.RT, Tmin.RT, Tmax.RT, Tmax, SurvProbs = VR.l
 ###############################
 
 # ## Function for simulating nest survey data
-# simulate.NSdata <- function(nind.avg.NS, Tmin.NS, Tmax.NS, Tmax, RepRates){
+# simulateData_Nests <- function(nind.avg.NS, Tmin.NS, Tmax.NS, Tmax, RepRates){
 #   
 #   # Determine number of nests surveyed in each year
 #   n.nests <- rep(NA, Tmax)
@@ -414,7 +413,7 @@ RT.data <- simulate.RTdata(nind.avg.RT, Tmin.RT, Tmax.RT, Tmax, SurvProbs = VR.l
 # }
 # 
 # ## Simulate nest survey data
-# NS.data <- simulate.NSdata(nind.avg.NS, Tmin.NS, Tmax.NS, RepRates = VR.list$R[1,])
+# NS.data <- simulateData_Nests(nind.avg.NS, Tmin.NS, Tmax.NS, RepRates = VR.list$R[1,])
 
 
 #########################
