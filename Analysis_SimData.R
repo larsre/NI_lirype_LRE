@@ -1,6 +1,6 @@
 
-# SETUP #
-#-------#
+# GENERAL SETUP #
+#---------------#
 
 ## Source all functions in "R" folder
 sourceDir <- function(path, trace = TRUE, ...) {
@@ -25,8 +25,80 @@ R_perF <- FALSE
 R_parent_drop0 <- TRUE
 
 
-## Set scaling parameter
-scale1 <- 1000
+## Set seed
+mySeed <- 0
+set.seed(mySeed)
+
+
+# SET SIMUALATION PARAMETERS #
+#----------------------------#
+
+# General simulation parameters
+#---
+
+Amax <- 2 # Number of age classes
+Tmax <- 15 # Number of years
+#Tmax <- 30 # Number of years
+Jmax <- 50 # Number of sites/transect lines
+
+
+# Vital rate parameters
+#---
+
+## Annual survival
+Mu.S <- 0.35 # Average annual survival probability
+sigmaT.S <- 0 # SD of random year variation in survival
+sigmaJ.S <- 0 # SD of random site variation in survival
+
+## Reproduction
+Mu.R <- 2 # Average number of chicks in August
+sigmaT.R <- 0.5 # SD of random year variation in number of chicks
+sigmaJ.R <- 0 # SD of random site variation in number of chicks
+
+## Juvenile summer survival
+#Mu.sJ <- 0.2 # Average summer survival of chicks
+#sigmaT.sJ <- 0 # SD of random year variation in chick survival
+#sigmaJ.sJ <- 0 # SD of random site variation in survival
+
+
+# Population parameters
+#---
+
+# Initial population numbers per site
+N1_juv_limits <- c(3, 8)
+
+# Average group size
+avg_Gsize <- 5.6
+
+
+# Data & observation parameters 
+#---
+
+## Line-transect distance sampling
+min.Tlength <- 1000 # Minimum transect length
+max.Tlength <- 1000  # Maximum transect length
+
+W <- 200 # Truncation distance (max. distance at which observation is possible)
+
+Mu.dd <- 75 # Average width parameter for half-normal detection function
+sigmaT.dd <- 0 # SD of random year variation in detection probability
+sigmaJ.dd <- 0 # SD of random line variation in detection probability
+
+## Known-fate radio-telemetry
+Tmin.RT <- 5 # First year for which radio-telemetry data has been collected
+Tmax.RT <- 10 # Last year for which radio-telemetry data has been collected
+
+# Average number of individuals fitted with transmitters each year
+nind.avg.RT <- 30
+
+# ## Nest survey
+# Tmin.NS <- 1 # First year for which nest survey data has been collected
+# Tmax.NS <- 15 # Last year for which nest survey data has been collected
+# 
+# # Average number of nests monitored each year
+# nind.avg.NS <- 40
+
+
 
 # SIMULATE DATA #
 #---------------#
