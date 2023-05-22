@@ -36,7 +36,12 @@ simulateInits <- function(nim.data, nim.constants, shareRE, survVarT, fitRodentC
   # Missing covariate values #
   #--------------------------#
   
-  RodentOcc <- nim.data$RodentOcc
+  if(!is.null(nim.data$RodentOcc)){
+    RodentOcc <- nim.data$RodentOcc
+  }else{
+    RodentOcc <- matrix(0, nrow = N_areas, ncol = N_years)
+  }
+  
   if(NA %in% RodentOcc){
     RodentOcc[which(is.na(RodentOcc))] <- runif(length(which(is.na(RodentOcc))), 0, 1)
   }
@@ -103,14 +108,14 @@ simulateInits <- function(nim.data, nim.constants, shareRE, survVarT, fitRodentC
     #epsT.R <- rnorm(N_year, 0, sigmaT.R)
     
     for(x in 1:N_areas){
-      R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + betaR.R[x]*RodentOcc[1:N_years] + epsT.R[1:N_years])
+      R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + betaR.R[x]*RodentOcc[x, 1:N_years] + epsT.R[1:N_years])
     }
   }else{
     epsT.R <- matrix(0, nrow = N_areas, ncol = N_years)
     #epsT.R <- matrix(rnorm(N_areas*N_years, 0, sigmaT.R), nrow = N_areas, ncol = N_years)
     
     for(x in 1:N_areas){
-      R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + betaR.R[x]*RodentOcc[1:N_years] + epsT.R[x, 1:N_years])
+      R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + betaR.R[x]*RodentOcc[x, 1:N_years] + epsT.R[x, 1:N_years])
     }
   }
 
@@ -214,6 +219,7 @@ simulateInits <- function(nim.data, nim.constants, shareRE, survVarT, fitRodentC
     ratio.JA1 = ratio.JA1,
     
     Mu.R = Mu.R,
+    h.Mu.betaR.R = h.Mu.betaR.R, h.sigma.betaR.R = h.sigma.betaR.R,
     h.Mu.R = h.Mu.R, h.sigma.R = h.sigma.R,
     sigmaT.R = sigmaT.R,
     epsT.R = epsT.R, 

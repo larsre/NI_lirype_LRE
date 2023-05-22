@@ -59,7 +59,7 @@ setupModel <- function(modelCode.path, customDist,
   }
   
   if(fitRodentCov){
-    params <- c(params, "betaR.R", "RodentOcc")
+    params <- c(params, "betaR.R", "h.Mu.betaR.R", "h.sigma.betaR.R", "RodentOcc")
   }
   
   ## Simulate initial values

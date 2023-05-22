@@ -69,8 +69,10 @@ rypeIDSM <- nimbleCode({
   h.Mu.R  ~ dunif(0, 15)
   h.sigma.R ~ dunif(0, 5)
   
-  h.Mu.betaR.R ~ dunif(-5, 5)
-  h.sigma.betaR.R ~ dunif(0, 5)
+  if(fitRodentCov){
+    h.Mu.betaR.R ~ dunif(-5, 5)
+    h.sigma.betaR.R ~ dunif(0, 5)
+  }
   
   sigmaT.R ~ dunif(0, 5)
   
@@ -219,9 +221,11 @@ rypeIDSM <- nimbleCode({
   
   ####################################################
   ## Rodent covariate imputation model
-  for(x in 1:N_areas){
-    for (t in 1:N_years){
-      RodentOcc[x, t] ~ dunif(0, 1)
+  if(fitRodentCov){
+    for(x in 1:N_areas){
+      for (t in 1:N_years){
+        RodentOcc[x, t] ~ dunif(0, 1)
+      }
     }
   }
   

@@ -31,13 +31,13 @@ R_parent_drop0 <- TRUE
 sumR.Level <- "line" # Summing at the line level
 
 # Random effects shared across areas
-shareRE <- FALSE
+shareRE <- TRUE
 
 # Time variation in survival
-survVarT <- TRUE
+survVarT <- FALSE
 
 # Rodent covariate on reproduction
-fitRodentCov <- TRUE
+fitRodentCov <- FALSE
 
 # DOWNLOAD/FETCH DATA #
 #---------------------#
@@ -120,7 +120,7 @@ input_data <- prepareInputData(d_trans = LT_data$d_trans,
 #                           testRun = FALSE, initVals.seed = 0)
   
 # Updated version (nimbleDistance::dHN)
-model_setup <- setupModel(modelCode.path = "NIMBLE Code/RypeIDSM_multiArea_dHN_sepRE_survT.R",
+model_setup <- setupModel(modelCode.path = "NIMBLE Code/RypeIDSM_multiArea_dHN.R",
                           customDist = TRUE,
                           shareRE = shareRE, survVarT = survVarT, fitRodentCov = fitRodentCov,
                           nim.data = input_data$nim.data,
@@ -156,7 +156,8 @@ IDSM.out.tidy <- tidySamples(IDSM.out = IDSM.out, save = TRUE)
 # OPTIONAL: MCMC TRACE PLOTS #
 #----------------------------#
 
-plotMCMCTraces(mcmc.out = IDSM.out.tidy)
+plotMCMCTraces(mcmc.out = IDSM.out.tidy,
+               fitRodentCov = fitRodentCov)
 
 
 # OPTIONAL: TIME SERIES PLOTS #
@@ -188,7 +189,8 @@ plotMaps(mcmc.out = IDSM.out.tidy,
          N_sites = input_data$nim.constant$N_sites, 
          min_years = input_data$nim.constant$min_years, 
          max_years = input_data$nim.constant$max_years, 
-         minYear = minYear, maxYear = maxYear)
+         minYear = minYear, maxYear = maxYear,
+         fitRodentCov = fitRodentCov)
 
 
 # OPTIONAL: MODEL COMPARISON (PLOTS) #
