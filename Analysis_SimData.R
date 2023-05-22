@@ -16,7 +16,7 @@ sourceDir('R')
 ## Set switches
 
 # Re-simulate data
-resimulate <- FALSE
+resimulate <- TRUE
 
 # Recruitment per adult or per adult female
 R_perF <- FALSE
@@ -25,10 +25,6 @@ R_perF <- FALSE
 R_parent_drop0 <- TRUE
 
 
-## Set seed
-mySeed <- 0
-set.seed(mySeed)
-
 
 # SET SIMUALATION PARAMETERS #
 #----------------------------#
@@ -36,9 +32,10 @@ set.seed(mySeed)
 # General simulation parameters
 #---
 
+mySeed <- 0
+
 Amax <- 2 # Number of age classes
 Tmax <- 15 # Number of years
-#Tmax <- 30 # Number of years
 Jmax <- 50 # Number of sites/transect lines
 
 
@@ -104,7 +101,18 @@ nind.avg.RT <- 30
 #---------------#
 
 if(resimulate){
-  source("DataSimulation_Full.R")
+  AllSimData <- assembleSimData(Amax = Amax, Tmax = Tmax, Jmax = Jmax,
+                                avg_Gsize = avg_Gsize, 
+                                Mu.S = Mu.S, sigmaT.S = sigmaT.S, sigmaJ.S = sigmaJ.S,
+                                Mu.R = Mu.R, sigmaT.R = sigmaT.R, sigmaJ.R = sigmaJ.R,
+                                Mu.dd = Mu.dd, sigmaT.dd = sigmaT.dd, sigmaJ.dd = sigmaJ.dd,
+                                W = W, min.Tlength = min.Tlength, max.Tlength = max.Tlength,
+                                nind.avg.RT = nind.avg.RT, 
+                                Tmin.RT = Tmin.RT, Tmax.RT = Tmax.RT,
+                                seed = mySeed, 
+                                stochasticSim = TRUE,
+                                plotPopSim = TRUE,
+                                save = TRUE)
 }else{
   AllSimData <- readRDS("SimData_Full.rds")
 }
@@ -144,15 +152,7 @@ input_data <- list(
 
 # MODEL SETUP #
 #-------------#
-
-# Original version (zeroes-trick)
-# model_setup <- setupModel(modelCode.path = "NIMBLE Code/RypeIDSM.R",
-#                           customDist = FALSE,
-#                           nim.data = input_data$nim.data,
-#                           nim.constants = input_data$nim.constants,
-#                           testRun = FALSE, initVals.seed = 0)
   
-# Updated version (nimbleDistance::dHN)
 model_setup <- setupModel(modelCode.path = "NIMBLE Code/RypeIDSM_dHN.R",
                           customDist = TRUE,
                           nim.data = input_data$nim.data,
