@@ -135,8 +135,8 @@ input_data <- list(
   
   nim.constants = list(
     N_years = AllSimData$SimParams$Tmax,
-    Tmin.RT = AllSimData$SimParams$Tmin.RT,
-    Tmax.RT = AllSimData$SimParams$Tmax.RT,
+    year_Survs = AllSimData$RT.data$year_Survs,
+    N_years_RT = AllSimData$RT.data$N_years_RT,
     W = AllSimData$SimParams$W,
     scale1 = scale1,
     A = colSums(AllSimData$DS.data$L)*(AllSimData$SimParams$W/scale1)*2,

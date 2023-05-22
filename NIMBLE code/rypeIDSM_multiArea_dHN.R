@@ -173,10 +173,10 @@ rypeIDSM <- nimbleCode({
   S2[1:N_years] <- S[SurvAreaIdx, 1:N_years]/S1[1:N_years]
   
   ## Data likelihoods
-  for (t in 1:5){
+  for (t in 1:N_years_RT){
     
-    Survs1[t, 2] ~ dbinom(S1[t], Survs1[t, 1])
-    Survs2[t, 2] ~ dbinom(S2[t], Survs2[t, 1])
+    Survs1[t, 2] ~ dbinom(S1[year_Survs[t]], Survs1[t, 1])
+    Survs2[t, 2] ~ dbinom(S2[year_Survs[t]], Survs2[t, 1])
     
   }
   
