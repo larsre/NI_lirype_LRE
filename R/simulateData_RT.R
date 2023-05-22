@@ -1,9 +1,25 @@
-# NOTE: As of now, only one (= annual) survival interval is included in the data
-#       simulation. However, extending this to conditional survival over two
-#       seasonal periods (as in the real data) is straightforward. 
+#' Simulate known-fate telemetry data
+#' This functions simulates a dataset of known-fate telemetry data for two 
+#' seasons (S1 and S2). At present, it assumes that survival is equal for both
+#' seasons and equal to the square-root of annual survival. It would be 
+#' straightforward to extend this to allow for different survival in the two 
+#' seasons. 
+#' @param nind.avg.RT integer. Average number of individuals fitted with transmitters
+#' every season.
+#' @param Tmin.RT integer. Index of the first year for which to simulate telemetry
+#' data.  
+#' @param Tmax.RT integer. Index of the last year for which to simulate telemetry 
+#' data.
+#' @param SurvProbs vector of time-dependent survival probabilities. 
+#'
+#' @return a list containing numbers of individuals with transmitters and subset 
+#' of survivors for the first (Survs1) and second (Survs2) seasons, as well as
+#' corresponding year indices.  
+#' @export
+#'
+#' @examples
 
-## Function for simulating known-fate telemetry data
-simulateData_RT <- function(nind.avg.RT, Tmin.RT, Tmax.RT, Tmax, SurvProbs){
+simulateData_RT <- function(nind.avg.RT, Tmin.RT, Tmax.RT, SurvProbs){
   
   # Set year range and number
   year_Survs <- c(Tmin.RT:Tmax.RT)

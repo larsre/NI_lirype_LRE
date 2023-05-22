@@ -1,4 +1,24 @@
-## Function for simulating hierarchical distance sampling data
+#' Simulate hierarchical distance sampling data
+#'
+#' @param Jmax integer. Total number of sites to simulate for.
+#' @param Tmax integer. Total number of years to simulate for.
+#' @param G.age 
+#' @param Mu.dd numeric. Average detection decline rate.
+#' @param sigmaT.dd numeric. Standard deviation of random year effects on detection.
+#' @param sigmaJ.dd numeric. Standard deviation of random site effects on detection.
+#' @param W numeric. Truncation distance.
+#' @param min.Tlength numeric. Minimum transect length.
+#' @param max.Tlength numeric. Maximum transect length.
+#' @param discard0 logical. If TRUE, retain only data from observations (drop
+#' non-observations). 
+#'
+#' @return a list containing simulated observation distances ("d") with corresponding
+#' years ("d_year") and sites ("d_site"), age-structured count observations ("DS.count")
+#' and transect lengths ("L").
+#' @export
+#'
+#' @examples
+
 simulateData_HDS <- function(Jmax, Tmax, G.age,
                              Mu.dd, sigmaT.dd, sigmaJ.dd,
                              W, min.Tlength, max.Tlength,

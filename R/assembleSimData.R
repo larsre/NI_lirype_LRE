@@ -1,5 +1,43 @@
 
 
+#' Simulate complete dataset for testing the integrated distance-sampling model
+#'
+#' @param Amax integer. Number of age classes to consider.
+#' @param Tmax integer. Total number of years to simulate for.
+#' @param Jmax integer. Total number of sites/transects to simulate for.
+#' @param avg_Gsize numeric. Average group size. 
+#' @param Mu.S numeric. Average annual survival probability.
+#' @param sigmaT.S numeric. Standard deviation of random year effects on survival.
+#' @param sigmaJ.S numeric. Standard deviation of random site effects on survival. Default = 0.
+#' @param Mu.R numeric. Average number of recruits/adult. 
+#' @param sigmaT.R numeric. Standard deviation of random year effects on reproduction. 
+#' @param sigmaJ.R numeric. Standard deviation of random site effects on reproduction. Default = 0.
+#' @param Mu.dd numeric. Average detection decline rate.
+#' @param sigmaT.dd numeric. Standard deviation of random year effects on detection.
+#' @param sigmaJ.dd numeric. Standard deviation of random site effects on detection. 
+#' @param W numeric. Truncation distance.
+#' @param min.Tlength numeric. Minimum transect length.
+#' @param max.Tlength numeric. Maximum transect length.
+#' @param nind.avg.RT integer. Average number of individuals fitted with transmitters
+#' every season.
+#' @param Tmin.RT integer. Index of the first year for which to simulate telemetry
+#' data.  
+#' @param Tmax.RT integer. Index of the last year for which to simulate telemetry 
+#' data.
+#' @param seed integer. Seed for data simulation. 
+#' @param stochasticSim logical. If TRUE (default), population dynamics are
+#' simulated including demographic stochasticitiy. If FALSE, deterministic 
+#' dynamics are simulated instead. 
+#' @param plotPopSim logical. If TRUE, plots simulated site-specific population size
+#' over time. Default = FALSE. 
+#' @param save logical. If TRUE (default), saves dataset as "SimData_Full.rds". 
+#'
+#' @return a list containing all data necessary for running the model, as well
+#' as all simulation parameters and true quantitites. 
+#' @export
+#'
+#' @examples
+
 assembleSimData <- function(Amax, Tmax, Jmax,
                             avg_Gsize, 
                             Mu.S, sigmaT.S, sigmaJ.S = 0,
@@ -61,7 +99,7 @@ assembleSimData <- function(Amax, Tmax, Jmax,
   
   ## Simulate known-fate telemetry data
   RT.data <- simulateData_RT(nind.avg.RT, 
-                             Tmin.RT, Tmax.RT, Tmax, 
+                             Tmin.RT, Tmax.RT, 
                              SurvProbs = VR.list$S[1,])
   
   

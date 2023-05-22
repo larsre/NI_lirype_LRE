@@ -1,4 +1,19 @@
-## Function for simulating group aggregation of population
+#' Simulate group aggregation of a population
+#'
+#' @param Jmax integer. Total number of sites to simulate for. 
+#' @param Tmax integer. Total number of years to simulate for.
+#' @param N.age array of simulated population sizes with dimension [j,a,t], 
+#' where j = site, a = age class, t = year.
+#' @param avg_Gsize numeric. Average group size. 
+#' @param discard0 logical. If TRUE, removes 0 groups (units that were not 
+#' asssigned any individuals). 
+#'
+#' @return
+#' @export a dataframe containing information on composition of simulated groups
+#' within each year and site. 
+#'
+#' @examples
+
 simulateGroups <- function(Jmax, Tmax, N.age, avg_Gsize, discard0 = TRUE){
   
   # Set up group data frame and matrix

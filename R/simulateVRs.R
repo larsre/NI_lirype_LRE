@@ -1,4 +1,20 @@
-## Function to simulate year- and site-specific vital rates
+#' Simulate year- and site-specific vital rates
+#'
+#' @param Tmax integer. The total number of years to simulate for.
+#' @param Jmax integer. The total number of sites/transects to simulate for.
+#' @param Mu.S numeric. Average annual survival probability. 
+#' @param Mu.R numeric. Average number of recruits/adult. 
+#' @param sigmaT.S numeric. Standard deviation of random year effects on survival.
+#' @param sigmaT.R numeric. Standard deviation of random year effects on reproduction. 
+#' @param sigmaJ.S numeric. Standard deviation of random site effects on survival.
+#' @param sigmaJ.R numeric. Standard deviation of random site effects on reproduction.
+#'
+#' @return A list containing year- and size-specific survival probabilities ("S")
+#' and reproductive rates ("R").
+#' @export 
+#'
+#' @examples
+
 simulateVRs <- function(Tmax, Jmax,
                         Mu.S, Mu.R, 
                         sigmaT.S, sigmaT.R, 

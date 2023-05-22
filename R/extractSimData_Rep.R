@@ -1,4 +1,17 @@
-## Function to extract reproductive data from distance sampling data
+#' Extract reproduction data from simulated distance sampling data
+#'
+#' @param Jmax integer. The total number of sites/transects surveyed. 
+#' @param Tmax integer. The total number of years with distance sampling surveys.
+#' @param DS.count array containing counts of adult and juvenile birds from 
+#' simulated distance sampling surveys. Dimensions: 1 = age class (1 = juveniles,
+#' 2 = adults), 2 = site/transect, 3 = year. 
+#'
+#' @return a list containing data on juveniles per adult from distance sampling
+#' surveys.
+#' @export
+#'
+#' @examples
+
 extractSimData_Rep <- function(Jmax, Tmax, DS.count){
   
   # Extract necessary data from DS counts

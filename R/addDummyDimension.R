@@ -1,3 +1,13 @@
+#' Add dummy dimensions to conform with dimensionality requirements of multi-area model
+#'
+#' @param x a vector, matrix, or 3-dimensional array that is lacking a dummy 
+#' area dimension.
+#'
+#' @return
+#' @export a matrix, 3- or 4-dimensional array constituting `x` with the added
+#' dummy dimension. 
+#'
+#' @examples
 
 addDummyDimension <- function(x){
   

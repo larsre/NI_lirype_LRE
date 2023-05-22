@@ -1,4 +1,21 @@
-## Function for simulating temporal population dynamics in each site
+#' Simulate site-specific population dynamics over time
+#'
+#' @param Amax integer. Number of age classes to consider.
+#' @param Tmax integer. Number of years for which to simulate dynamics.
+#' @param Jmax integer. Number of sites for which to simulate dynamics.
+#' @param VR.list list of site- and time-dependent survival and reproductive rates. 
+#' @param stochastic logical. If TRUE (default), population dynamics are
+#' simulated including demographic stochasticitiy. If FALSE, deterministic 
+#' dynamics are simulated instead. 
+#' @param plot logical. If TRUE, plots simulated site-specific population size
+#' over time. Default = FALSE. 
+#'
+#' @return a list containing an array of simulated population sizes N[j,a,t], 
+#' where j = site, a = age class, t = year. 
+#' @export
+#'
+#' @examples
+
 simulatePopDyn <- function(Amax, Tmax, Jmax, VR.list, stochastic = TRUE, plot = FALSE){
   
   # Prepare arrays for storing population projections
