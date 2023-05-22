@@ -69,6 +69,9 @@ rypeIDSM <- nimbleCode({
   h.Mu.R  ~ dunif(0, 15)
   h.sigma.R ~ dunif(0, 5)
   
+  h.Mu.betaR.R ~ dunif(-5, 5)
+  h.sigma.betaR.R ~ dunif(0, 5)
+  
   sigmaT.R ~ dunif(0, 5)
   
   for (t in 1:N_years){
@@ -76,13 +79,22 @@ rypeIDSM <- nimbleCode({
   }
   #TODO: Implement spatial correlation in temporal RE (epsT.R[x, t])
   
+
   for(x in 1:N_areas){
     
     Mu.R[x]  ~ dlnorm(meanlog = log(h.Mu.R), sdlog = h.sigma.R)
     
+    if(fitRodentCov){
+      betaR.R[x] ~ dnorm(mean = h.Mu.betaR.R, sd = h.sigma.betaR.R)
+    }
+    
     ## Constraints;
-    R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + epsT.R[1:N_years])
-    #R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + epsT.R[x, 1:N_years])
+    if(fitRodentCov){
+      R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + betaR.R[x]*RodentOcc[x, 1:N_years] + epsT.R[1:N_years])
+    }else{
+      R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + epsT.R[1:N_years])
+      #R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + epsT.R[x, 1:N_years])
+    }
     
     ## Likelihood;
     for (i in 1:N_sumR_obs[x]){
@@ -204,5 +216,13 @@ rypeIDSM <- nimbleCode({
       #D[x, t] <- N_tot_exp[x, t] / A[x, t]       ## Deriving density as N/A     
     }
   }
-
+  
+  ####################################################
+  ## Rodent covariate imputation model
+  for(x in 1:N_areas){
+    for (t in 1:N_years){
+      RodentOcc[x, t] ~ dunif(0, 1)
+    }
+  }
+  
 })

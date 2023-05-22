@@ -31,10 +31,13 @@ R_parent_drop0 <- TRUE
 sumR.Level <- "line" # Summing at the line level
 
 # Random effects shared across areas
-shareRE <- TRUE
+shareRE <- FALSE
 
 # Time variation in survival
-survVarT <- FALSE
+survVarT <- TRUE
+
+# Rodent covariate on reproduction
+fitRodentCov <- TRUE
 
 # DOWNLOAD/FETCH DATA #
 #---------------------#
@@ -76,6 +79,17 @@ LT_data <- wrangleData_LineTrans(DwC_archive_list = Rype_arkiv,
 d_cmr <- wrangleData_CMR(minYear = minYear)
 
 
+# WRANGLE RODENT DATA #
+#---------------------#
+
+## Load and reformat rodent data
+d_rodent <- wrangleData_Rodent(duplTransects = duplTransects,
+                               #localities = localities,
+                               areas = areas,
+                               areaAggregation = TRUE,
+                               minYear = minYear, maxYear = maxYear)
+
+
 # PREPARE INPUT DATA FOR INTEGRATED MODEL #
 #-----------------------------------------#
 
@@ -83,6 +97,7 @@ d_cmr <- wrangleData_CMR(minYear = minYear)
 input_data <- prepareInputData(d_trans = LT_data$d_trans, 
                                d_obs = LT_data$d_obs,
                                d_cmr = d_cmr,
+                               d_rodent = d_rodent,
                                #localities = localities, 
                                areas = areas,
                                areaAggregation = TRUE,
@@ -105,9 +120,9 @@ input_data <- prepareInputData(d_trans = LT_data$d_trans,
 #                           testRun = FALSE, initVals.seed = 0)
   
 # Updated version (nimbleDistance::dHN)
-model_setup <- setupModel(modelCode.path = "NIMBLE Code/RypeIDSM_multiArea_dHN.R",
+model_setup <- setupModel(modelCode.path = "NIMBLE Code/RypeIDSM_multiArea_dHN_sepRE_survT.R",
                           customDist = TRUE,
-                          shareRE = shareRE, survVarT = survVarT,
+                          shareRE = shareRE, survVarT = survVarT, fitRodentCov = fitRodentCov,
                           nim.data = input_data$nim.data,
                           nim.constants = input_data$nim.constants,
                           testRun = TRUE, nchains = 3,

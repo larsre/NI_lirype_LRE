@@ -1,6 +1,7 @@
 #' Plot MCMC traces and posterior densities to pdf
 #'
 #' @param mcmc.out an mcmc list containing posterior samples from a model run.
+#' @param fitRodentCov logical. If TRUE, rodent covariate on reproduction is included.
 #' @param VitalRates logical. If TRUE (default), plots traces and posterior densities for vital rate parameters.
 #' @param DetectParams logical. If TRUE (default), plots traces and posterior densities for detection parameters.
 #' @param PopSizes logical. If TRUE (default), plots traces and posterior densities for population sizes.
@@ -11,12 +12,15 @@
 #'
 #' @examples
 #' 
-plotMCMCTraces <- function(mcmc.out, VitalRates = TRUE, DetectParams = TRUE, PopSizes = TRUE, Densities = TRUE){
+plotMCMCTraces <- function(mcmc.out, fitRodentCov, VitalRates = TRUE, DetectParams = TRUE, PopSizes = TRUE, Densities = TRUE){
   
   ## Make parameter lists
   mVR_params <- c("Mu.R", "h.Mu.R", "h.sigma.R", "sigmaT.R",
                   "Mu.D1", "sigma.D", "ratio.JA1",
                   "Mu.S", "Mu.S1", "h.Mu.S", "h.sigma.S")
+  if(fitRodentCov){
+    mVR_params <- c(mVR_params, "betaR.R", "h.Mu.betaR.R", "h.sigma.betaR.R")
+  }
   
   tVR_params <- c("R_year", "S")
   
