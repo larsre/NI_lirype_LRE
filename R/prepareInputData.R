@@ -57,7 +57,7 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, d_rodent, localities = NULL,
   
   ## If desired: remove all transects on which willow ptarmigans were never encountered
   if(excl_neverObs){
-    d_trans2 <- d_trans %>%
+    d_trans <- d_trans %>%
       dplyr::filter(locationID %in% d_obs$locationID)
   }
 

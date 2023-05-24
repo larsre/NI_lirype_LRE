@@ -5,6 +5,8 @@
 #' nimbleDistance package.  
 #' @param nim.data list of input objects representing data
 #' @param nim.constants list of input objects representing constants
+#' @param R_perF logical. If TRUE, treats recruitment rate as juvenile per adult female.
+#' If FALSE, treats recruitment rate as juvenile per adult (sum of both sexes).
 #' @param shareRE logical. If TRUE, temporal random effects are shared across locations.
 #' @param survVarT logical. If TRUE, survival is simulated including annual variation.
 #' @param fitRodentCov logical. If TRUE, rodent covariate on reproduction is included.
@@ -24,7 +26,7 @@
 
 setupModel <- function(modelCode.path, customDist,
                        nim.data, nim.constants,
-                       shareRE, survVarT, fitRodentCov,
+                       R_perF, shareRE, survVarT, fitRodentCov,
                        niter = 100000, nthin = 20, nburn = 40000, nchains = 3,
                        testRun = FALSE, initVals.seed){
 
@@ -68,6 +70,7 @@ setupModel <- function(modelCode.path, customDist,
   for(c in 1:nchains){
     initVals[[c]] <- simulateInits(nim.data = nim.data, 
                                    nim.constants = nim.constants, 
+                                   R_perF = R_perF,
                                    shareRE = shareRE, 
                                    survVarT = survVarT,
                                    fitRodentCov = fitRodentCov)

@@ -196,7 +196,12 @@ rypeIDSM <- nimbleCode({
         
         ## Process model
         Density[x, 2, j, t] <- sum(Density[x, 1:N_ageC, j, t-1])*S[x, t-1] # Adults
-        Density[x, 1, j, t] <- Density[x, 2, j, t]*R_year[x, t]/2 # Juveniles
+        
+        if(R_perF){
+          Density[x, 1, j, t] <- (Density[x, 2, j, t]/2)*R_year[x, t] # Juveniles 
+        }else{
+          Density[x, 1, j, t] <- Density[x, 2, j, t]*R_year[x, t] # Juveniles
+        }
         
         N_exp[x, 1:N_ageC, j, t] <- Density[x, 1:N_ageC, j, t]*L[x, j, t]*W*2
         

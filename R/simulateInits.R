@@ -2,6 +2,8 @@
 #'
 #' @param nim.data list of input objects representing data
 #' @param nim.constants list of input objects representing constants
+#' @param R_perF logical. If TRUE, treats recruitment rate as juvenile per adult female.
+#' If FALSE, treats recruitment rate as juvenile per adult (sum of both sexes).
 #' @param shareRE logical. If TRUE, temporal random effects are shared across locations.
 #' @param survVarT logical. If TRUE, survival is simulated including annual variation.
 #' @param fitRodentCov logical. If TRUE, initial values are generated for rodent 
@@ -12,7 +14,7 @@
 #'
 #' @examples
 
-simulateInits <- function(nim.data, nim.constants, shareRE, survVarT, fitRodentCov){
+simulateInits <- function(nim.data, nim.constants, R_perF, shareRE, survVarT, fitRodentCov){
   
   # Limits and constants #
   #----------------------#
@@ -191,7 +193,12 @@ simulateInits <- function(nim.data, nim.constants, shareRE, survVarT, fitRodentC
       for(t in 2:N_years){
         
         Density[x, 2, j, t] <- sum(Density[x, 1:N_ageC, j, t-1])*S[x, t-1] # Adults
-        Density[x, 1, j, t] <- Density[x, 2, j, t]*R_year[x, t]/2 # Juveniles
+        
+        if(R_perF){
+          Density[x, 1, j, t] <- (Density[x, 2, j, t]/2)*R_year[x, t] # Juveniles 
+        }else{
+          Density[x, 1, j, t] <- Density[x, 2, j, t]*R_year[x, t] # Juveniles
+        }
         
         N_exp[x, 1:N_ageC, j, t] <- Density[x, 1:N_ageC, j, t]*L[x, j, t]*W*2
       }
