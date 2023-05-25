@@ -120,6 +120,7 @@ if(resimulate){
                                 nind.avg.RT = nind.avg.RT, 
                                 Tmin.RT = Tmin.RT, Tmax.RT = Tmax.RT,
                                 seed = mySeed, 
+                                R_perF = R_perF,
                                 stochasticSim = TRUE,
                                 plotPopSim = TRUE,
                                 save = TRUE)

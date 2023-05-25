@@ -4,6 +4,8 @@
 #' @param Tmax integer. Number of years for which to simulate dynamics.
 #' @param Jmax integer. Number of sites for which to simulate dynamics.
 #' @param VR.list list of site- and time-dependent survival and reproductive rates. 
+#' @param R_perF logical. If TRUE, treats recruitment rate as juvenile per adult female.
+#' If FALSE, treats recruitment rate as juvenile per adult (sum of both sexes).
 #' @param stochastic logical. If TRUE (default), population dynamics are
 #' simulated including demographic stochasticitiy. If FALSE, deterministic 
 #' dynamics are simulated instead. 
@@ -16,7 +18,7 @@
 #'
 #' @examples
 
-simulatePopDyn <- function(Amax, Tmax, Jmax, VR.list, stochastic = TRUE, plot = FALSE){
+simulatePopDyn <- function(Amax, Tmax, Jmax, VR.list, R_perF, stochastic = TRUE, plot = FALSE){
   
   # Prepare arrays for storing population projections
   N <- array(NA, dim = c(Jmax, Amax, Tmax))
@@ -25,7 +27,12 @@ simulatePopDyn <- function(Amax, Tmax, Jmax, VR.list, stochastic = TRUE, plot = 
   # Initialize population projection
   for(j in 1:Jmax){
     N[j,2,1] <- round(runif(1, N1_juv_limits[1], N1_juv_limits[2])) # Number of adults
-    N[j,1,1] <- rpois(1, N[j,2,1]*VR.list$R[1]) # Number of juveniles
+
+    if(R_perF){
+      N[j,1,1] <- rpois(1, lambda = (N[j,2,1]/2)*(VR.list$R[j,1])) # Number of juveniles
+    }else{
+      N[j,1,1] <- rpois(1, lambda = N[j,2,1]*(VR.list$R[j,1])) # Number of juveniles
+    }
   }
   
   # Print simulation info
@@ -45,7 +52,11 @@ simulatePopDyn <- function(Amax, Tmax, Jmax, VR.list, stochastic = TRUE, plot = 
         N[j,2,t+1] <- rbinom(1, size = sum(N[j,1:Amax,t]), prob = VR.list$S[j,t])
         
         # - Reproduction of survivors
-        N[j,1,t+1] <- rpois(1, lambda = N[j,2,t+1]*(VR.list$R[j,t+1]))
+        if(R_perF){
+          N[j,1,t+1] <- rpois(1, lambda = (N[j,2,t+1]/2)*(VR.list$R[j,t+1]))
+        }else{
+          N[j,1,t+1] <- rpois(1, lambda = N[j,2,t+1]*(VR.list$R[j,t+1]))
+        }
         
         # - Young-of-the-year recruiting in the end of summer
         # N[j,1,t+1] <- rbinom(1, size = Chicks[j,t+1], prob = VR.list$sJ[j,t+1])
