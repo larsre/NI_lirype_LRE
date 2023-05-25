@@ -17,17 +17,17 @@ rypeIDSM <- nimbleCode({
   #random year effect for distance sampling model; 
   ## Priors for hyper-parameters
   mu.dd ~ dunif(-10, 100)
-  sigma.dd ~ dunif(0, 20)
+  sigmaT.dd ~ dunif(0, 20)
   
   for(t in 1:N_years){
-    eps.dd[t] ~ dnorm(0, sd = sigma.dd) 
+    epsT.dd[t] ~ dnorm(0, sd = sigmaT.dd) 
   }
   
   
   
   ########################################################
   for(t in 1:N_years){
-    log(sigma[t]) <- mu.dd + eps.dd[t]
+    log(sigma[t]) <- mu.dd + epsT.dd[t]
     sigma2[t] <- sigma[t] * sigma[t]
     
     # effective strip width
@@ -54,14 +54,14 @@ rypeIDSM <- nimbleCode({
   
   ## Priors; 
   for (t in 1:N_years){
-    eps.R[t] ~ dnorm(0, sd = sigma.R)
+    epsT.R[t] ~ dnorm(0, sd = sigmaT.R)
   }
   
-  mu.R  ~ dunif(-5, 5)
-  sigma.R ~ dunif(0, 15)
+  Mu.R  ~ dunif(0, 10)
+  sigmaT.R ~ dunif(0, 5)
   
   ## Constraints;
-  R_year[1:N_years] <- exp(mu.R + eps.R[1:N_years])
+  R_year[1:N_years] <- exp(log(Mu.R) + epsT.R[1:N_years])
   
   ## Likelihood;
   for (i in 1:N_sumR_obs){
@@ -87,7 +87,7 @@ rypeIDSM <- nimbleCode({
     eps.D1[j] ~ dnorm(0, sd = sigma.D)
   }
   
-  mu.D1 ~ dunif(-3, 30)
+  Mu.D1 ~ dunif(0, 10)
   sigma.D ~ dunif(0, 20)
   
   ratio.JA1 ~ dunif(0, 1)
@@ -102,8 +102,8 @@ rypeIDSM <- nimbleCode({
     N_exp[1, j, 1] ~ dpois(Density[1, j, 1]*L[j, 1]*W*2) 
     N_exp[2, j, 1] ~ dpois(Density[2, j, 1]*L[j, 1]*W*2) 
     
-    Density[1, j, 1] <- exp(mu.D1 + eps.D1[j])*ratio.JA1             ## random effects model for spatial variation in density for year 1
-    Density[2, j, 1] <- exp(mu.D1 + eps.D1[j])*(1-ratio.JA1)
+    Density[1, j, 1] <- exp(log(Mu.D1) + eps.D1[j])*ratio.JA1             ## random effects model for spatial variation in density for year 1
+    Density[2, j, 1] <- exp(log(Mu.D1) + eps.D1[j])*(1-ratio.JA1)
     
     ## Detection model year 1
     for(x in 1:N_ageC){
@@ -117,20 +117,20 @@ rypeIDSM <- nimbleCode({
   ## Model for survival; 
   
   ## Priors
+  Mu.S ~ dunif(0, 1)
   Mu.S1 ~ dunif(0.25, 0.9)
-  Mu.S2 ~ dunif(0.25, 0.9)
   
   ## Constraints
-  S1[1:N_years] <- Mu.S1
-  S2[1:N_years] <- Mu.S2
+  S[1:N_years] <- Mu.S
   
-  S[1:N_years] <- S1[1:N_years]*S2[1:N_years]
+  S1[1:N_years] <- Mu.S1
+  S2[1:N_years] <- S[1:N_years]/S1[1:N_years]
   
   ## Data likelihoods
-  for (t in 1:4){
+  for (t in 1:N_years_RT){
     
-    Survs1[t, 2] ~ dbinom(S1[t], Survs1[t, 1])
-    Survs2[t, 2] ~ dbinom(S2[t], Survs2[t, 1])
+    Survs1[t, 2] ~ dbinom(S1[year_Survs[t]], Survs1[t, 1])
+    Survs2[t, 2] ~ dbinom(S2[year_Survs[t]], Survs2[t, 1])
     
   }
   
@@ -146,7 +146,7 @@ rypeIDSM <- nimbleCode({
       Density[2, j, t] <- sum(Density[1:N_ageC, j, t-1])*S[t-1] 
       
       if(R_perF){
-        Density[1, j, t] <- Density[2, j, t]/2*R_year[t] 
+        Density[1, j, t] <- (Density[2, j, t]/2)*R_year[t] 
       }else{
         Density[1, j, t] <- Density[2, j, t]*R_year[t]
       }
@@ -173,7 +173,7 @@ rypeIDSM <- nimbleCode({
   
   for (t in 1:N_years){
     N_tot_exp[t] <- sum(N_exp[1, 1:N_sites, t] + N_exp[2, 1:N_sites, t])    ## Summing up expected number of birds in covered area; 
-    D[t] <- N_tot_exp[t] / A[t]       ## Deriving density as N/A     
+    #D[t] <- N_tot_exp[t] / A[t]       ## Deriving density as N/A     
   }
   
 })

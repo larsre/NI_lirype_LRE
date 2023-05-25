@@ -36,6 +36,7 @@ fitRodentCov <- FALSE
 # Addition of dummy dimension for running multi-area setup
 addDummyDim <- FALSE
 
+
 # SET SIMUALATION PARAMETERS #
 #----------------------------#
 
@@ -138,13 +139,23 @@ input_data <- prepareInputData_Sim(SimData = AllSimData,
 
 # MODEL SETUP #
 #-------------#
-  
-model_setup <- setupModel(modelCode.path = "NIMBLE Code/RypeIDSM_dHN.R",
+
+if(addDummyDim){
+  modelCode.path <- "NIMBLE Code/RypeIDSM_multiArea_dHN.R"
+}else{
+  modelCode.path <- "NIMBLE Code/RypeIDSM_dHN.R"
+}
+
+model_setup <- setupModel(modelCode.path = modelCode.path,
                           customDist = TRUE,
-                          shareRE = shareRE, survVarT = survVarT, fitRodentCov = fitRodentCov,
+                          R_perF = R_perF,
+                          shareRE = shareRE, 
+                          survVarT = survVarT, 
+                          addDummyDim = addDummyDim,
+                          fitRodentCov = fitRodentCov,
                           nim.data = input_data$nim.data,
                           nim.constants = input_data$nim.constants,
-                          testRun = FALSE, nchains = 3,
+                          testRun = TRUE, nchains = 3,
                           initVals.seed = mySeed)
 
 # MODEL (TEST) RUN #
@@ -163,7 +174,11 @@ IDSM.out <- nimbleMCMC(code = model_setup$modelCode,
                        setSeed = 0)
 Sys.time() - t.start
 
-saveRDS(IDSM.out, file = paste0("rypeIDSM_dHN_simData_s", Jmax, "_t", Tmax, ".rds"))
+if(addDummyDim){
+  saveRDS(IDSM.out, file = paste0("rypeIDSM_dHN_multiArea_simData_s", Jmax, "_t", Tmax, ".rds"))
+}else{
+  saveRDS(IDSM.out, file = paste0("rypeIDSM_dHN_simData_s", Jmax, "_t", Tmax, ".rds"))
+}
 
 
 
@@ -174,4 +189,23 @@ plotMCMCTraces(mcmc.out = IDSM.out,
                fitRodentCov = fitRodentCov)
 
 
+
+# MODEL COMPARISON #
+#------------------#
+
+## Multi-area vs. single-area setup
+mcmc.out <- readRDS("rypeIDSM_dHN_multiArea_simData_s50_t15.rds")
+NodeNames <- dimnames(mcmc.out[[1]])[[2]]
+NodeNames_drop <- gsub("[1, ", "[", NodeNames, fixed = TRUE)
+for(i in 1:model_setup$mcmcParams$nchains){
+  dimnames(mcmc.out[[i]])[[2]] <- NodeNames_drop
+}
+saveRDS(mcmc.out, "rypeIDSM_dHN_multiArea_simData_s50_t15_dimDrop.rds")
+
+modelComp <- plotModelComparison(modelPaths = c("rypeIDSM_dHN_multiArea_simData_s50_t15_dimDrop.rds", 
+                                                "rypeIDSM_dHN_simData_s50_t15.rds"), 
+                                 modelChars = c("Multi-area setup", "Single-area setup"), 
+                                 N_sites = input_data$nim.constants$N_sites, N_years = input_data$nim.constants$N_years,
+                                 plotPath = "Plots/ModelComp_MultiVSSingleSetup",
+                                 returnData = FALSE)
 

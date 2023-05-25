@@ -26,7 +26,7 @@
 
 setupModel <- function(modelCode.path, customDist,
                        nim.data, nim.constants,
-                       R_perF, shareRE, survVarT, fitRodentCov,
+                       R_perF, shareRE, survVarT, fitRodentCov, addDummyDim = TRUE,
                        niter = 100000, nthin = 20, nburn = 40000, nchains = 3,
                        testRun = FALSE, initVals.seed){
 
@@ -64,16 +64,33 @@ setupModel <- function(modelCode.path, customDist,
     params <- c(params, "betaR.R", "h.Mu.betaR.R", "h.sigma.betaR.R", "RodentOcc")
   }
   
+  if(nim.constants$N_areas == 1 & !addDummyDim){
+    hyperparam.idx <- which(params %in% c("h.Mu.R", "h.sigma.R", "h.Mu.S", "h.sigma.S", "h.Mu.betaR.R", "h.sigma.betaR.R"))
+    params <- params[-hyperparam.idx]
+  }
+  
   ## Simulate initial values
   set.seed(initVals.seed)
   initVals <- list()
   for(c in 1:nchains){
-    initVals[[c]] <- simulateInits(nim.data = nim.data, 
-                                   nim.constants = nim.constants, 
+    
+    if(nim.constants$N_areas == 1 & !addDummyDim){
+      
+      initVals[[c]] <- simulateInits_singleArea(nim.data = nim.data, 
+                                                nim.constants = nim.constants, 
+                                                R_perF = R_perF,
+                                                survVarT = survVarT,
+                                                fitRodentCov = fitRodentCov)
+    }else{
+      
+      initVals[[c]] <- simulateInits(nim.data = nim.data, 
+                                     nim.constants = nim.constants, 
                                      R_perF = R_perF,
-                                   shareRE = shareRE, 
-                                   survVarT = survVarT,
-                                   fitRodentCov = fitRodentCov)
+                                     shareRE = shareRE, 
+                                     survVarT = survVarT,
+                                     fitRodentCov = fitRodentCov)
+    }
+
   }
   
   ## Adjust MCMC parameters if doing a test run
