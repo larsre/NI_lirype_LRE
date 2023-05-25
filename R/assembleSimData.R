@@ -24,6 +24,11 @@
 #' data.  
 #' @param Tmax.RT integer. Index of the last year for which to simulate telemetry 
 #' data.
+#' @param R_perF logical. If TRUE, treats recruitment rate as juvenile per adult female.
+#' If FALSE, treats recruitment rate as juvenile per adult (sum of both sexes).
+#' @param R_parent_drop0 logical. If TRUE, removes observations of juveniles without adults
+#' from recruitment data. If FALSE, sets 1 as the number of adults/adults females when none
+#' are observed. 
 #' @param seed integer. Seed for data simulation. 
 #' @param stochasticSim logical. If TRUE (default), population dynamics are
 #' simulated including demographic stochasticitiy. If FALSE, deterministic 
@@ -46,6 +51,7 @@ assembleSimData <- function(Amax, Tmax, Jmax,
                             W, min.Tlength, max.Tlength,
                             nind.avg.RT, 
                             Tmin.RT, Tmax.RT,
+                            R_perF, R_parent_drop0,
                             seed = NA, 
                             stochasticSim = TRUE,
                             plotPopSim = FALSE,
@@ -71,6 +77,7 @@ assembleSimData <- function(Amax, Tmax, Jmax,
   ## Simulate population trajectories for all sites
   SimData <- simulatePopDyn(Amax = Amax, Tmax = Tmax, Jmax = Jmax, 
                             VR.list = VR.list, 
+                            R_perF = R_perF,
                             stochastic = stochasticSim, plot = plotPopSim)
   
   
@@ -94,7 +101,9 @@ assembleSimData <- function(Amax, Tmax, Jmax,
   
   ## Extract reproductive data
   Rep.data <- extractSimData_Rep(Jmax = Jmax, Tmax = Tmax, 
-                                 DS.count = DS.data$DS.count)
+                                 DS.count = DS.data$DS.count,
+                                 R_perF = R_perF,
+                                 R_parent_drop0 = R_parent_drop0)
   
   
   ## Simulate known-fate telemetry data

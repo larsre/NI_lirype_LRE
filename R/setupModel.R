@@ -70,7 +70,7 @@ setupModel <- function(modelCode.path, customDist,
   for(c in 1:nchains){
     initVals[[c]] <- simulateInits(nim.data = nim.data, 
                                    nim.constants = nim.constants, 
-                                   R_perF = R_perF,
+                                     R_perF = R_perF,
                                    shareRE = shareRE, 
                                    survVarT = survVarT,
                                    fitRodentCov = fitRodentCov)
