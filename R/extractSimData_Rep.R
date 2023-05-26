@@ -31,7 +31,7 @@ extractSimData_Rep <- function(Jmax, Tmax, DS.count, R_perF, R_parent_drop0){
   sumR_obs_year <- rep(1:Tmax, each = Jmax)
   
   # Discard entries with 0 adults present
-  if(R_parent_drop){
+  if(R_parent_drop0){
     drop.idx <- which(sumAd_obs == 0)
     sumR_obs <- sumR_obs[-drop.idx]
     sumAd_obs <- sumAd_obs[-drop.idx]

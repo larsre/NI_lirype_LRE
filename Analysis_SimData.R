@@ -122,6 +122,7 @@ if(resimulate){
                                 Tmin.RT = Tmin.RT, Tmax.RT = Tmax.RT,
                                 seed = mySeed, 
                                 R_perF = R_perF,
+                                R_parent_drop0 = R_parent_drop0,
                                 stochasticSim = TRUE,
                                 plotPopSim = TRUE,
                                 save = TRUE)
