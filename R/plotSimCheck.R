@@ -1,10 +1,12 @@
-
-
 #' Title
 #'
 #' @param type The type of parameter to compare. Either "demographic", "density" or "detection" 
 #' @param simData List object. Output from data simulation model
 #' @param mcmcData mcmc.list object. output from NIMLBE model run.  
+#' @param VitalRates logical. If TRUE (default), plots traces and posterior densities for vital rate parameters.
+#' @param DetectParams logical. If TRUE (default), plots traces and posterior densities for detection parameters.
+#' @param PopSizes logical. If TRUE (default), plots traces and posterior densities for population sizes.
+#' @param Densities logical. If TRUE (default), plots traces and posterior densities for population densities.
 #' @return Plot comparing posterior distributions with parameters used to simulate data 
 #' @export
 #'
@@ -12,7 +14,7 @@
 
 
 
-plotSimCheck <- function (type = "demographic", simData = d1, mcmcData = d2) {
+plotSimCheck <- function (type = "demographic", simData = d1, mcmcData = d2, VitalRates = TRUE, DetectParams = TRUE, PopSizes = TRUE, Densities = TRUE) {
 
   require(coda)
   require(tidyverse)
@@ -21,8 +23,9 @@ plotSimCheck <- function (type = "demographic", simData = d1, mcmcData = d2) {
   require(see)
   require(cowplot)
   
-################################################################################    
-if(type == "demographic") {
+
+if(VitalRates) {
+  
   ## Prepare tidy data
   R_year <- mcmcData %>% spread_draws(R_year[year])
   Mu_R <- mcmcData %>% spread_draws(mu.R) %>% mutate(lab_code = "mu.R")
@@ -101,8 +104,81 @@ if(type == "demographic") {
   
     }
 
-################################################################################
-  if(type == "density"){
+  if(DetectParams){
+    
+    # mean half normal scale parameter (mu.dd)
+    Mu_dd <- mcmcData %>% spread_draws(mu.dd) %>% mutate(lab_code = "mu.dd")
+    p1 <- ggplot(data = Mu_dd, aes(x = lab_code, y = exp(mu.dd))) +
+      geom_violinhalf(fill = "lightgreen", alpha = 0.7)  +
+      #ylim(0, 4) +
+      geom_point(aes(x = "mu.dd", y = simData$SimParams$Mu.dd ), 
+                 col = "darkblue", size = 3) +
+      theme_cowplot() +
+      theme(panel.grid.major.y = element_line(color = "#8ccde3",
+                                              size = 0.25,
+                                              linetype = 2), 
+            text = element_text(size = 10)) +
+      ylab("HN scale para") +
+      xlab("")
+    
+    ## temporal variation in scale parameter (sigma.dd) - i.e. sd of random var.
+    sigmaT_dd <- mcmcData %>% spread_draws(sigma.dd) %>% mutate(lab_code = "sigma.dd")
+    
+    p2 <- ggplot(data = sigmaT_dd, aes(x = lab_code, y = sigma.dd)) +
+      geom_violinhalf(fill = "lightgreen", alpha = 0.7)  +
+      #ylim(0, 4) +
+      geom_point(aes(x = "sigma.dd", y = simData$SimParams$sigmaT.dd), 
+                 col = "darkblue", size = 3) +
+      theme_cowplot() +
+      theme(panel.grid.major.y = element_line(color = "#8ccde3",
+                                              size = 0.25,
+                                              linetype = 2), 
+            text = element_text(size = 10)) +
+      ylab("sigmaT.dd") +
+      xlab("")
+    
+    ## esw across years
+    esw_year <- mcmcData %>% spread_draws(esw[year])
+    
+    
+    p4 <- ggplot(data = esw_year, aes(x = as.factor(year), y = esw)) +
+      geom_violinhalf(fill = "lightgreen", alpha = 0.7)  +
+      # ylim(0, 160) +
+      theme_cowplot() +
+      theme(panel.grid.major.y = element_line(color = "#8ccde3",
+                                              size = 0.25,
+                                              linetype = 2), 
+            text = element_text(size = 10)) +
+      ylab("Esw") +
+      xlab("Year")
+    
+    ## esw across years
+    p_year <- mcmcData %>% spread_draws(p[year])
+    
+    p5 <- ggplot(data = p_year, aes(x = as.factor(year), y = p)) +
+      geom_violinhalf(fill = "lightgreen", alpha = 0.7)  +
+      # ylim(0, 160) +
+      theme_cowplot() +
+      theme(panel.grid.major.y = element_line(color = "#8ccde3",
+                                              size = 0.25,
+                                              linetype = 2), 
+            text = element_text(size = 10)) +
+      ylab("Detection probability") +
+      xlab("Year")
+    
+    ########################
+    p3 <- plot_grid(p1, p2, nrow = 1)
+    p_out <- plot_grid(p3, p4, p5, nrow=3)
+    
+    
+  } 
+  
+  if(PopSizes){
+    message("Plotting ov SimChecks for population sizes not yet supported.")  
+  }
+  
+  
+  if(Densities){
     
     # Prepare density (for each time step) for simulated data
     N_temp <- apply(simData$N.data, 3, sum) 
@@ -130,74 +206,7 @@ if(type == "demographic") {
 
   }  
 
-if(type == "detection"){
-
-  # mean half normal scale parameter (mu.dd)
-  Mu_dd <- mcmcData %>% spread_draws(mu.dd) %>% mutate(lab_code = "mu.dd")
-  p1 <- ggplot(data = Mu_dd, aes(x = lab_code, y = exp(mu.dd))) +
-    geom_violinhalf(fill = "lightgreen", alpha = 0.7)  +
-    #ylim(0, 4) +
-    geom_point(aes(x = "mu.dd", y = simData$SimParams$Mu.dd ), 
-               col = "darkblue", size = 3) +
-    theme_cowplot() +
-    theme(panel.grid.major.y = element_line(color = "#8ccde3",
-                                            size = 0.25,
-                                            linetype = 2), 
-          text = element_text(size = 10)) +
-    ylab("HN scale para") +
-    xlab("")
-  
-  ## temporal variation in scale parameter (sigma.dd) - i.e. sd of random var.
-  sigmaT_dd <- mcmcData %>% spread_draws(sigma.dd) %>% mutate(lab_code = "sigma.dd")
-  
-  p2 <- ggplot(data = sigmaT_dd, aes(x = lab_code, y = sigma.dd)) +
-    geom_violinhalf(fill = "lightgreen", alpha = 0.7)  +
-    #ylim(0, 4) +
-    geom_point(aes(x = "sigma.dd", y = simData$SimParams$sigmaT.dd), 
-               col = "darkblue", size = 3) +
-    theme_cowplot() +
-    theme(panel.grid.major.y = element_line(color = "#8ccde3",
-                                            size = 0.25,
-                                            linetype = 2), 
-          text = element_text(size = 10)) +
-    ylab("sigmaT.dd") +
-    xlab("")
-  
-  ## esw across years
-  esw_year <- mcmcData %>% spread_draws(esw[year])
-  
-  
-  p4 <- ggplot(data = esw_year, aes(x = as.factor(year), y = esw)) +
-    geom_violinhalf(fill = "lightgreen", alpha = 0.7)  +
-   # ylim(0, 160) +
-    theme_cowplot() +
-    theme(panel.grid.major.y = element_line(color = "#8ccde3",
-                                            size = 0.25,
-                                            linetype = 2), 
-          text = element_text(size = 10)) +
-    ylab("Esw") +
-    xlab("Year")
-  
-  ## esw across years
-  p_year <- mcmcData %>% spread_draws(p[year])
-  
-  p5 <- ggplot(data = p_year, aes(x = as.factor(year), y = p)) +
-    geom_violinhalf(fill = "lightgreen", alpha = 0.7)  +
-    # ylim(0, 160) +
-    theme_cowplot() +
-    theme(panel.grid.major.y = element_line(color = "#8ccde3",
-                                            size = 0.25,
-                                            linetype = 2), 
-          text = element_text(size = 10)) +
-    ylab("Detection probability") +
-    xlab("Year")
-  
-  ########################
-  p3 <- plot_grid(p1, p2, nrow = 1)
-  p_out <- plot_grid(p3, p4, p5, nrow=3)
-  
-  
-}  
+ 
   
   p_out  
 }
