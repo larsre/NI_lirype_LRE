@@ -194,6 +194,8 @@ plotMCMCTraces(mcmc.out = IDSM.out,
 # MODEL CHECKS AGAINST SIMULATION PARAMETERS #
 #--------------------------------------------#
 
+plotSimCheck(SimData = AllSimData,
+             mcmc.out = mcmc.out)
 
 
 # MODEL COMPARISON #
