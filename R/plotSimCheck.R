@@ -197,20 +197,46 @@ plotSimCheck <- function(SimData, mcmc.out, VitalRates = TRUE, DetectParams = TR
   } 
   
   if(PopSizes){
-    message("Plotting ov SimChecks for population sizes not yet supported.") 
-    #TODO: Add code for population sizes
+    
+    ## Extract population sizes from simulated data
+    N_data <- tibble(year = seq(1:SimData$SimParams$Tmax), 
+                     N_tot = apply(SimData$N.data, 3, sum),
+                     N_juv = colSums(SimData$N.data[,1,]),
+                     N_ad = colSums(SimData$N.data[,2,])) 
+    
+    ## Summarize mcmc data - annual population sizes
+    N_tot <- mcmc.out %>% spread_draws(N_tot_exp[year]) 
+    
+    p_out <- ggplot(data = N_tot, aes(x = as.factor(year), y = N_tot_exp)) +
+      geom_violinhalf(fill = "lightgreen", alpha = 0.7)  +
+      geom_point(data = N_data, aes(x = as.factor(year), y = N_tot), 
+                 col = "darkblue", size = 3) +
+      theme_cowplot() +
+      theme(panel.grid.major.y = element_line(color = "#8ccde3", size = 0.25, linetype = 2), 
+            text = element_text(size = 10)) +
+      ylab("Population size") +
+      xlab("Year")
+    p_out
+    
+    ## Plot to pdf
+    pdf("Plots/SimCheck/SimCheck_PopSize.pdf", width = 12, height = 5)
+    suppressWarnings(
+      print(p_out)
+    )
+    dev.off()
+    
+    plot.paths <- c(plot.paths, "SimCheck_PopSize.pdf")
   }
   
   
   if(Densities){
     
-    # Prepare density (for each time step) for simulated data
+    ## Prepare density (for each time step) for simulated data
     N_temp <- apply(SimData$N.data, 3, sum) 
     A_temp <- apply(SimData$DS.data$L, 2, sum) * SimData$SimParams$W*2 / (1000 *1000)
-    D_temp <- tibble(year=seq(1:SimData$SimParams$Tmax), Mean.D = N_temp / A_temp) 
+    D_temp <- tibble(year = seq(1:SimData$SimParams$Tmax), Mean.D = N_temp / A_temp) 
     
-    # Summarize mcmc data - annual density. This could (should) be done with 
-    # spread_draws()
+    ## Summarize mcmc data - annual density. This could (should) be done with spread_draws()
     
     Density_year <- mcmc.out %>% spread_draws(N_tot_exp[year]) %>% 
       dplyr::mutate(density = (N_tot_exp/A_temp)) 
