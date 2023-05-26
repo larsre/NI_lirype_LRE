@@ -87,7 +87,7 @@ simulateInits <- function(nim.data, nim.constants, R_perF, shareRE, survVarT, fi
   S2[1:N_years] <- S[nim.constants$SurvAreaIdx, 1:N_years]/S1[1:N_years]
   
   ## Area-specific reproductive parameters
-  h.Mu.R  <- runif(1, 2, 8)
+  h.Mu.R  <- runif(1, 1, 4)
   h.sigma.R <- runif(1, 0, 0.05)
   
   h.Mu.betaR.R <- runif(1, 0, 0.1)

@@ -66,7 +66,7 @@ simulateInits_singleArea <- function(nim.data, nim.constants, R_perF, survVarT, 
   S2 <- S/S1
   
   ## Area-specific reproductive parameters
-  Mu.R <- runif(1, 2, 8)
+  Mu.R <- runif(1, 1, 4)
   
   if(fitRodentCov){
     betaR.R <- runif(1, 0, 0.1)
