@@ -89,7 +89,6 @@ plotSimCheck <- function(SimData, mcmc.out, VitalRates = TRUE, DetectParams = TR
             text = element_text(size = 10)) +
       ylab("Year RE SD") +
       xlab("")
-    p3
     
     ## Plot annual recruitment rates (R_year)
     Na_temp <- apply(SimData$N.data, c(2,3), sum) 
@@ -117,7 +116,9 @@ plotSimCheck <- function(SimData, mcmc.out, VitalRates = TRUE, DetectParams = TR
     
     ## Plot to pdf
     pdf("Plots/SimCheck/SimCheck_VRs.pdf", width = 12, height = 7.5)
-    print(p_out)
+    suppressWarnings(
+      print(p_out)
+    )
     dev.off()
     
     plot.paths <- c(plot.paths, "SimCheck_VRs.pdf")
@@ -189,7 +190,9 @@ plotSimCheck <- function(SimData, mcmc.out, VitalRates = TRUE, DetectParams = TR
     
     ## Plot to pdf
     pdf("Plots/SimCheck/SimCheck_Detects.pdf", width = 10, height = 7.5)
-    print(p_out)
+    suppressWarnings(
+      print(p_out)
+    )
     dev.off()
     
     plot.paths <- c(plot.paths, "SimCheck_Detects.pdf")
@@ -254,7 +257,9 @@ plotSimCheck <- function(SimData, mcmc.out, VitalRates = TRUE, DetectParams = TR
     
     ## Plot to pdf
     pdf("Plots/SimCheck/SimCheck_Density.pdf", width = 12, height = 5)
-    print(p_out)
+    suppressWarnings(
+      print(p_out)
+    )
     dev.off()
     
     plot.paths <- c(plot.paths, "SimCheck_Density.pdf")
