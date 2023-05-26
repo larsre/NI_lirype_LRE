@@ -194,8 +194,12 @@ plotMCMCTraces(mcmc.out = IDSM.out,
 # MODEL CHECKS AGAINST SIMULATION PARAMETERS #
 #--------------------------------------------#
 
-plotSimCheck(SimData = AllSimData,
-             mcmc.out = mcmc.out)
+if(!addDummyDim){
+  plotSimCheck(SimData = AllSimData,
+               mcmc.out = IDSM.out)
+}else{
+  stop("Function plotSimCheck() is not currently adapted for running for the multi-area setup (dummy dimension not supported)")
+}
 
 
 # MODEL COMPARISON #
