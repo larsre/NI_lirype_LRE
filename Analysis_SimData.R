@@ -157,7 +157,7 @@ model_setup <- setupModel(modelCode.path = modelCode.path,
                           nim.data = input_data$nim.data,
                           nim.constants = input_data$nim.constants,
                           niter = 500000, nthin = 5, nburn = 300000, nchains = 4,
-                          testRun = FALSE, nchains = 3,
+                          testRun = FALSE,
                           initVals.seed = mySeed)
 
 # MODEL (TEST) RUN #
