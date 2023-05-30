@@ -24,17 +24,22 @@ R_perF <- FALSE
 # Drop observations of juveniles with no adults present
 R_parent_drop0 <- TRUE
 
-# Random effects shared across areas
-shareRE <- TRUE
-
 # Time variation in survival
-survVarT <- FALSE
+survVarT <- TRUE
 
 # Rodent covariate on reproduction
 fitRodentCov <- FALSE
 
 # Addition of dummy dimension for running multi-area setup
 addDummyDim <- FALSE
+
+# Random effects shared across areas
+if(survVarT & addDummyDim){
+  shareRE <- FALSE
+}else{
+  shareRE <- TRUE
+}
+
 
 
 # SET SIMUALATION PARAMETERS #
@@ -55,12 +60,17 @@ Jmax <- 50 # Number of sites/transect lines
 
 ## Annual survival
 Mu.S <- 0.35 # Average annual survival probability
-sigmaT.S <- 0 # SD of random year variation in survival
+if(survVarT){
+  sigmaT.S <- 0.8 # SD of random year variation in survival
+}else{
+  sigmaT.S <- 0 # SD of random year variation in survival
+}
+
 sigmaJ.S <- 0 # SD of random site variation in survival
 
 ## Reproduction
 Mu.R <- 2 # Average number of chicks in August
-sigmaT.R <- 0.5 # SD of random year variation in number of chicks
+sigmaT.R <- 0.4 # SD of random year variation in number of chicks
 sigmaJ.R <- 0 # SD of random site variation in number of chicks
 
 ## Juvenile summer survival
@@ -142,9 +152,9 @@ input_data <- prepareInputData_Sim(SimData = AllSimData,
 #-------------#
 
 if(addDummyDim){
-  modelCode.path <- "NIMBLE Code/RypeIDSM_multiArea_dHN.R"
+  modelCode.path <- ifelse(survVarT, "NIMBLE Code/RypeIDSM_multiArea_dHN_sepRE_survT.R", "NIMBLE Code/RypeIDSM_multiArea_dHN.R")
 }else{
-  modelCode.path <- "NIMBLE Code/RypeIDSM_dHN.R"
+  modelCode.path <- ifelse(survVarT, "NIMBLE Code/RypeIDSM_dHN_survT.R", "NIMBLE Code/RypeIDSM_dHN.R")
 }
 
 model_setup <- setupModel(modelCode.path = modelCode.path,
@@ -157,7 +167,7 @@ model_setup <- setupModel(modelCode.path = modelCode.path,
                           nim.data = input_data$nim.data,
                           nim.constants = input_data$nim.constants,
                           niter = 500000, nthin = 5, nburn = 300000, nchains = 4,
-                          testRun = FALSE,
+                          testRun = TRUE,
                           initVals.seed = mySeed)
 
 # MODEL (TEST) RUN #
@@ -176,11 +186,20 @@ IDSM.out <- nimbleMCMC(code = model_setup$modelCode,
                        setSeed = 0)
 Sys.time() - t.start
 
-if(addDummyDim){
-  saveRDS(IDSM.out, file = paste0("rypeIDSM_dHN_multiArea_simData_s", Jmax, "_t", Tmax, ".rds"))
+if(survVarT){
+  if(addDummyDim){
+    saveRDS(IDSM.out, file = paste0("rypeIDSM_dHN_multiArea_survT_simData_s", Jmax, "_t", Tmax, ".rds"))
+  }else{
+    saveRDS(IDSM.out, file = paste0("rypeIDSM_dHN_survT_simData_s", Jmax, "_t", Tmax, ".rds"))
+  }
 }else{
-  saveRDS(IDSM.out, file = paste0("rypeIDSM_dHN_simData_s", Jmax, "_t", Tmax, ".rds"))
+  if(addDummyDim){
+    saveRDS(IDSM.out, file = paste0("rypeIDSM_dHN_multiArea_simData_s", Jmax, "_t", Tmax, ".rds"))
+  }else{
+    saveRDS(IDSM.out, file = paste0("rypeIDSM_dHN_simData_s", Jmax, "_t", Tmax, ".rds"))
+  }
 }
+
 
 
 
