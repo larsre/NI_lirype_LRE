@@ -120,11 +120,18 @@ rypeIDSM <- nimbleCode({
   Mu.S ~ dunif(0, 1)
   Mu.S1 ~ dunif(0.25, 0.9)
   
-  ## Constraints
-  S[1:N_years] <- Mu.S
+  sigmaT.S ~ dunif(0, 5)
+  epsT.S1.prop ~ dunif(0, 1) # Proportion of random year effect that will be allocated to season 1
   
-  S1[1:N_years] <- Mu.S1
+  ## Constraints
+  logit(S[1:N_years]) <- logit(Mu.S) + epsT.S[1:N_years]
+  
+  S1[1:N_years] <- logit(Mu.S1) + epsT.S1.prop*epsT.S[1:N_years]
   S2[1:N_years] <- S[1:N_years]/S1[1:N_years]
+  
+  for(t in 1:N_years){
+    epsT.S[t] ~ dnorm(0, sd = sigmaT.S) # Temporal RE
+  }
   
   ## Data likelihoods
   for (t in 1:N_years_RT){

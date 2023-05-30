@@ -31,7 +31,7 @@ survVarT <- TRUE
 fitRodentCov <- FALSE
 
 # Addition of dummy dimension for running multi-area setup
-addDummyDim <- TRUE
+addDummyDim <- FALSE
 
 # Random effects shared across areas
 if(survVarT & addDummyDim){
@@ -154,7 +154,7 @@ input_data <- prepareInputData_Sim(SimData = AllSimData,
 if(addDummyDim){
   modelCode.path <- ifelse(survVarT, "NIMBLE Code/RypeIDSM_multiArea_dHN_sepRE_survT.R", "NIMBLE Code/RypeIDSM_multiArea_dHN.R")
 }else{
-  modelCode.path <- "NIMBLE Code/RypeIDSM_dHN.R"
+  modelCode.path <- ifelse(survVarT, "NIMBLE Code/RypeIDSM_dHN_survT.R", "NIMBLE Code/RypeIDSM_dHN.R")
 }
 
 model_setup <- setupModel(modelCode.path = modelCode.path,
@@ -186,11 +186,20 @@ IDSM.out <- nimbleMCMC(code = model_setup$modelCode,
                        setSeed = 0)
 Sys.time() - t.start
 
-if(addDummyDim){
-  saveRDS(IDSM.out, file = paste0("rypeIDSM_dHN_multiArea_simData_s", Jmax, "_t", Tmax, ".rds"))
+if(survVarT){
+  if(addDummyDim){
+    saveRDS(IDSM.out, file = paste0("rypeIDSM_dHN_multiArea_survT_simData_s", Jmax, "_t", Tmax, ".rds"))
+  }else{
+    saveRDS(IDSM.out, file = paste0("rypeIDSM_dHN_survT_simData_s", Jmax, "_t", Tmax, ".rds"))
+  }
 }else{
-  saveRDS(IDSM.out, file = paste0("rypeIDSM_dHN_simData_s", Jmax, "_t", Tmax, ".rds"))
+  if(addDummyDim){
+    saveRDS(IDSM.out, file = paste0("rypeIDSM_dHN_multiArea_simData_s", Jmax, "_t", Tmax, ".rds"))
+  }else{
+    saveRDS(IDSM.out, file = paste0("rypeIDSM_dHN_simData_s", Jmax, "_t", Tmax, ".rds"))
+  }
 }
+
 
 
 
