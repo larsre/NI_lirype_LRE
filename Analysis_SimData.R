@@ -156,7 +156,8 @@ model_setup <- setupModel(modelCode.path = modelCode.path,
                           fitRodentCov = fitRodentCov,
                           nim.data = input_data$nim.data,
                           nim.constants = input_data$nim.constants,
-                          testRun = TRUE, nchains = 3,
+                          niter = 500000, nthin = 5, nburn = 300000, nchains = 4,
+                          testRun = FALSE, nchains = 3,
                           initVals.seed = mySeed)
 
 # MODEL (TEST) RUN #
