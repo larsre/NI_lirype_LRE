@@ -2,6 +2,8 @@
 #'
 #' @param nim.data list of input objects representing data
 #' @param nim.constants list of input objects representing constants
+#' @param R_perF logical. If TRUE, treats recruitment rate as juvenile per adult female.
+#' If FALSE, treats recruitment rate as juvenile per adult (sum of both sexes).
 #' @param shareRE logical. If TRUE, temporal random effects are shared across locations.
 #' @param survVarT logical. If TRUE, survival is simulated including annual variation.
 #' @param fitRodentCov logical. If TRUE, initial values are generated for rodent 
@@ -12,7 +14,7 @@
 #'
 #' @examples
 
-simulateInits <- function(nim.data, nim.constants, shareRE, survVarT, fitRodentCov){
+simulateInits <- function(nim.data, nim.constants, R_perF, shareRE, survVarT, fitRodentCov){
   
   # Limits and constants #
   #----------------------#
@@ -36,7 +38,12 @@ simulateInits <- function(nim.data, nim.constants, shareRE, survVarT, fitRodentC
   # Missing covariate values #
   #--------------------------#
   
-  RodentOcc <- nim.data$RodentOcc
+  if(!is.null(nim.data$RodentOcc)){
+    RodentOcc <- nim.data$RodentOcc
+  }else{
+    RodentOcc <- matrix(0, nrow = N_areas, ncol = N_years)
+  }
+  
   if(NA %in% RodentOcc){
     RodentOcc[which(is.na(RodentOcc))] <- runif(length(which(is.na(RodentOcc))), 0, 1)
   }
@@ -80,7 +87,7 @@ simulateInits <- function(nim.data, nim.constants, shareRE, survVarT, fitRodentC
   S2[1:N_years] <- S[nim.constants$SurvAreaIdx, 1:N_years]/S1[1:N_years]
   
   ## Area-specific reproductive parameters
-  h.Mu.R  <- runif(1, 2, 8)
+  h.Mu.R  <- runif(1, 1, 4)
   h.sigma.R <- runif(1, 0, 0.05)
   
   h.Mu.betaR.R <- runif(1, 0, 0.1)
@@ -103,14 +110,14 @@ simulateInits <- function(nim.data, nim.constants, shareRE, survVarT, fitRodentC
     #epsT.R <- rnorm(N_year, 0, sigmaT.R)
     
     for(x in 1:N_areas){
-      R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + betaR.R[x]*RodentOcc[1:N_years] + epsT.R[1:N_years])
+      R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + betaR.R[x]*RodentOcc[x, 1:N_years] + epsT.R[1:N_years])
     }
   }else{
     epsT.R <- matrix(0, nrow = N_areas, ncol = N_years)
     #epsT.R <- matrix(rnorm(N_areas*N_years, 0, sigmaT.R), nrow = N_areas, ncol = N_years)
     
     for(x in 1:N_areas){
-      R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + betaR.R[x]*RodentOcc[1:N_years] + epsT.R[x, 1:N_years])
+      R_year[x, 1:N_years] <- exp(log(Mu.R[x]) + betaR.R[x]*RodentOcc[x, 1:N_years] + epsT.R[x, 1:N_years])
     }
   }
 
@@ -186,7 +193,12 @@ simulateInits <- function(nim.data, nim.constants, shareRE, survVarT, fitRodentC
       for(t in 2:N_years){
         
         Density[x, 2, j, t] <- sum(Density[x, 1:N_ageC, j, t-1])*S[x, t-1] # Adults
-        Density[x, 1, j, t] <- Density[x, 2, j, t]*R_year[x, t]/2 # Juveniles
+        
+        if(R_perF){
+          Density[x, 1, j, t] <- (Density[x, 2, j, t]/2)*R_year[x, t] # Juveniles 
+        }else{
+          Density[x, 1, j, t] <- Density[x, 2, j, t]*R_year[x, t] # Juveniles
+        }
         
         N_exp[x, 1:N_ageC, j, t] <- Density[x, 1:N_ageC, j, t]*L[x, j, t]*W*2
       }
@@ -214,6 +226,7 @@ simulateInits <- function(nim.data, nim.constants, shareRE, survVarT, fitRodentC
     ratio.JA1 = ratio.JA1,
     
     Mu.R = Mu.R,
+    h.Mu.betaR.R = h.Mu.betaR.R, h.sigma.betaR.R = h.sigma.betaR.R,
     h.Mu.R = h.Mu.R, h.sigma.R = h.sigma.R,
     sigmaT.R = sigmaT.R,
     epsT.R = epsT.R, 

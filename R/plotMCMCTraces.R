@@ -7,7 +7,7 @@
 #' @param PopSizes logical. If TRUE (default), plots traces and posterior densities for population sizes.
 #' @param Densities logical. If TRUE (default), plots traces and posterior densities for population densities.
 #'
-#' @return
+#' @return a vector of pdf plot names. The plots can be found in Plots/MCMCTraces.
 #' @export
 #'
 #' @examples

@@ -57,7 +57,7 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, d_rodent, localities = NULL,
   
   ## If desired: remove all transects on which willow ptarmigans were never encountered
   if(excl_neverObs){
-    d_trans2 <- d_trans %>%
+    d_trans <- d_trans %>%
       dplyr::filter(locationID %in% d_obs$locationID)
   }
 
@@ -344,6 +344,8 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, d_rodent, localities = NULL,
     Survs1 = d_cmr$Survs1, # Season 1 releases & survivors (area 1)
     Survs2 = d_cmr$Survs2, # Season 2 releases & survivors (area 1)
     SurvAreaIdx = SurvAreaIdx,
+    year_Survs = d_cmr$year_Survs, # Years (indices) of telemetry data
+    N_years_RT = length(d_cmr$year_Survs),
     
     RodentOcc = d_rodent,
     
@@ -370,6 +372,7 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, d_rodent, localities = NULL,
                         N_ageC = N_ageC,
                         N_areas = input.data$N_areas, area_names = input.data$area_names,
                         SurvAreaIdx = input.data$SurvAreaIdx,
+                        year_Survs = input.data$year_Survs, N_years_RT = input.data$N_years_RT,
                         sumR_obs_year = input.data$sumR_obs_year, N_sumR_obs = input.data$N_sumR_obs,
                         N_ageC = N_ageC)
   

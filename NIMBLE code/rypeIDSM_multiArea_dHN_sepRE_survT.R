@@ -69,8 +69,10 @@ rypeIDSM <- nimbleCode({
   h.Mu.R  ~ dunif(0, 15)
   h.sigma.R ~ dunif(0, 5)
   
-  h.Mu.betaR.R ~ dunif(-5, 5)
-  h.sigma.betaR.R ~ dunif(0, 5)
+  if(fitRodentCov){
+    h.Mu.betaR.R ~ dunif(-5, 5)
+    h.sigma.betaR.R ~ dunif(0, 5)
+  }
 
   sigmaT.R ~ dunif(0, 5)
   
@@ -176,10 +178,10 @@ rypeIDSM <- nimbleCode({
   S2[1:N_years] <- S[SurvAreaIdx, 1:N_years]/S1[1:N_years]
   
   ## Data likelihoods
-  for (t in 1:5){
+  for (t in 1:N_years_RT){
     
-    Survs1[t, 2] ~ dbinom(S1[t], Survs1[t, 1])
-    Survs2[t, 2] ~ dbinom(S2[t], Survs2[t, 1])
+    Survs1[t, 2] ~ dbinom(S1[year_Survs[t]], Survs1[t, 1])
+    Survs2[t, 2] ~ dbinom(S2[year_Survs[t]], Survs2[t, 1])
     
   }
   
@@ -194,7 +196,12 @@ rypeIDSM <- nimbleCode({
         
         ## Process model
         Density[x, 2, j, t] <- sum(Density[x, 1:N_ageC, j, t-1])*S[x, t-1] # Adults
-        Density[x, 1, j, t] <- Density[x, 2, j, t]*R_year[x, t]/2 # Juveniles
+        
+        if(R_perF){
+          Density[x, 1, j, t] <- (Density[x, 2, j, t]/2)*R_year[x, t] # Juveniles 
+        }else{
+          Density[x, 1, j, t] <- Density[x, 2, j, t]*R_year[x, t] # Juveniles
+        }
         
         N_exp[x, 1:N_ageC, j, t] <- Density[x, 1:N_ageC, j, t]*L[x, j, t]*W*2
         
@@ -224,9 +231,11 @@ rypeIDSM <- nimbleCode({
   
   ####################################################
   ## Rodent covariate imputation model
-  for(x in 1:N_areas){
-    for (t in 1:N_years){
-      RodentOcc[x, t] ~ dunif(0, 1)
+  if(fitRodentCov){
+    for(x in 1:N_areas){
+      for (t in 1:N_years){
+        RodentOcc[x, t] ~ dunif(0, 1)
+      }
     }
   }
   

@@ -20,6 +20,9 @@ sourceDir('R')
 # downloadData <- FALSE
 downloadData <- TRUE
 
+# Aggregation to area level
+areaAggregation <- FALSE
+
 # Recruitment per adult or per adult female
 R_perF <- FALSE
 
@@ -66,9 +69,9 @@ duplTransects <- listDuplTransects()
 ## Extract transect and observational data from DwC archive
 LT_data <- wrangleData_LineTrans(DwC_archive_list = Rype_arkiv, 
                                  duplTransects = duplTransects,
-                                 #localities = localities,
-                                 areas = areas,
-                                 areaAggregation = TRUE,
+                                 localities = localities,
+                                 #areas = areas,
+                                 areaAggregation = areaAggregation,
                                  minYear = minYear, maxYear = maxYear)
 
 
@@ -84,9 +87,9 @@ d_cmr <- wrangleData_CMR(minYear = minYear)
 
 ## Load and reformat rodent data
 d_rodent <- wrangleData_Rodent(duplTransects = duplTransects,
-                               #localities = localities,
-                               areas = areas,
-                               areaAggregation = TRUE,
+                               localities = localities,
+                               #areas = areas,
+                               areaAggregation = areaAggregation,
                                minYear = minYear, maxYear = maxYear)
 
 
@@ -98,9 +101,9 @@ input_data <- prepareInputData(d_trans = LT_data$d_trans,
                                d_obs = LT_data$d_obs,
                                d_cmr = d_cmr,
                                d_rodent = d_rodent,
-                               #localities = localities, 
-                               areas = areas,
-                               areaAggregation = TRUE,
+                               localities = localities, 
+                               #areas = areas,
+                               areaAggregation = areaAggregation,
                                excl_neverObs = TRUE,
                                R_perF = R_perF,
                                R_parent_drop0 = R_parent_drop0,
@@ -133,7 +136,7 @@ model_setup <- setupModel(modelCode.path = "NIMBLE Code/RypeIDSM_multiArea_dHN.R
 
 # MODEL (TEST) RUN #
 #------------------#
-#t.start <- Sys.time()
+t.start <- Sys.time()
 IDSM.out <- nimbleMCMC(code = model_setup$modelCode,
                        data = input_data$nim.data, 
                        constants = input_data$nim.constants,
@@ -145,7 +148,7 @@ IDSM.out <- nimbleMCMC(code = model_setup$modelCode,
                        thin = model_setup$mcmcParams$nthin, 
                        samplesAsCodaMCMC = TRUE, 
                        setSeed = 0)
-#Sys.time() - t.start
+Sys.time() - t.start
 
 saveRDS(IDSM.out, file = 'rypeIDSM_dHN_multiArea_realData_Lierne.rds')
 
@@ -153,7 +156,7 @@ saveRDS(IDSM.out, file = 'rypeIDSM_dHN_multiArea_realData_Lierne.rds')
 # TIDY UP POSTERIOR SAMPLES #
 #---------------------------#
 
-IDSM.out.tidy <- tidySamples(IDSM.out = IDSM.out, save = TRUE)
+IDSM.out.tidy <- tidySamples(IDSM.out = IDSM.out, save = FALSE)
 
 
 # OPTIONAL: MCMC TRACE PLOTS #
@@ -174,26 +177,6 @@ plotTimeSeries(mcmc.out = IDSM.out.tidy,
                max_years = input_data$nim.constant$max_years, 
                minYear = minYear, maxYear = maxYear,
                VitalRates = TRUE, DetectParams = TRUE, Densities = TRUE)
-
-
-# OPTIONAL: MAP PLOTS #
-#---------------------#
-
-## Make map of Norwegian municipalities ("fylke")
-NorwayMunic.map <- setupMap_NorwayMunic(shp.path = "data/Kommuner_2018_WGS84/Kommuner_2018_WGS84.shp",
-                                        d_trans = LT_data$d_trans,
-                                        areas = areas, areaAggregation = TRUE)
-
-## Plot population growth rate, density, and vital rates on map
-plotMaps(mcmc.out = IDSM.out.tidy, 
-         mapNM = NorwayMunic.map,
-         N_areas = input_data$nim.constant$N_areas, 
-         area_names = input_data$nim.constant$area_names, 
-         N_sites = input_data$nim.constant$N_sites, 
-         min_years = input_data$nim.constant$min_years, 
-         max_years = input_data$nim.constant$max_years, 
-         minYear = minYear, maxYear = maxYear,
-         fitRodentCov = fitRodentCov)
 
 
 # OPTIONAL: MODEL COMPARISON (PLOTS) #

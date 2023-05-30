@@ -45,8 +45,8 @@ plotModelComparison <- function(modelPaths, modelChars, N_sites, N_years, plotPa
   ## Plot overlapping posterior densities for different parameter groups
   
   # "Main" parameters
-  mains <- c('mu.D1', 'sigma.D', 'mu.R', 'sigma.R',
-             'Mu.S1', 'Mu.S2', 'ratio.JA1')
+  mains <- c('mu.D1', 'sigma.D', 'Mu.R', 'sigmaT.R',
+             'Mu.S1', 'Mu.S', 'ratio.JA1')
   
   pdf(paste0(plotPath, '/ModelComp_Mains.pdf'), width = 8, height = 5)
   print(
@@ -89,18 +89,18 @@ plotModelComparison <- function(modelPaths, modelChars, N_sites, N_years, plotPa
   dev.off()
   
   # Annual density (total)
-  D <- paste0('D[', 1:N_years, ']') 
-  
-  pdf(paste0(plotPath, '/ModelComp_D.pdf'), width = 8, height = 5)
-  print(
-    ggplot(subset(data.all, Parameter %in% D)) + 
-      geom_density(aes(x = Value, color = Model, fill = Model), alpha = 0.5) + 
-      facet_wrap(~Parameter, scales = 'free') +
-      scale_fill_viridis(discrete = T) + 
-      scale_color_viridis(discrete = T) + 
-      theme_bw() + theme(panel.grid = element_blank())
-  )
-  dev.off()
+  # D <- paste0('D[', 1:N_years, ']') 
+  # 
+  # pdf(paste0(plotPath, '/ModelComp_D.pdf'), width = 8, height = 5)
+  # print(
+  #   ggplot(subset(data.all, Parameter %in% D)) + 
+  #     geom_density(aes(x = Value, color = Model, fill = Model), alpha = 0.5) + 
+  #     facet_wrap(~Parameter, scales = 'free') +
+  #     scale_fill_viridis(discrete = T) + 
+  #     scale_color_viridis(discrete = T) + 
+  #     theme_bw() + theme(panel.grid = element_blank())
+  # )
+  # dev.off()
   
   # Site- and age-specific population sizes
   pdf(paste0(plotPath, '/ModelComp_N_a_exp.pdf'), width = 8, height = 5)

@@ -12,7 +12,7 @@
 #' @param DetectParams logical. If TRUE (default), plots time series of detection parameters.
 #' @param Densities logical. If TRUE (default), plots time series of average population densities.
 #'
-#' @return
+#' @return a vector of pdf plot names. The plots can be found in Plots/TimeSeries.
 #' @export
 #'
 #' @examples
@@ -93,11 +93,11 @@ plotTimeSeries <- function(mcmc.out,
 
   ## Make plots and print to pdf
   plot.paths <- c()
+  ifelse(!dir.exists("Plots/TimeSeries"), dir.create("Plots/TimeSeries"), FALSE) ## Check if folder exists, if not create folder
   
   # Reproductive rates
   if(VitalRates){
     
-    ifelse(!dir.exists("Plots/TimeSeries"), dir.create("Plots/TimeSeries"), FALSE) ## Check if folder exists, if not create folder
     pdf("Plots/TimeSeries/TimeSeries_rRep.pdf", width = 8, height = 5)
     for(i in 1:N_areas){
       
