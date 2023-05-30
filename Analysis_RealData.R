@@ -112,15 +112,12 @@ input_data <- prepareInputData(d_trans = LT_data$d_trans,
 # MODEL SETUP #
 #-------------#
 
-# Original version (zeroes-trick)
-# model_setup <- setupModel(modelCode.path = "NIMBLE Code/RypeIDSM.R",
-#                           customDist = FALSE,
-#                           nim.data = input_data$nim.data,
-#                           nim.constants = input_data$nim.constants,
-#                           testRun = FALSE, initVals.seed = 0)
-  
-# Updated version (nimbleDistance::dHN)
-model_setup <- setupModel(modelCode.path = "NIMBLE Code/RypeIDSM_multiArea_dHN.R",
+## Determine correct code path
+code.path <- selectCodePath(shareRE = shareRE,
+                            survVarT = survVarT)
+
+## Setup for model using nimbleDistance::dHN
+model_setup <- setupModel(modelCode.path = code.path,
                           customDist = TRUE,
                           R_perF = R_perF,
                           shareRE = shareRE, 

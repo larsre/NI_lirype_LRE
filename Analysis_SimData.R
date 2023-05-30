@@ -151,12 +151,12 @@ input_data <- prepareInputData_Sim(SimData = AllSimData,
 # MODEL SETUP #
 #-------------#
 
-if(addDummyDim){
-  modelCode.path <- ifelse(survVarT, "NIMBLE Code/RypeIDSM_multiArea_dHN_sepRE_survT.R", "NIMBLE Code/RypeIDSM_multiArea_dHN.R")
-}else{
-  modelCode.path <- ifelse(survVarT, "NIMBLE Code/RypeIDSM_dHN_survT.R", "NIMBLE Code/RypeIDSM_dHN.R")
-}
+## Determine correct code path
+modelCode.path <- selectCodePath(shareRE = shareRE,
+                                 survVarT = survVarT,
+                                 addDummyDim = addDummyDim)
 
+## Set up model
 model_setup <- setupModel(modelCode.path = modelCode.path,
                           customDist = TRUE,
                           R_perF = R_perF,

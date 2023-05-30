@@ -106,6 +106,12 @@ list(
   ),
   
   tar_target(
+    modelCode.path,
+    selectCodePath(shareRE = shareRE,
+                   survVarT = survVarT)
+  ),
+  
+  tar_target(
     model_setup,
     setupModel(modelCode.path = "NIMBLE code/rypeIDSM_multiArea_dHN_sepRE_survT.R",
                customDist = TRUE,
