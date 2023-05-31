@@ -180,13 +180,18 @@ plotTimeSeries(mcmc.out = IDSM.out.tidy,
                showDataWindow = FALSE)
 
 
-# OPTIONAL: MODEL COMPARISON (PLOTS) #
-#------------------------------------#
+# OPTIONAL: PLOT COVARIATE PREDICTIONS #
+#--------------------------------------#
 
-# modelComp <- plotModelComparison(modelPaths = c("rypeIDSM_realData_Lierne.rds", 
-#                                                 "rypeIDSM_dHN_realData_Lierne.rds"), 
-#                                  modelChars = c("Zeroes trick", "dHN"), 
-#                                  N_sites = 58, N_years = 6,
-#                                  plotPath = "Plots/ModelCompTest",
-#                                  returnData = FALSE)
+if(fitRodentCov){
+  plotCovPrediction(mcmc.out = IDSM.out.tidy,
+                    effectParam = "betaR.R",
+                    covName = "Rodent occupancy",
+                    minCov = 0, 
+                    maxCov = 1,
+                    N_areas = input_data$nim.constant$N_areas, 
+                    area_names = input_data$nim.constant$area_names)
+}
+
+
 
