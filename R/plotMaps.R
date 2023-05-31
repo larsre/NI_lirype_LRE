@@ -238,7 +238,7 @@ plotMaps <- function(mcmc.out, mapNM,
     pdf("Plots/AreaMaps/betaR_Map.pdf", width = 5, height = 6)
     
     print(
-      tm_shape(mapNM.betaR) + tm_polygons("Median", palette = "plasma", style = "cont", colorNA = "grey80")
+      tm_shape(mapNM.betaR) + tm_polygons("Median", palette = colorspace::divergingx_hcl(10, palette = "Zissou1"), style = "cont", colorNA = "grey80")
     )
     
     print(
