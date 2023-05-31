@@ -40,7 +40,7 @@ shareRE <- TRUE
 survVarT <- FALSE
 
 # Rodent covariate on reproduction
-fitRodentCov <- FALSE
+fitRodentCov <- TRUE
 
 # DOWNLOAD/FETCH DATA #
 #---------------------#
@@ -131,7 +131,7 @@ model_setup <- setupModel(modelCode.path = "NIMBLE Code/RypeIDSM_multiArea_dHN.R
                           fitRodentCov = fitRodentCov,
                           nim.data = input_data$nim.data,
                           nim.constants = input_data$nim.constants,
-                          testRun = TRUE, nchains = 3,
+                          testRun = TRUE, nchains = 4,
                           initVals.seed = 0)
 
 # MODEL (TEST) RUN #
@@ -176,7 +176,8 @@ plotTimeSeries(mcmc.out = IDSM.out.tidy,
                min_years = input_data$nim.constant$min_years, 
                max_years = input_data$nim.constant$max_years, 
                minYear = minYear, maxYear = maxYear,
-               VitalRates = TRUE, DetectParams = TRUE, Densities = TRUE)
+               VitalRates = TRUE, DetectParams = TRUE, Densities = TRUE,
+               showDataWindow = FALSE)
 
 
 # OPTIONAL: MODEL COMPARISON (PLOTS) #
