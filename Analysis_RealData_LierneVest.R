@@ -156,7 +156,7 @@ saveRDS(IDSM.out, file = 'rypeIDSM_dHN_multiArea_realData_Lierne.rds')
 # TIDY UP POSTERIOR SAMPLES #
 #---------------------------#
 
-IDSM.out.tidy <- tidySamples(IDSM.out = IDSM.out, save = FALSE)
+IDSM.out.tidy <- tidySamples(IDSM.out = IDSM.out, save = TRUE)
 
 
 # OPTIONAL: MCMC TRACE PLOTS #
@@ -178,6 +178,19 @@ plotTimeSeries(mcmc.out = IDSM.out.tidy,
                minYear = minYear, maxYear = maxYear,
                VitalRates = TRUE, DetectParams = TRUE, Densities = TRUE,
                showDataWindow = FALSE)
+
+
+# OPTIONAL: PLOT VITAL RATE POSTERIORS #
+#--------------------------------------#
+
+plotPosteriorDens_VR(mcmc.out = IDSM.out.tidy,
+                     N_areas = input_data$nim.constant$N_areas, 
+                     area_names = input_data$nim.constant$area_names, 
+                     N_years = input_data$nim.constant$N_years,
+                     minYear = minYear,
+                     survAreaIdx = input_data$nim.constants$SurvAreaIdx,
+                     survVarT = survVarT,
+                     fitRodentCov = fitRodentCov) 
 
 
 # OPTIONAL: PLOT COVARIATE PREDICTIONS #
