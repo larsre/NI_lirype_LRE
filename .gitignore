@@ -1,6 +1,7 @@
 # Folders
 .Rproj.user/
-data/
+data/Kommuner_2018_WGS84
+*.zip
 
 # History files
 .Rhistory
