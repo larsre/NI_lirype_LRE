@@ -39,7 +39,7 @@ plotPosteriorDens_VR <- function(mcmc.out, N_areas, area_names, N_years, minYear
   
   ## Reduce posterior samples to relevant parameters only
   for(n in 1:length(mcmc.out)){
-    mcmc.out[[n]] <- as.mcmc(mcmc.out[[n]][,which(colnames(mcmc.out[[n]]) %in% c(relParams, relParams_t))])
+    mcmc.out[[n]] <- coda::as.mcmc(mcmc.out[[n]][,which(colnames(mcmc.out[[n]]) %in% c(relParams, relParams_t))])
   }
 
   ## Reformat samples
@@ -78,17 +78,19 @@ plotPosteriorDens_VR <- function(mcmc.out, N_areas, area_names, N_years, minYear
     if(i == survAreaIdx){
       p_Mu.SX[[i]] <- ggplot(subset(out.data, Parameter %in% c("Mu.S1", "Mu.S2"))) + 
         geom_density(aes(x = Value, colour = Season, fill = Season), alpha = 0.5) + 
-        scale_fill_manual(values = mako(5)[c(2,4)]) + 
-        scale_color_manual(values = mako(5)[c(2,4)]) +
+        scale_fill_manual(values = viridis::mako(5)[c(2,4)]) + 
+        scale_color_manual(values = viridis::mako(5)[c(2,4)]) +
         xlab("") + ylab("Density") + 
         ggtitle("Average seasonal survival") + 
         theme_classic() + 
         theme(legend.position = "top", legend.title = element_blank())
+    }else{
+      p_Mu.SX[[i]] <- NA
     }
 
     # Average annual survival
     p_Mu.S[[i]] <- ggplot(subset(out.data, Parameter == paste0("Mu.S[", i, "]"))) + 
-      geom_density(aes(x = Value), colour = mako(5)[3], fill = mako(5)[3], alpha = 0.5) + 
+      geom_density(aes(x = Value), colour = viridis::mako(5)[3], fill = viridis::mako(5)[3], alpha = 0.5) + 
       xlab("") + ylab("Density") + 
       ggtitle("Average annual survival") + 
       theme_classic()
@@ -104,8 +106,8 @@ plotPosteriorDens_VR <- function(mcmc.out, N_areas, area_names, N_years, minYear
     if(survVarT){
       p_S[[i]] <- ggplot(subset(out.data, AreaIdx == i & VRcat == "Survival" & Season == "Annual")) + 
         geom_density(aes(x = Value, colour = plotYear, fill = plotYear), alpha = 0.5) + 
-        scale_fill_manual(name = "Year", values = c(rev(colorspace::sequential_hcl(N_years, palette = "Peach")), mako(5)[3])) + 
-        scale_color_manual(name = "Year", values = c(rev(colorspace::sequential_hcl(N_years, palette = "Peach")), mako(5)[3])) +
+        scale_fill_manual(name = "Year", values = c(rev(colorspace::sequential_hcl(N_years, palette = "Peach")), viridis::mako(5)[3])) + 
+        scale_color_manual(name = "Year", values = c(rev(colorspace::sequential_hcl(N_years, palette = "Peach")), viridis::mako(5)[3])) +
         xlab("") + ylab("Density") + 
         ggtitle("Survival probability") + 
         theme_classic()
@@ -134,12 +136,22 @@ plotPosteriorDens_VR <- function(mcmc.out, N_areas, area_names, N_years, minYear
       cowplot::draw_label(area_names[[i]], fontface = 'bold', x = 0, hjust = 0) +
       theme(plot.margin = margin(0, 0, 0, 7))
     
-    print(
-      cowplot::plot_grid(
-        title, cowplot::plot_grid(p_Mu.S[[i]], p_Mu.SX[[i]], p_Mu.R[[i]], NULL, labels = c("A)", "B)", "C)", "")),
-        ncol = 1,
-        rel_heights = c(0.1, 1))
-    )
+    if(i == survAreaIdx){
+      print(
+        cowplot::plot_grid(
+          title, cowplot::plot_grid(p_Mu.S[[i]], p_Mu.SX[[i]], p_Mu.R[[i]], NULL, labels = c("A)", "B)", "C)", "")),
+          ncol = 1,
+          rel_heights = c(0.1, 1))
+      )
+    }else{
+      print(
+        cowplot::plot_grid(
+          title, cowplot::plot_grid(p_Mu.S[[i]], NULL, p_Mu.R[[i]], NULL, labels = c("A)", "B)", "C)", "")),
+          ncol = 1,
+          rel_heights = c(0.1, 1))
+      )
+    }
+
   }
   dev.off()
   
@@ -151,7 +163,11 @@ plotPosteriorDens_VR <- function(mcmc.out, N_areas, area_names, N_years, minYear
       cowplot::draw_label(area_names[[i]], fontface = 'bold', x = 0, hjust = 0) +
       theme(plot.margin = margin(0, 0, 0, 7))
     
-    top_row <- cowplot::plot_grid(p_Mu.SX[[i]], p_Mu.S[[i]], labels = c("A)", "B)"), label_size = 12)
+    if(i == survAreaIdx){
+      top_row <- cowplot::plot_grid(p_Mu.SX[[i]], p_Mu.S[[i]], labels = c("A)", "B)"), label_size = 12)
+    }else{
+      top_row <- cowplot::plot_grid(NULL, p_Mu.S[[i]], labels = c("A)", "B)"), label_size = 12)
+    }
     bottom_row <- p_R[[i]] + 
       theme(legend.position = "bottom", legend.direction = "horizontal", legend.title = element_blank()) +
       guides(colour = guide_legend(nrow = 2, byrow = TRUE), fill = guide_legend(nrow = 2, byrow = TRUE))

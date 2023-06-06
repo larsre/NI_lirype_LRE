@@ -173,6 +173,34 @@ plotTimeSeries(mcmc.out = IDSM.out.tidy,
                VitalRates = TRUE, DetectParams = TRUE, Densities = TRUE)
 
 
+# OPTIONAL: PLOT VITAL RATE POSTERIORS #
+#--------------------------------------#
+
+plotPosteriorDens_VR(mcmc.out = IDSM.out.tidy,
+                     N_areas = input_data$nim.constant$N_areas, 
+                     area_names = input_data$nim.constant$area_names, 
+                     N_years = input_data$nim.constant$N_years,
+                     minYear = minYear,
+                     survAreaIdx = input_data$nim.constants$SurvAreaIdx,
+                     survVarT = survVarT,
+                     fitRodentCov = fitRodentCov) 
+
+
+# OPTIONAL: PLOT COVARIATE PREDICTIONS #
+#--------------------------------------#
+
+if(fitRodentCov){
+  plotCovPrediction(mcmc.out = IDSM.out.tidy,
+                    effectParam = "betaR.R",
+                    covName = "Rodent occupancy",
+                    minCov = 0, 
+                    maxCov = 1,
+                    N_areas = input_data$nim.constant$N_areas, 
+                    area_names = input_data$nim.constant$area_names,
+                    fitRodentCov = fitRodentCov)
+}
+
+
 # OPTIONAL: MAP PLOTS #
 #---------------------#
 

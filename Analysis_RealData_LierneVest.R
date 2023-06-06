@@ -203,7 +203,8 @@ if(fitRodentCov){
                     minCov = 0, 
                     maxCov = 1,
                     N_areas = input_data$nim.constant$N_areas, 
-                    area_names = input_data$nim.constant$area_names)
+                    area_names = input_data$nim.constant$area_names,
+                    fitRodentCov = fitRodentCov)
 }
 
 

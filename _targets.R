@@ -115,6 +115,7 @@ list(
     model_setup,
     setupModel(modelCode.path = "NIMBLE code/rypeIDSM_multiArea_dHN_sepRE_survT.R",
                customDist = TRUE,
+               R_perF = R_perF,
                nim.data = input_data$nim.data,
                nim.constants = input_data$nim.constants,
                shareRE = shareRE,
@@ -170,6 +171,30 @@ list(
     setupMap_NorwayMunic(shp.path = "data/Kommuner_2018_WGS84/Kommuner_2018_WGS84.shp",
                         d_trans = LT_data$d_trans,
                         areas = areas, areaAggregation = areaAggregation)
+  ),
+  
+  tar_target(
+    post.densPlots,
+    plotPosteriorDens_VR(mcmc.out = IDSM.out.tidy,
+                         N_areas = input_data$nim.constant$N_areas, 
+                         area_names = input_data$nim.constant$area_names, 
+                         N_years = input_data$nim.constant$N_years,
+                         minYear = minYear,
+                         survAreaIdx = input_data$nim.constants$SurvAreaIdx,
+                         survVarT = survVarT,
+                         fitRodentCov = fitRodentCov) 
+  ),
+  
+  tar_target(
+    cov.predPlots,
+    plotCovPrediction(mcmc.out = IDSM.out.tidy,
+                      effectParam = "betaR.R",
+                      covName = "Rodent occupancy",
+                      minCov = 0, 
+                      maxCov = 1,
+                      N_areas = input_data$nim.constant$N_areas, 
+                      area_names = input_data$nim.constant$area_names,
+                      fitRodentCov = fitRodentCov)
   ),
   
   tar_target(
