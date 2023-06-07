@@ -279,7 +279,7 @@ plotMaps <- function(mcmc.out, mapNM,
   pdf("Plots/AreaMaps/Avg_lambda_Map.pdf", width = 5, height = 6)
   
   print(
-    tm_shape(mapNM.lambda1) + tm_polygons("Median", palette = "plasma", style = "cont", colorNA = "grey80") #+
+    tm_shape(mapNM.lambda1) + tm_polygons("Median", palette = colorspace::divergingx_hcl(10, palette = "PiYG"), midpoint = 1, style = "cont", colorNA = "grey80") #+
     #tm_layout(title = paste0("Average population growth rate (", minYear, "-", maxYear, "), Median"))
   )
   
@@ -289,7 +289,7 @@ plotMaps <- function(mcmc.out, mapNM,
   )
   
   print(
-    tm_shape(mapNM.lambda2) + tm_polygons("Median", palette = "plasma", style = "cont", colorNA = "grey80") #+
+    tm_shape(mapNM.lambda2) + tm_polygons("Median", palette = colorspace::divergingx_hcl(10, palette = "PiYG"), midpoint = 1, style = "cont", colorNA = "grey80") #+
     #tm_layout(title = paste0("Average population growth rate (", minYearIdx_shared + minYear - 1, "-", maxYearIdx_shared + minYear - 1, "), Median"))
   )
   
