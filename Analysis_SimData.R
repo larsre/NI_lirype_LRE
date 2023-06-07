@@ -183,7 +183,7 @@ IDSM.out <- nimbleMCMC(code = model_setup$modelCode,
                        nburnin = model_setup$mcmcParams$nburn, 
                        thin = model_setup$mcmcParams$nthin, 
                        samplesAsCodaMCMC = TRUE, 
-                       setSeed = 0)
+                       setSeed = mySeed)
 Sys.time() - t.start
 
 if(survVarT){
