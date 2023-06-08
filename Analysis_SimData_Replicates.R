@@ -259,6 +259,10 @@ for(i in 1:length(simSeed.list)){
       runSeed = runSeeds[k])
 
     saveRDS(sumPost, file = paste0("simModelFits_sum/IDSMsampleSum_simSeed", simSeed.list[i], "_runSeed", runSeeds[k], ".rds"))
+    
+    ## Remove samples and free up disk space
+    rm(IDSM.out)
+    gc()
   }
   
 }
