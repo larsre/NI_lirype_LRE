@@ -1,12 +1,7 @@
 #' Visualize comparison of model estimates with true parameter values from data simulation
 #'
-#' @param SimData a list containing all data necessary for running the model, as well
-#' as all simulation parameters and true quantitites. Output of assembleSimData().
-#' @param mcmc.out an mcmc list containing posterior samples from a model run. 
-#' @param VitalRates logical. If TRUE (default), plots traces and posterior densities for vital rate parameters.
-#' @param DetectParams logical. If TRUE (default), plots traces and posterior densities for detection parameters.
-#' @param PopSizes logical. If TRUE (default), plots traces and posterior densities for population sizes.
-#' @param Densities logical. If TRUE (default), plots traces and posterior densities for population densities.
+#' @param PlotColors string specifying color palette to use for plots. 
+#' Currently supports "customRainbow" (default), "Temps", and "Zissou1".
 #' @return a vector of pdf plot names. The plots can be found in Plots/TimeSeries.
 #' 
 #' @export 
@@ -14,8 +9,7 @@
 #' @examples
 
 
-
-plotSimCheck <- function(SimData, mcmc.out, VitalRates = TRUE, DetectParams = TRUE, PopSizes = TRUE, Densities = TRUE) {
+plotSimCheck_replicates <- function(plotColors = "customRainbow", VitalRates = TRUE, DetectParams = TRUE, PopSizes = TRUE, Densities = TRUE) {
   
   require(coda)
   require(tidyverse)
@@ -24,247 +18,322 @@ plotSimCheck <- function(SimData, mcmc.out, VitalRates = TRUE, DetectParams = TR
   require(see)
   require(cowplot)
   
+  if(!(plotColors %in% c("customRainbow", "Temps", "Zissou1"))){
+    stop("Invalid plotColors. Currently supported are customRainbow, Temps, and Zissou1.")
+  }
   
-  # Setup #
-  #-------#
+  # Data aggregation #
+  #------------------#
+  
+  ## Load information on simulation and run seeds
+  simSeeds <- readRDS("simData/seedList.rds")
+  runSeeds <- readRDS("simModelFits_sum/seedInfo.rds")
+  
+  ## Set up tibbles to collate simulated data and model posteriors
+  N_simData <- D_simData <-  R_simData <- simParams <- tibble()
+  R_year <- Mu_R <- sigmaT_R <- Mu_S <- tibble()
+  Mu_dd <- sigmaT_dd <- esw_year <- p_year <- tibble()
+  N_tot <- Density_year <- tibble()
+  
+  for(i in 1:length(simSeeds)){
+    
+    ## Read in simulated dataset
+    SimData <- readRDS(paste0("simData/AllSimData_seed", simSeeds[i], ".rds"))
+    
+    ## Extract data on baseline parameters
+    simParams_temp <- tibble(Mu_R = SimData$SimParams$Mu.R,
+                             sigmaT_R = SimData$SimParams$sigmaT.R,
+                             Mu_S = SimData$SimParams$Mu.S,
+                             Mu_S1 = sqrt(SimData$SimParams$Mu.S),
+                             Mu_S2 = sqrt(SimData$SimParams$Mu.S),
+                             Mu_dd = SimData$SimParams$Mu.dd,
+                             sigmaT_dd = SimData$SimParams$sigmaT.dd,
+                             dataSetID = as.factor(i),
+                             simSeed = as.factor(simSeeds[i]))
+    simParams <- rbind(simParams, simParams_temp)
+    
+    ## Extract data on annual recruitment
+    Na_temp <- apply(SimData$N.data, c(2,3), sum) 
+    R_simData_temp <- as_tibble(t(Na_temp)) %>%
+      dplyr::mutate(realizedR = V1 / V2, year = seq(1:SimData$SimParams$Tmax)) %>%
+      dplyr::select(year, realizedR) %>%
+      dplyr::mutate(predictedR = colMeans(SimData$VR.list$R),
+                    dataSetID = as.factor(i),
+                    simSeed = as.factor(simSeeds[i]))
+    R_simData <- rbind(R_simData, R_simData_temp)
+    
+    ## Extract data on population size
+    N_data_temp <- tibble(year = seq(1:SimData$SimParams$Tmax), 
+                          N_tot = apply(SimData$N.data, 3, sum),
+                          N_juv = colSums(SimData$N.data[,1,]),
+                          N_ad = colSums(SimData$N.data[,2,]),
+                          dataSetID = as.factor(i),
+                          simSeed = as.factor(simSeeds[i])) 
+    N_simData <- rbind(N_simData, N_data_temp)
+    
+    ## Extract data on density
+    A_temp <- apply(SimData$DS.data$L, 2, sum) * SimData$SimParams$W*2 / (1000 *1000)
+    D_temp <- tibble(year = seq(1:SimData$SimParams$Tmax), 
+                     Mean.D = N_data_temp$N_tot / A_temp,
+                     dataSetID = as.factor(i),
+                     simSeed = as.factor(simSeeds[i])) 
+    D_simData <- rbind(D_simData, D_temp)
+    
+    for(k in 1:length(runSeeds[[i]])){
+      
+      ## Read in posterior samples
+      postSam <- readRDS(paste0("simModelFits_sum/IDSMsampleSum_simSeed", simSeeds[i], "_runSeed", runSeeds[[i]][k], ".rds"))$sum.post
+      
+      ## List seed information
+      seedInfo <- tibble(dataSetID = as.factor(i),
+                         simSeed = as.factor(simSeeds[i]),
+                         runID = as.factor(k),
+                         runSeed = as.factor(runSeeds[[i]][k]))
+      ## Append data
+      R_year <- rbind(R_year, cbind(postSam$R_year, seedInfo))
+      Mu_R <- rbind(Mu_R, cbind(postSam$Mu_R, seedInfo))
+      sigmaT_R <- rbind(sigmaT_R, cbind(postSam$sigmaT_R, seedInfo))
+      Mu_S <- rbind(Mu_S, cbind(postSam$Mu_S_data, seedInfo))
+      
+      Mu_dd_temp <- postSam$Mu_dd %>%
+        dplyr::mutate(mu.dd = exp(mu.dd),
+                      lab_code = "Mu.dd") %>%
+        dplyr::rename(Mu.dd = mu.dd)
+      
+      Mu_dd <- rbind(Mu_dd, cbind(Mu_dd_temp, seedInfo))
+      sigmaT_dd <- rbind(sigmaT_dd, cbind(postSam$sigmaT_dd, seedInfo))
+      esw_year <- rbind(esw_year, cbind(postSam$esw_year, seedInfo))
+      p_year <- rbind(p_year, cbind(postSam$p_year, seedInfo))
+      
+      N_tot <- rbind(N_tot, cbind(postSam$N_tot, seedInfo))
+      Density_year <- rbind(Density_year, cbind(postSam$Density_year, seedInfo))
+    }
+  }
+  
+  
+  # Set up for plotting #
+  #---------------------#
   
   ## Plotting directory
-  ifelse(!dir.exists("Plots/SimCheck"), dir.create("Plots/SimCheck"), FALSE) ## Check if folder exists, if not create folder
+  ifelse(!dir.exists("Plots/SimCheck_replicates"), dir.create("Plots/SimCheck_replicates"), FALSE) ## Check if folder exists, if not create folder
   
   ## List of plot names (required for targets integration)
   plot.paths <- c()
   
+  ## Custom color palette
+  source("ColorPalettes_Custom.R")
   
-  # Plotting vital rates #
-  #----------------------#
+  ## Set plot colors
+  if(plotColors == "customRainbow"){
+    plot.cols <- custom_palettes("darkRainbow", n = length(simSeeds), type = "continuous")
+  }
+  if(plotColors == "Temps"){
+    plot.cols <- paletteer::paletteer_c("grDevices::Temps", length(simSeeds))
+  }
+  if(plotColors == "Zissou1"){
+    plot.cols <- hcl.colors(length(simSeeds), palette = "Zissou1")
+  }
   
-  if(VitalRates) {
+  # Plotting vital rates (all replicates) #
+  #---------------------------------------#
+  
+  
+  
+  ## Plot average survival probabilities (Mu.S)
+  p1 <- ggplot(data = Mu_S, aes(x = Surv, y = S)) +
+    geom_violinhalf(aes(color = simSeed, linetype = runID), fill = NA, position = "identity")  +
+    geom_point(aes(x = "S", y = simParams$Mu_S[1]), 
+               col = "black", size = 3) +
+    geom_point(aes(x = "S1", y = simParams$Mu_S1[1]), 
+               col = "black", size = 3) + 
+    geom_point(aes(x = "S2", y = simParams$Mu_S2[1]), 
+               col = "black", size = 3) + 
+    scale_color_manual(values = plot.cols) + 
+    scale_linetype_manual(values = rep("solid", nlevels(Mu_S$runID))) + 
+    theme_cowplot() +
+    theme(panel.grid.major.y = element_line(color = "#8ccde3",  linewidth = 0.25, linetype = 2), 
+          text = element_text(size = 10), legend.position = "none") +
+    ylab("Survival probability") +
+    xlab("Survival component")
+  
+  
+  ## Plot average recruitment rate (Mu.R)
+  p2 <- ggplot(data = Mu_R, aes(x = lab_code, y = Mu.R)) +
+    geom_violinhalf(aes(group = runSeed, color = simSeed), fill = NA, position = "identity")  +
+    geom_point(aes(x = "Mu.R", y = simParams$Mu_R[1]), 
+               col = "black", size = 3) +
+    scale_color_manual(values = plot.cols) + 
+    theme_cowplot() +
+    theme(panel.grid.major.y = element_line(color = "#8ccde3", linewidth = 0.25, linetype = 2), 
+          text = element_text(size = 10), legend.position = "none") +
+    ylab("Recruitment rate") +
+    xlab("")
+  
+  ## Plot temporal variation in recruitment rate (sigma.R)
+  p3 <- ggplot(data = sigmaT_R, aes(x = lab_code, y = sigmaT.R)) +
+    geom_violinhalf(aes(group = runSeed, color = simSeed), fill = NA, position = "identity")  +
+    geom_point(aes(x = "sigmaT.R", y = simParams$sigmaT_R[1]), 
+               col = "black", size = 3) +
+    scale_color_manual(values = plot.cols) + 
+    theme_cowplot() +
+    theme(panel.grid.major.y = element_line(color = "#8ccde3", size = 0.25, linetype = 2), 
+          text = element_text(size = 10), legend.position = "none") +
+    ylab("Year RE SD") +
+    xlab("")
+  
+  ## Plot annual recruitment rates (R_year)
+  p4 <- ggplot(data = R_year, aes(x = as.factor(year), y = R_year)) +
+    geom_violinhalf(aes(color = simSeed, linetype = runID), fill = NA, position = "identity")  +
+    geom_point(data = R_simData, aes(x = as.factor(year), y = predictedR, col = simSeed), size = 3) +
+    geom_point(data = R_simData, aes(x = as.factor(year), y = realizedR, col = simSeed), size = 3, alpha = 0.25) +
+    scale_color_manual(values = plot.cols) + 
+    scale_linetype_manual(values = rep("solid", nlevels(Mu_S$runID))) + 
+    theme_cowplot() +
+    theme(panel.grid.major.y = element_line(color = "#8ccde3", size = 0.25, linetype = 2), 
+          text = element_text(size = 10), legend.position = "none") +
+    ylab("R") +
+    xlab("Year")
+  
+  ## Putting the plots together in a multipanel plot
+  p_a <- plot_grid(p1, p2, p3, nrow = 1)
+  p_out <- plot_grid(p_a, p4, nrow = 2, label_size = 10)
+  
+  ## Plot to pdf
+  pdf(paste0("Plots/SimCheck_replicates/SimCheck_VRs_", plotColors, ".pdf"), width = 12, height = 7.5)
+  suppressWarnings(
+    print(p_out)
+  )
+  dev.off()
+  
+
+  
+  
+  # Plotting detection parameters (all replicates) #
+  #------------------------------------------------#
+  
+  
+  
+  ## Mean half normal scale parameter (mu.dd)
+  p1 <- ggplot(data = Mu_dd, aes(x = lab_code, y = Mu.dd)) +
+    geom_violinhalf(aes(group = runSeed, color = simSeed), fill = NA, position = "identity")  +
+    geom_point(aes(x = "Mu.dd", y = simParams$Mu_dd[1]), 
+               col = "black", size = 3) +
+    scale_color_manual(values = plot.cols) + 
+    theme_cowplot() +
+    theme(panel.grid.major.y = element_line(color = "#8ccde3", size = 0.25, linetype = 2), 
+          text = element_text(size = 10), legend.position = "none") +
+    ylab("HN scale parameter") +
+    xlab("")
+  
+  ## Temporal variation in scale parameter (sigmaT.dd) - i.e. sd of random var.
+  p2 <- ggplot(data = sigmaT_dd, aes(x = lab_code, y = sigmaT.dd)) +
+    geom_violinhalf(aes(group = runSeed, color = simSeed), fill = NA, position = "identity")  +
+    geom_point(aes(x = "sigmaT.dd", y = simParams$sigmaT_dd[1]), 
+               col = "black", size = 3) +
+    scale_color_manual(values = plot.cols) + 
+    theme_cowplot() +
+    theme(panel.grid.major.y = element_line(color = "#8ccde3", size = 0.25, linetype = 2), 
+          text = element_text(size = 10), legend.position = "none") +
+    ylab("sigmaT.dd") +
+    xlab("")
+  
+  ## Effective strip width across years
+  p4 <- ggplot(data = esw_year, aes(x = as.factor(year), y = esw)) +
+    geom_violinhalf(aes(color = simSeed, linetype = runID), fill = NA, position = "identity")  +
+    scale_color_manual(values = plot.cols) + 
+    scale_linetype_manual(values = rep("solid", nlevels(Mu_S$runID))) + 
+    theme_cowplot() +
+    theme(panel.grid.major.y = element_line(color = "#8ccde3", size = 0.25, linetype = 2), 
+          text = element_text(size = 10), legend.position = "none") +
+    ylab("Eff. strip width") +
+    xlab("Year")
+  #TODO: Add theoretical true values calculated from simulated data
+  
+  ## Detection probability across years
+  p5 <- ggplot(data = p_year, aes(x = as.factor(year), y = p)) +
+    geom_violinhalf(aes(color = simSeed, linetype = runID), fill = NA, position = "identity")  +
+    scale_color_manual(values = plot.cols) + 
+    scale_linetype_manual(values = rep("solid", nlevels(Mu_S$runID))) + 
+    theme_cowplot() +
+    theme(panel.grid.major.y = element_line(color = "#8ccde3", size = 0.25, linetype = 2), 
+          text = element_text(size = 10), legend.position = "none") +
+    ylab("Detection probability") +
+    xlab("Year")
+  #TODO: Add theoretical true values calculated from simulated data
+  
+  
+  ## Assemble plots
+  p3 <- plot_grid(p1, p2, nrow = 1)
+  p_out <- plot_grid(p3, p4, p5, nrow = 3)
+  
+  ## Plot to pdf
+  pdf(paste0("Plots/SimCheck_replicates/SimCheck_Detects_", plotColors, ".pdf"), width = 10, height = 7.5)
+  suppressWarnings(
+    print(p_out)
+  )
+  dev.off()
+  
+
+  
+  
+  for(i in 1:length(simSeeds)){
     
-    ## Prepare tidy data
-    R_year <- mcmc.out %>% spread_draws(R_year[year])
-    Mu_R <- mcmc.out %>% spread_draws(Mu.R) %>% mutate(lab_code = "Mu.R")
-    sigmaT_R <- mcmc.out %>% spread_draws(sigmaT.R) %>% mutate(lab_code = "sigmaT.R")
+    ## Plot annual population size 
+    N_tot_sub <- subset(N_tot, dataSetID == i)
+    N_simData_sub <- subset(N_simData, dataSetID == i)
     
-    Mu_S1 <- mcmc.out %>% spread_draws(Mu.S1) %>% mutate(Surv = "S1") %>% rename(S = Mu.S1) %>% select(S, Surv)
-    Mu_S <- mcmc.out %>% spread_draws(Mu.S) %>% mutate(Surv = "S") %>% rename(S = Mu.S) %>% select(S, Surv)
-    Mu_S_data <-  tibble(S = Mu_S$S/Mu_S1$S, Surv = "S2") %>% bind_rows(., Mu_S1, Mu_S)
-    
-    ## Plot average survival probabilities (Mu.S)
-    p1 <- ggplot(data = Mu_S_data, aes(x = Surv, y = S)) +
-      geom_violinhalf(fill = "lightgreen", alpha = 0.7)  +
-      ylim(0, 1) +
-      geom_point(aes(x = "S", y = SimData$SimParams$Mu.S), 
-                 col = "darkblue", size = 3) +
-      geom_point(aes(x = "S1", y = sqrt(SimData$SimParams$Mu.S)), 
-                 col = "darkblue", size = 3) + 
-      geom_point(aes(x = "S2", y = sqrt(SimData$SimParams$Mu.S)), 
-                 col = "darkblue", size = 3) + 
-      theme_cowplot() +
-      theme(panel.grid.major.y = element_line(color = "#8ccde3",  size = 0.25, linetype = 2), 
-            text = element_text(size = 10)) +
-      ylab("Survival probability") +
-      xlab("Survival component")
-    
-    
-    ## Plot average recruitment rate (Mu.R)
-    p2 <- ggplot(data = Mu_R, aes(x = lab_code, y = Mu.R)) +
-      geom_violinhalf(fill = "lightgreen", alpha = 0.7)  +
-      ylim(0, 4) +
-      geom_point(aes(x = "Mu.R", y = SimData$SimParams$Mu.R), 
-                 col = "darkblue", size = 3) +
+    pN <- ggplot(data = N_tot_sub, aes(x = as.factor(year), y = N_tot_exp)) +
+      geom_violinhalf(aes(linetype = runID), color = NA, fill = plot.cols[i], alpha = 0.25, position = "identity")  +
+      geom_point(data = N_simData_sub, aes(x = as.factor(year), y = N_tot), color = "black", size = 3) +
+      scale_linetype_manual(values = rep("solid", nlevels(N_tot_sub$runID))) + 
       theme_cowplot() +
       theme(panel.grid.major.y = element_line(color = "#8ccde3", size = 0.25, linetype = 2), 
-            text = element_text(size = 10)) +
-      ylab("Recruitment rate") +
-      xlab("")
+            text = element_text(size = 10), legend.position = "none") +
+      ylab("Population size") +
+      xlab("Year")
     
-    ## Plot temporal variation in recruitment rate (sigma.R)
-    p3 <- ggplot(data = sigmaT_R, aes(x = lab_code, y = sigmaT.R)) +
-      geom_violinhalf(fill = "lightgreen", alpha = 0.7)  +
-      ylim(0, max(sigmaT_R$sigmaT.R)+1) +
-      geom_point(aes(x = "sigmaT.R", y = SimData$SimParams$sigmaT.R), 
-                 col = "darkblue", size = 3) +
+    ## Plot annual population densities 
+    Density_year_sub <- subset(Density_year, dataSetID == i)
+    D_simData_sub <- subset(D_simData, dataSetID == i)
+    
+    pD <- ggplot(data = Density_year_sub , aes(x = as.factor(year), y = density)) +
+      geom_violinhalf(aes(linetype = runID), color = NA, fill = plot.cols[i], alpha = 0.25, position = "identity")  +
+      geom_point(data = D_simData_sub, aes(x = as.factor(year), y = Mean.D), color = "black", size = 3) +
+      scale_linetype_manual(values = rep("solid", nlevels(Density_year_sub$runID))) + 
       theme_cowplot() +
       theme(panel.grid.major.y = element_line(color = "#8ccde3", size = 0.25, linetype = 2), 
-            text = element_text(size = 10)) +
-      ylab("Year RE SD") +
-      xlab("")
+            text = element_text(size = 10), legend.position = "none") +
+      ylab("Average population density") +
+      xlab("Year")
     
-    ## Plot annual recruitment rates (R_year)
-    Na_temp <- apply(SimData$N.data, c(2,3), sum) 
-    R_simData <- as_tibble(t(Na_temp)) %>%
-      dplyr::mutate(realizedR = V1 / V2, year = seq(1:SimData$SimParams$Tmax)) %>%
-      dplyr::select(year, realizedR) %>%
-      dplyr::mutate(predictedR = colMeans(AllSimData$VR.list$R))
+    ## Plot annual recruitment rates 
+    R_year_sub <- subset(R_year, dataSetID == i)
+    R_simData_sub <- subset(R_simData, dataSetID == i)
     
-    p4 <- ggplot(data = R_year, aes(x = as.factor(year), y = R_year)) +
-      geom_violinhalf(fill = "lightgreen", alpha = 0.7)  +
-      ylim(0, 5) +
-      geom_point(data = R_simData, aes(x = as.factor(year), y = predictedR), 
-                 col = "darkblue", size = 3) +
-      geom_point(data = R_simData, aes(x = as.factor(year), y = realizedR), 
-                 col = "purple", size = 3, alpha = 0.5) +
+    
+    pR <- ggplot(data = R_year_sub, aes(x = as.factor(year), y = R_year)) +
+      geom_violinhalf(aes(linetype = runID), color = NA, fill = plot.cols[i], alpha = 0.25, position = "identity")  +
+      geom_point(data = R_simData_sub, aes(x = as.factor(year), y = predictedR), color = "black", size = 3) +
+      geom_point(data = R_simData_sub, aes(x = as.factor(year), y = realizedR), color = "grey20", size = 3, alpha = 0.25) +
+      scale_linetype_manual(values = rep("solid", nlevels(Mu_S$runID))) + 
       theme_cowplot() +
       theme(panel.grid.major.y = element_line(color = "#8ccde3", size = 0.25, linetype = 2), 
-            text = element_text(size = 10)) +
+            text = element_text(size = 10), legend.position = "none") +
       ylab("R") +
       xlab("Year")
     
-    ## Putting the plots together in a multipanel plot
-    p_a <- plot_grid(p1, p2, p3, nrow = 1)
-    p_out <- plot_grid(p_a, p4, nrow = 2, label_size = 10)
-    
-    ## Plot to pdf
-    pdf("Plots/SimCheck/SimCheck_VRs.pdf", width = 12, height = 7.5)
-    suppressWarnings(
-      print(p_out)
-    )
-    dev.off()
-    
-    plot.paths <- c(plot.paths, "SimCheck_VRs.pdf")
-  }
-  
-  
-  # Plotting detection parameters #
-  #-------------------------------#
-  
-  if(DetectParams){
-    
-    ## Mean half normal scale parameter (mu.dd)
-    Mu_dd <- mcmc.out %>% spread_draws(mu.dd) %>% mutate(lab_code = "mu.dd")
-    
-    p1 <- ggplot(data = Mu_dd, aes(x = lab_code, y = exp(mu.dd))) +
-      geom_violinhalf(fill = "lightgreen", alpha = 0.7)  +
-      #ylim(0, 4) +
-      geom_point(aes(x = "mu.dd", y = SimData$SimParams$Mu.dd), 
-                 col = "darkblue", size = 3) +
-      theme_cowplot() +
-      theme(panel.grid.major.y = element_line(color = "#8ccde3", size = 0.25, linetype = 2), 
-            text = element_text(size = 10)) +
-      ylab("HN scale parameter") +
-      xlab("")
-    
-    ## Temporal variation in scale parameter (sigmaT.dd) - i.e. sd of random var.
-    sigmaT_dd <- mcmc.out %>% spread_draws(sigmaT.dd) %>% mutate(lab_code = "sigmaT.dd")
-    
-    p2 <- ggplot(data = sigmaT_dd, aes(x = lab_code, y = sigmaT.dd)) +
-      geom_violinhalf(fill = "lightgreen", alpha = 0.7)  +
-      #ylim(0, 4) +
-      geom_point(aes(x = "sigmaT.dd", y = SimData$SimParams$sigmaT.dd), 
-                 col = "darkblue", size = 3) +
-      theme_cowplot() +
-      theme(panel.grid.major.y = element_line(color = "#8ccde3", size = 0.25, linetype = 2), 
-            text = element_text(size = 10)) +
-      ylab("sigmaT.dd") +
-      xlab("")
-    
-    ## Effective strip width across years
-    esw_year <- mcmc.out %>% spread_draws(esw[year])
-    
-    p4 <- ggplot(data = esw_year, aes(x = as.factor(year), y = esw)) +
-      geom_violinhalf(fill = "lightgreen", alpha = 0.7)  +
-      # ylim(0, 160) +
-      theme_cowplot() +
-      theme(panel.grid.major.y = element_line(color = "#8ccde3", size = 0.25, linetype = 2), 
-            text = element_text(size = 10)) +
-      ylab("Eff. strip width") +
-      xlab("Year")
-    #TODO: Add theoretical true values calculated from simulated data
-    
-    ## Detection probability across years
-    p_year <- mcmc.out %>% spread_draws(p[year])
-    
-    p5 <- ggplot(data = p_year, aes(x = as.factor(year), y = p)) +
-      geom_violinhalf(fill = "lightgreen", alpha = 0.7)  +
-      # ylim(0, 160) +
-      theme_cowplot() +
-      theme(panel.grid.major.y = element_line(color = "#8ccde3", size = 0.25, linetype = 2), 
-            text = element_text(size = 10)) +
-      ylab("Detection probability") +
-      xlab("Year")
-    #TODO: Add theoretical true values calculated from simulated data
-    
+
     ## Assemble plots
-    p3 <- plot_grid(p1, p2, nrow = 1)
-    p_out <- plot_grid(p3, p4, p5, nrow = 3)
+    pAll <- plot_grid(pN, pD, pR, ncol = 1)
     
     ## Plot to pdf
-    pdf("Plots/SimCheck/SimCheck_Detects.pdf", width = 10, height = 7.5)
+    pdf(paste0("Plots/SimCheck_replicates/SimCheck_NDR_simSeed", simSeeds[i], "_", plotColors, ".pdf"), width = 10, height = 10)
     suppressWarnings(
-      print(p_out)
+      print(pAll)
     )
     dev.off()
     
-    plot.paths <- c(plot.paths, "SimCheck_Detects.pdf")
     
-  } 
-  
-  if(PopSizes){
-    
-    ## Extract population sizes from simulated data
-    N_data <- tibble(year = seq(1:SimData$SimParams$Tmax), 
-                     N_tot = apply(SimData$N.data, 3, sum),
-                     N_juv = colSums(SimData$N.data[,1,]),
-                     N_ad = colSums(SimData$N.data[,2,])) 
-    
-    ## Summarize mcmc data - annual population sizes
-    N_tot <- mcmc.out %>% spread_draws(N_tot_exp[year]) 
-    
-    p_out <- ggplot(data = N_tot, aes(x = as.factor(year), y = N_tot_exp)) +
-      geom_violinhalf(fill = "lightgreen", alpha = 0.7)  +
-      geom_point(data = N_data, aes(x = as.factor(year), y = N_tot), 
-                 col = "darkblue", size = 3) +
-      theme_cowplot() +
-      theme(panel.grid.major.y = element_line(color = "#8ccde3", size = 0.25, linetype = 2), 
-            text = element_text(size = 10)) +
-      ylab("Population size") +
-      xlab("Year")
-    p_out
-    
-    ## Plot to pdf
-    pdf("Plots/SimCheck/SimCheck_PopSize.pdf", width = 12, height = 5)
-    suppressWarnings(
-      print(p_out)
-    )
-    dev.off()
-    
-    plot.paths <- c(plot.paths, "SimCheck_PopSize.pdf")
   }
   
-  
-  if(Densities){
-    
-    ## Prepare density (for each time step) for simulated data
-    N_temp <- apply(SimData$N.data, 3, sum) 
-    A_temp <- apply(SimData$DS.data$L, 2, sum) * SimData$SimParams$W*2 / (1000 *1000)
-    D_temp <- tibble(year = seq(1:SimData$SimParams$Tmax), Mean.D = N_temp / A_temp) 
-    
-    ## Summarize mcmc data - annual density. This could (should) be done with spread_draws()
-    
-    Density_year <- mcmc.out %>% spread_draws(N_tot_exp[year]) %>% 
-      dplyr::mutate(density = (N_tot_exp/A_temp)) 
-    
-    p_out <- ggplot(data = Density_year, aes(x = as.factor(year), y = density)) +
-      geom_violinhalf(fill = "lightgreen", alpha = 0.7)  +
-      geom_point(data=D_temp, aes(x = as.factor(year), y = Mean.D), 
-                 col = "darkblue", size = 3) +
-      theme_cowplot() +
-      theme(panel.grid.major.y = element_line(color = "#8ccde3", size = 0.25, linetype = 2), 
-            text = element_text(size = 10)) +
-      ylab("Density") +
-      xlab("Year")
-    p_out
-    
-    ## Plot to pdf
-    pdf("Plots/SimCheck/SimCheck_Density.pdf", width = 12, height = 5)
-    suppressWarnings(
-      print(p_out)
-    )
-    dev.off()
-    
-    plot.paths <- c(plot.paths, "SimCheck_Density.pdf")
-    
-  }  
-  
-  return(plot.paths)
 }

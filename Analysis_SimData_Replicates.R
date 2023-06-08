@@ -168,7 +168,7 @@ if(!dir.exists("simModelFits_sum")){
 }
 
 ## Set number of run replicates
-N_runs <- 2
+N_runs <- 3
 runSeed.list <- list()
 
 for(i in 1:length(simSeed.list)){
@@ -262,3 +262,17 @@ for(i in 1:length(simSeed.list)){
   }
   
 }
+
+## Save complete seed information
+saveRDS(runSeed.list, file = "simModelFits_sum/seedInfo.rds")
+
+
+#*******************************************************************************
+
+# PLOT COMPARISON OF MODEL ESTIMATES AND SIMULATED DATA #
+#-------------------------------------------------------#
+
+plotSimCheck_replicates()
+plotSimCheck_replicates("Temps")
+plotSimCheck_replicates("Zissou1")
+
