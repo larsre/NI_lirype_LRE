@@ -178,6 +178,9 @@ for(i in 1:length(simSeed.list)){
   runSeed.list[[i]] <- runSeeds
   names(runSeed.list)[i] <- paste0("simSeed_", simSeed.list[i])
   
+  ## Load corresponding dataset
+  input_data <- readRDS(paste0("simData/inputData_seed", simSeed.list[i], ".rds"))
+  
   for(k in 1:length(runSeeds)){
     
     ## Set run seed
