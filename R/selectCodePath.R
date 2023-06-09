@@ -14,21 +14,21 @@ selectCodePath <- function(shareRE, survVarT, addDummyDim = TRUE){
   if(addDummyDim){
     
     if(survVarT){
-      code.path <- "NIMBLE Code/RypeIDSM_multiArea_dHN_sepRE_survT.R"
+      code.path <- "NIMBLE code/rypeIDSM_multiArea_dHN_sepRE_survT.R"
     }else{
       if(shareRE){
-        code.path <- "NIMBLE Code/RypeIDSM_multiArea_dHN.R"
+        code.path <- "NIMBLE code/rypeIDSM_multiArea_dHN.R"
       }else{
-        code.path <- "NIMBLE Code/RypeIDSM_multiArea_dHN_sepRE.R"
+        code.path <- "NIMBLE code/rypeIDSM_multiArea_dHN_sepRE.R"
       }
     }
     
   }else{
     
     if(survVarT){
-      code.path <- "NIMBLE Code/RypeIDSM_dHN_survT.R"
+      code.path <- "NIMBLE code/rypeIDSM_dHN_survT.R"
     }else{
-      code.path <- "NIMBLE Code/RypeIDSM_dHN.R"
+      code.path <- "NIMBLE code/rypeIDSM_dHN.R"
     }
   }
   
