@@ -2,14 +2,15 @@
 #'
 #' @param PlotColors string specifying color palette to use for plots. 
 #' Currently supports "customRainbow" (default), "Temps", and "Zissou1".
-#' @return a vector of pdf plot names. The plots can be found in Plots/TimeSeries.
+#' @param thin integer. Thinning rate to use on samples for plotting. 
+#' @return a vector of png plot names. The plots can be found in Plots/TimeSeries.
 #' 
 #' @export 
 #'
 #' @examples
 
 
-plotSimCheck_replicates <- function(plotColors = "customRainbow", VitalRates = TRUE, DetectParams = TRUE, PopSizes = TRUE, Densities = TRUE) {
+plotSimCheck_replicates <- function(plotColors = "customRainbow", thin = 1) {
   
   require(coda)
   require(tidyverse)
@@ -100,24 +101,32 @@ plotSimCheck_replicates <- function(plotColors = "customRainbow", VitalRates = T
                          simSeed = as.factor(simSeeds[i]),
                          runID = as.factor(k),
                          runSeed = as.factor(runSeeds[[i]][k]))
+      
+      ## Set indices for thinning samples
+      N_samples <- nrow(postSam$Mu_R)
+      thin.idx <- seq(1, N_samples, by = thin)
+      
+      N_samples_t <- nrow(postSam$R_year)
+      thin.idx_t <- seq(1, N_samples_t, by = thin)
+      
       ## Append data
-      R_year <- rbind(R_year, cbind(postSam$R_year, seedInfo))
-      Mu_R <- rbind(Mu_R, cbind(postSam$Mu_R, seedInfo))
-      sigmaT_R <- rbind(sigmaT_R, cbind(postSam$sigmaT_R, seedInfo))
-      Mu_S <- rbind(Mu_S, cbind(postSam$Mu_S_data, seedInfo))
+      R_year <- rbind(R_year, cbind(postSam$R_year[thin.idx_t,], seedInfo))
+      Mu_R <- rbind(Mu_R, cbind(postSam$Mu_R[thin.idx,], seedInfo))
+      sigmaT_R <- rbind(sigmaT_R, cbind(postSam$sigmaT_R[thin.idx,], seedInfo))
+      Mu_S <- rbind(Mu_S, cbind(postSam$Mu_S_data[seq(1, nrow(postSam$Mu_S_data), by = thin),], seedInfo))
       
       Mu_dd_temp <- postSam$Mu_dd %>%
         dplyr::mutate(mu.dd = exp(mu.dd),
                       lab_code = "Mu.dd") %>%
         dplyr::rename(Mu.dd = mu.dd)
       
-      Mu_dd <- rbind(Mu_dd, cbind(Mu_dd_temp, seedInfo))
-      sigmaT_dd <- rbind(sigmaT_dd, cbind(postSam$sigmaT_dd, seedInfo))
-      esw_year <- rbind(esw_year, cbind(postSam$esw_year, seedInfo))
-      p_year <- rbind(p_year, cbind(postSam$p_year, seedInfo))
+      Mu_dd <- rbind(Mu_dd, cbind(Mu_dd_temp[thin.idx,], seedInfo))
+      sigmaT_dd <- rbind(sigmaT_dd, cbind(postSam$sigmaT_dd[thin.idx,], seedInfo))
+      esw_year <- rbind(esw_year, cbind(postSam$esw_year[thin.idx_t,], seedInfo))
+      p_year <- rbind(p_year, cbind(postSam$p_year[thin.idx_t,], seedInfo))
       
-      N_tot <- rbind(N_tot, cbind(postSam$N_tot, seedInfo))
-      Density_year <- rbind(Density_year, cbind(postSam$Density_year, seedInfo))
+      N_tot <- rbind(N_tot, cbind(postSam$N_tot[thin.idx_t,], seedInfo))
+      Density_year <- rbind(Density_year, cbind(postSam$Density_year[thin.idx_t,], seedInfo))
     }
   }
   
