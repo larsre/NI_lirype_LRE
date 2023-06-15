@@ -158,17 +158,16 @@ plotSimCheck_replicates <- function(plotColors = "customRainbow", thin = 1) {
   #---------------------------------------#
   
   
-  
   ## Plot average survival probabilities (Mu.S)
   p1 <- ggplot(data = Mu_S, aes(x = Surv, y = S)) +
-    geom_violinhalf(aes(color = simSeed, linetype = runID), fill = NA, position = "identity")  +
+    geom_violinhalf(aes(color = simSeed, linetype = runID), fill = NA, position = "identity", scale = "width")  +
     geom_point(aes(x = "S", y = simParams$Mu_S[1]), 
                col = "black", size = 3) +
     geom_point(aes(x = "S1", y = simParams$Mu_S1[1]), 
                col = "black", size = 3) + 
     geom_point(aes(x = "S2", y = simParams$Mu_S2[1]), 
                col = "black", size = 3) + 
-    scale_color_manual(values = plot.cols) + 
+    scale_color_manual(values = alpha(plot.cols, 0.75)) + 
     scale_linetype_manual(values = rep("solid", nlevels(Mu_S$runID))) + 
     theme_cowplot() +
     theme(panel.grid.major.y = element_line(color = "#8ccde3",  linewidth = 0.25, linetype = 2), 
@@ -179,10 +178,11 @@ plotSimCheck_replicates <- function(plotColors = "customRainbow", thin = 1) {
   
   ## Plot average recruitment rate (Mu.R)
   p2 <- ggplot(data = Mu_R, aes(x = lab_code, y = Mu.R)) +
-    geom_violinhalf(aes(group = runSeed, color = simSeed), fill = NA, position = "identity")  +
+    geom_violinhalf(aes(linetype = runSeed, color = simSeed), fill = NA, position = "identity")  +
     geom_point(aes(x = "Mu.R", y = simParams$Mu_R[1]), 
                col = "black", size = 3) +
-    scale_color_manual(values = plot.cols) + 
+    scale_color_manual(values = alpha(plot.cols, 0.75)) + 
+    scale_linetype_manual(values = rep("solid", nlevels(Mu_R$runSeed))) + 
     theme_cowplot() +
     theme(panel.grid.major.y = element_line(color = "#8ccde3", linewidth = 0.25, linetype = 2), 
           text = element_text(size = 10), legend.position = "none") +
@@ -191,10 +191,11 @@ plotSimCheck_replicates <- function(plotColors = "customRainbow", thin = 1) {
   
   ## Plot temporal variation in recruitment rate (sigma.R)
   p3 <- ggplot(data = sigmaT_R, aes(x = lab_code, y = sigmaT.R)) +
-    geom_violinhalf(aes(group = runSeed, color = simSeed), fill = NA, position = "identity")  +
+    geom_violinhalf(aes(linetype = runSeed, color = simSeed), fill = NA, position = "identity")  +
     geom_point(aes(x = "sigmaT.R", y = simParams$sigmaT_R[1]), 
                col = "black", size = 3) +
-    scale_color_manual(values = plot.cols) + 
+    scale_color_manual(values = alpha(plot.cols, 0.75)) + 
+    scale_linetype_manual(values = rep("solid", nlevels(sigmaT_R$runSeed))) + 
     theme_cowplot() +
     theme(panel.grid.major.y = element_line(color = "#8ccde3", linewidth = 0.25, linetype = 2), 
           text = element_text(size = 10), legend.position = "none") +
@@ -203,11 +204,12 @@ plotSimCheck_replicates <- function(plotColors = "customRainbow", thin = 1) {
   
   ## Plot annual recruitment rates (R_year)
   p4 <- ggplot(data = R_year, aes(x = as.factor(year), y = R_year)) +
-    geom_violinhalf(aes(color = simSeed, linetype = runID), fill = NA, position = "identity")  +
-    geom_point(data = R_simData, aes(x = as.factor(year), y = predictedR, col = simSeed), size = 3) +
-    geom_point(data = R_simData, aes(x = as.factor(year), y = realizedR, col = simSeed), size = 3, alpha = 0.25) +
+    geom_violinhalf(aes(fill = simSeed, linetype = runID), alpha = 1/3, color = NA, position = "identity", scale = "width")  +
+    geom_point(data = R_simData, aes(x = as.factor(year), y = predictedR, fill = simSeed), col = "black", size = 2, shape = 21) +
+    #geom_point(data = R_simData, aes(x = as.factor(year), y = realizedR, fill = simSeed), col = "grey40", size = 2, shape = 23) +
+    scale_fill_manual(values = plot.cols) + 
     scale_color_manual(values = plot.cols) + 
-    scale_linetype_manual(values = rep("solid", nlevels(Mu_S$runID))) + 
+    scale_linetype_manual(values = rep("solid", nlevels(R_year$runID))) + 
     theme_cowplot() +
     theme(panel.grid.major.y = element_line(color = "#8ccde3", linewidth = 0.25, linetype = 2), 
           text = element_text(size = 10), legend.position = "none") +
@@ -238,10 +240,11 @@ plotSimCheck_replicates <- function(plotColors = "customRainbow", thin = 1) {
   
   ## Mean half normal scale parameter (mu.dd)
   p1 <- ggplot(data = Mu_dd, aes(x = lab_code, y = Mu.dd)) +
-    geom_violinhalf(aes(group = runSeed, color = simSeed), fill = NA, position = "identity")  +
+    geom_violinhalf(aes(linetype = runID, color = simSeed), fill = NA, position = "identity")  +
     geom_point(aes(x = "Mu.dd", y = simParams$Mu_dd[1]), 
                col = "black", size = 3) +
-    scale_color_manual(values = plot.cols) + 
+    scale_color_manual(values = alpha(plot.cols, 0.75)) + 
+    scale_linetype_manual(values = rep("solid", nlevels(Mu_dd$runID))) + 
     theme_cowplot() +
     theme(panel.grid.major.y = element_line(color = "#8ccde3", linewidth = 0.25, linetype = 2), 
           text = element_text(size = 10), legend.position = "none") +
@@ -250,10 +253,11 @@ plotSimCheck_replicates <- function(plotColors = "customRainbow", thin = 1) {
   
   ## Temporal variation in scale parameter (sigmaT.dd) - i.e. sd of random var.
   p2 <- ggplot(data = sigmaT_dd, aes(x = lab_code, y = sigmaT.dd)) +
-    geom_violinhalf(aes(group = runSeed, color = simSeed), fill = NA, position = "identity")  +
+    geom_violinhalf(aes(linetype = runID, color = simSeed), fill = NA, position = "identity")  +
     geom_point(aes(x = "sigmaT.dd", y = simParams$sigmaT_dd[1]), 
                col = "black", size = 3) +
-    scale_color_manual(values = plot.cols) + 
+    scale_color_manual(values = alpha(plot.cols, 0.75)) + 
+    scale_linetype_manual(values = rep("solid", nlevels(sigmaT_dd$runID))) + 
     theme_cowplot() +
     theme(panel.grid.major.y = element_line(color = "#8ccde3", linewidth = 0.25, linetype = 2), 
           text = element_text(size = 10), legend.position = "none") +
@@ -262,22 +266,25 @@ plotSimCheck_replicates <- function(plotColors = "customRainbow", thin = 1) {
   
   ## Effective strip width across years
   p4 <- ggplot(data = esw_year, aes(x = as.factor(year), y = esw)) +
-    geom_violinhalf(aes(color = simSeed, linetype = runID), fill = NA, position = "identity")  +
+    geom_violinhalf(aes(fill = simSeed, linetype = runID), alpha = 1/3, color = NA, position = "identity", scale = "width")  +
     scale_color_manual(values = plot.cols) + 
+    scale_fill_manual(values = plot.cols) + 
     scale_linetype_manual(values = rep("solid", nlevels(esw_year$runID))) + 
-    geom_point(data = det_simData, aes(x = as.factor(year), y = esw, col = simSeed), size = 3) +
+    geom_point(data = det_simData, aes(x = as.factor(year), y = esw, fill = simSeed), col = "black", size = 2, shape = 21) +
+    ylim(min(esw_year$esw), 300) + 
     theme_cowplot() +
     theme(panel.grid.major.y = element_line(color = "#8ccde3", linewidth = 0.25, linetype = 2), 
           text = element_text(size = 10), legend.position = "none") +
     ylab("Eff. strip width") +
     xlab("Year")
-
+  
   ## Detection probability across years
   p5 <- ggplot(data = p_year, aes(x = as.factor(year), y = p)) +
-    geom_violinhalf(aes(color = simSeed, linetype = runID), fill = NA, position = "identity")  +
+    geom_violinhalf(aes(fill = simSeed, linetype = runID), alpha = 1/3, color = NA, position = "identity", scale = "width")  +
     scale_color_manual(values = plot.cols) + 
+    scale_fill_manual(values = plot.cols) + 
     scale_linetype_manual(values = rep("solid", nlevels(p_year$runID))) +
-    geom_point(data = det_simData, aes(x = as.factor(year), y = p, col = simSeed), size = 3) +
+    geom_point(data = det_simData, aes(x = as.factor(year), y = p, fill = simSeed), col = "black", size = 2, shape = 21) +
     theme_cowplot() +
     theme(panel.grid.major.y = element_line(color = "#8ccde3", linewidth = 0.25, linetype = 2), 
           text = element_text(size = 10), legend.position = "none") +
@@ -310,8 +317,8 @@ plotSimCheck_replicates <- function(plotColors = "customRainbow", thin = 1) {
     N_simData_sub <- subset(N_simData, dataSetID == i)
     
     pN <- ggplot(data = N_tot_sub, aes(x = as.factor(year), y = N_tot_exp)) +
-      geom_violinhalf(aes(linetype = runID), color = NA, fill = plot.cols[i], alpha = 0.25, position = "identity")  +
-      geom_point(data = N_simData_sub, aes(x = as.factor(year), y = N_tot), color = "black", size = 3) +
+      geom_violinhalf(aes(linetype = runID), color = NA, fill = plot.cols[i], alpha = 0.25, position = "identity", scale = "width")  +
+      geom_point(data = N_simData_sub, aes(x = as.factor(year), y = N_tot), color = "black", size = 2) +
       scale_linetype_manual(values = rep("solid", nlevels(N_tot_sub$runID))) + 
       theme_cowplot() +
       theme(panel.grid.major.y = element_line(color = "#8ccde3", linewidth = 0.25, linetype = 2), 
@@ -324,8 +331,8 @@ plotSimCheck_replicates <- function(plotColors = "customRainbow", thin = 1) {
     D_simData_sub <- subset(D_simData, dataSetID == i)
     
     pD <- ggplot(data = Density_year_sub , aes(x = as.factor(year), y = density)) +
-      geom_violinhalf(aes(linetype = runID), color = NA, fill = plot.cols[i], alpha = 0.25, position = "identity")  +
-      geom_point(data = D_simData_sub, aes(x = as.factor(year), y = Mean.D), color = "black", size = 3) +
+      geom_violinhalf(aes(linetype = runID), color = NA, fill = plot.cols[i], alpha = 0.25, position = "identity", scale = "width")  +
+      geom_point(data = D_simData_sub, aes(x = as.factor(year), y = Mean.D), color = "black", size = 2) +
       scale_linetype_manual(values = rep("solid", nlevels(Density_year_sub$runID))) + 
       theme_cowplot() +
       theme(panel.grid.major.y = element_line(color = "#8ccde3", linewidth = 0.25, linetype = 2), 
@@ -339,8 +346,8 @@ plotSimCheck_replicates <- function(plotColors = "customRainbow", thin = 1) {
     
     
     pR <- ggplot(data = R_year_sub, aes(x = as.factor(year), y = R_year)) +
-      geom_violinhalf(aes(linetype = runID), color = NA, fill = plot.cols[i], alpha = 0.25, position = "identity")  +
-      geom_point(data = R_simData_sub, aes(x = as.factor(year), y = predictedR), color = "black", size = 3) +
+      geom_violinhalf(aes(linetype = runID), color = NA, fill = plot.cols[i], alpha = 0.25, position = "identity", scale = "width")  +
+      geom_point(data = R_simData_sub, aes(x = as.factor(year), y = predictedR), color = "black", size = 2) +
       geom_point(data = R_simData_sub, aes(x = as.factor(year), y = realizedR), color = "grey20", size = 3, alpha = 0.25) +
       scale_linetype_manual(values = rep("solid", nlevels(Mu_S$runID))) + 
       theme_cowplot() +
@@ -354,10 +361,10 @@ plotSimCheck_replicates <- function(plotColors = "customRainbow", thin = 1) {
     det_simData_sub <- subset(det_simData, dataSetID == i)
     
     pE <- ggplot(data = esw_year_sub, aes(x = as.factor(year), y = esw)) +
-      geom_violinhalf(aes(linetype = runID), color = NA, fill = plot.cols[i], alpha = 0.25, position = "identity")  +
+      geom_violinhalf(aes(linetype = runID), color = NA, fill = plot.cols[i], alpha = 0.25, position = "identity", scale = "width")  +
       scale_color_manual(values = plot.cols) + 
       scale_linetype_manual(values = rep("solid", nlevels(esw_year$runID))) + 
-      geom_point(data = det_simData_sub, aes(x = as.factor(year), y = esw), color = "black", size = 3) +
+      geom_point(data = det_simData_sub, aes(x = as.factor(year), y = esw), color = "black", size = 2) +
       theme_cowplot() +
       theme(panel.grid.major.y = element_line(color = "#8ccde3", linewidth = 0.25, linetype = 2), 
             text = element_text(size = 10), legend.position = "none") +
@@ -368,17 +375,17 @@ plotSimCheck_replicates <- function(plotColors = "customRainbow", thin = 1) {
     p_year_sub <- subset(p_year, dataSetID == i)
     
     pP <- ggplot(data = p_year_sub, aes(x = as.factor(year), y = p)) +
-      geom_violinhalf(aes(linetype = runID), color = NA, fill = plot.cols[i], alpha = 0.25, position = "identity")  +
+      geom_violinhalf(aes(linetype = runID), color = NA, fill = plot.cols[i], alpha = 0.25, position = "identity", scale = "width")  +
       scale_color_manual(values = plot.cols) + 
       scale_linetype_manual(values = rep("solid", nlevels(p_year$runID))) +
-      geom_point(data = det_simData_sub, aes(x = as.factor(year), y = p), color = "black", size = 3) +
+      geom_point(data = det_simData_sub, aes(x = as.factor(year), y = p), color = "black", size = 2) +
       theme_cowplot() +
       theme(panel.grid.major.y = element_line(color = "#8ccde3", linewidth = 0.25, linetype = 2), 
             text = element_text(size = 10), legend.position = "none") +
       ylab("Detection probability") +
       xlab("Year")
     
-
+    
     ## Assemble plots
     pAll <- plot_grid(pN, pD, pR, pE, pP, ncol = 1)
     
