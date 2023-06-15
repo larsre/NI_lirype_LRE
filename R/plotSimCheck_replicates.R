@@ -225,7 +225,12 @@ plotSimCheck_replicates <- function(plotColors = "customRainbow", thin = 1) {
   )
   dev.off()
   
-
+  ## Plot to png
+  png(paste0("Plots/SimCheck_replicates/SimCheck_VRs_", plotColors, ".png"), width = 12, height = 7.5, units = "in", res = 300)
+  suppressWarnings(
+    print(p_out)
+  )
+  dev.off()
   
   
   # Plotting detection parameters (all replicates) #
@@ -290,7 +295,12 @@ plotSimCheck_replicates <- function(plotColors = "customRainbow", thin = 1) {
   )
   dev.off()
   
-
+  ## Plot to png
+  png(paste0("Plots/SimCheck_replicates/SimCheck_Detects_", plotColors, ".png"), width = 10, height = 7.5, units = "in", res = 300)
+  suppressWarnings(
+    print(p_out)
+  )
+  dev.off()
   
   
   for(i in 1:length(simSeeds)){
@@ -379,6 +389,12 @@ plotSimCheck_replicates <- function(plotColors = "customRainbow", thin = 1) {
     )
     dev.off()
     
+    ## Plot to png
+    png(paste0("Plots/SimCheck_replicates/SimCheck_tAll_simSeed", simSeeds[i], "_", plotColors, ".png"), width = 10, height = 14, units = "in", res = 300)
+    suppressWarnings(
+      print(pAll)
+    )
+    dev.off()
     
   }
   
