@@ -260,7 +260,7 @@ for(i in 1:length(simSeed.list)){
       ),
       simSeed = simSeed.list[i],
       runSeed = runSeeds[k])
-
+    
     saveRDS(sumPost, file = paste0("simModelFits_sum/IDSMsampleSum_simSeed", simSeed.list[i], "_runSeed", runSeeds[k], ".rds"))
     
     ## Remove samples and free up disk space
@@ -279,7 +279,7 @@ saveRDS(runSeed.list, file = "simModelFits_sum/seedInfo.rds")
 # PLOT COMPARISON OF MODEL ESTIMATES AND SIMULATED DATA #
 #-------------------------------------------------------#
 
-plotSimCheck_replicates()
-plotSimCheck_replicates("Temps")
-plotSimCheck_replicates("Zissou1")
+plotSimCheck_replicates(thin = 100)
+plotSimCheck_replicates("Temps", thin = 100)
+plotSimCheck_replicates("Zissou1", thin = 100)
 
