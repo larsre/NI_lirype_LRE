@@ -64,7 +64,7 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, d_rodent, localities = NULL,
   #    dplyr::filter(locationID %in% d_obs$locationID)
   #}
   if(excl_neverObs){
-    d_trans <- semi_join(d_trans, d_obs, by = c("locationID", "Year"))
+    d_trans <- dplyr::semi_join(d_trans, d_obs, by = c("locationID", "Year"))
   }
   ## Variables shared across areas
   # Number of age classes
