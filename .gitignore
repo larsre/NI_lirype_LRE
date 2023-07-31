@@ -14,6 +14,9 @@ data/NorgeKommuner_clipped_kystkontor
 # PDF files
 *.pdf
 
+# PNG files
+*.png 
+
 # Shape files
 *.shp
 
