@@ -67,6 +67,6 @@ simulateData_HDS <- function(Jmax, Tmax, G.age,
   
   # Collate and return data
   DS.data <- list(d = data$distance, d_year = data$year, d_site = data$site,
-                  DS.count = DS.count, L = L)
+                  DS.count = DS.count, L = L, sigma = Sigma)
   return(DS.data)
 }
