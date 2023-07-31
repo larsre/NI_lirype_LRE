@@ -33,8 +33,11 @@
 #'
 #' @examples
 
-prepareInputData <- function(d_trans, d_obs, d_cmr, d_rodent, localities = NULL, areas = NULL, areaAggregation, excl_neverObs = TRUE, R_perF, R_parent_drop0, sumR.Level = "group", dataVSconstants = TRUE, save = TRUE){
 
+
+prepareInputData <- function(d_trans, d_obs, d_cmr, d_rodent, localities = NULL, areas = NULL, areaAggregation, excl_neverObs = TRUE, R_perF, R_parent_drop0, sumR.Level = "group", dataVSconstants = TRUE, save = TRUE){
+  
+  
   # Multi-area setup #
   #------------------#
   
@@ -56,18 +59,20 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, d_rodent, localities = NULL,
   }
   
   ## If desired: remove all transects on which willow ptarmigans were never encountered
+  #if(excl_neverObs){
+  #  d_trans <- d_trans %>%
+  #    dplyr::filter(locationID %in% d_obs$locationID)
+  #}
   if(excl_neverObs){
-    d_trans <- d_trans %>%
-      dplyr::filter(locationID %in% d_obs$locationID)
+    d_trans <- semi_join(d_trans, d_obs, by = c("locationID", "Year"))
   }
-
   ## Variables shared across areas
   # Number of age classes
   N_ageC <- 2
   
   # (Number of) years
-  range_yearsTot <- min(d_trans$Year):max(d_trans$Year)
-  idx_yearsTot <- range_yearsTot - min(d_trans$Year) + 1
+  range_yearsTot <- min(d_trans$Year):max(d_trans$Year)     
+  idx_yearsTot <- range_yearsTot - min(d_trans$Year) + 1  
   N_yearsTot <- length(range_yearsTot)
   
   # Truncation distance
@@ -124,7 +129,7 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, d_rodent, localities = NULL,
     N_sites[x] <- n_distinct(d_trans_sub$locationID)
     
     ## (Number of) years with data
-    years_mon <- sort(unique(d_trans_sub$Year)) - min(range_yearsTot) + 1
+    years_mon <- sort(unique(d_trans_sub$Year)) - min(range_yearsTot) + 1 
     min_years[x] <- min(years_mon)
     max_years[x] <- max(years_mon)
 
@@ -154,6 +159,7 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, d_rodent, localities = NULL,
     
     # Observation distance from transect #
     #------------------------------------#
+ 
     
     temp_dist <- d_obs_sub %>% 
       dplyr::filter(between(DistanceToTransectLine, -0.1, W)) %>% 
@@ -177,16 +183,19 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, d_rodent, localities = NULL,
     #-------------------------------------------#
     
     temp <- TransLen %>% select(locationID)
-    
-    TaksObs <- d_obs_sub %>% filter(between(DistanceToTransectLine, -0.1, W)) %>%
+
+    TaksObs <- d_obs_sub %>% 
+      filter(between(DistanceToTransectLine, -0.1, W)) %>% # 
       dplyr::mutate(cs = unknownJuvenile+unknownunknown+FemaleAdult+MaleAdult) %>%
       reshape2::dcast(locationID~Year, value.var = "cs", sum) %>%
       dplyr::right_join(., temp, by = c("locationID" = "locationID")) %>%
       replace(., is.na(.), 0) %>%
       dplyr::arrange(locationID)
-    
+  
     TaksObs_mat <- TaksObs %>% dplyr::select(-locationID) %>% as.matrix() 
     colnames(TaksObs_mat) <- as.numeric(colnames(TaksObs_mat)) - min(range_yearsTot) + 1
+    
+    years_mon <- as.numeric(colnames(TaksObs_mat)) # filtering observations on DistanceToTransectLine will in some cases remove all observations for a transect line within 1 year. This recalculates number of years with samples
     
     for(t in 1:N_yearsTot){
       
@@ -199,7 +208,8 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, d_rodent, localities = NULL,
     #-------------------------------------#
     
     ## Juveniles (& unknowns)
-    TaksObs_J <- d_obs_sub %>% filter(between(DistanceToTransectLine, -0.1, W)) %>%
+    TaksObs_J <- d_obs_sub %>% 
+      filter(between(DistanceToTransectLine, -0.1, W)) %>%
       dplyr::mutate(cs = unknownJuvenile + unknownunknown) %>%
       reshape2::dcast(locationID~Year, value.var="cs", sum) %>%
       dplyr::right_join(., temp, by=c("locationID"="locationID")) %>%
@@ -217,7 +227,8 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, d_rodent, localities = NULL,
     }
     
     ## Adults 
-    TaksObs_A <- d_obs_sub %>% filter(between(DistanceToTransectLine, -0.1, W)) %>%
+    TaksObs_A <- d_obs_sub %>% 
+      filter(between(DistanceToTransectLine, -0.1, W)) %>%
       dplyr::mutate(cs = FemaleAdult + MaleAdult) %>%
       reshape2::dcast(locationID~Year, value.var="cs", sum) %>%
       dplyr::right_join(., temp, by=c("locationID"="locationID")) %>%
@@ -392,6 +403,4 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, d_rodent, localities = NULL,
   ## Return data
   return(rype.data)
 }
-
-
 
