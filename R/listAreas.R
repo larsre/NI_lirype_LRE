@@ -3,7 +3,7 @@
 #' area used for local density estimation
 #' 
 #' The current list contains valid areas (reporting levels) for the three data
-#' sets openly available through GBIF (per Dec. 2022)
+#' sets openly available through GBIF
 #'
 #' @return a character vector with UTF-8 encoding. 
 #' @export
@@ -62,7 +62,7 @@ listAreas <- function(){
     "Høylandet Fjellstyre",
     "Øyer Fjellstyre",
     #added 2022:
-    "Folldal Fjellstyre",
+    "Folldal Fjellstyre"
     #added 2023:
     #"Sunndal Fjellstyre",
     #"Rendalen",
