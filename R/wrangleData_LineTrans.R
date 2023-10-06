@@ -1,14 +1,16 @@
 
 #' Extract and filter transect and observation data from DwC archive
 #'
-#' @param DwC_archive_list list of DwCArchives. Darwin Core archives containing line transect 
-#' data for willow ptarmigan (Lagopus lagopus) in Norway.
-#' @param duplTransects vector of strings. (parent) EventIDs of transects that are duplicates and need removing from the data
+#' @param DwC_archive_list list of DwCArchives. Darwin Core archives containing
+#' line transect data for willow ptarmigan (Lagopus lagopus) in Norway.
+#' @param duplTransects vector of strings. (parent) EventIDs of transects that
+#' are duplicates and need removing from the data
 #' @param localities string or vector of strings. Names of localities to extract
 #' data for. Either localities or areas must be provided. 
 #' @param areas string or vector of strings. Names of areas to extract
 #' data for. Either localities or areas must be provided.
-#' @param areaAggregation logical. If TRUE, areas are used as smallest spatial unit. If FALSE, locations (within areas) are used as smallest spatial unit.
+#' @param areaAggregation logical. If TRUE, areas are used as smallest spatial
+#' unit. If FALSE, locations (within areas) are used as smallest spatial unit.
 #' @param minYear integer. Earliest year of data to extract.
 #' @param maxYear integer. Latest year of data to extract.  
 #'
@@ -66,7 +68,7 @@ wrangleData_LineTrans <- function(DwC_archive_list, duplTransects, localities = 
     dplyr::select(locationID, eventDate, eventID, modified, 
                   samplingProtocol, eventRemarks, sampleSizeValue, 
                   stateProvince, municipality, locality, 
-                  verbatimLocality, locationRemarks, Year) %>%
+                  verbatimLocality, locationRemarks, Year, footprintWKT) %>% #LRE: added footprintWKT for spatial filtering
     dplyr::filter(eventRemarks == "Line transect") %>%
     dplyr::mutate(locationRemarks = gsub("In the original data this is known as lineID ", '', locationRemarks)) %>%
     tidyr::separate(., col = locationRemarks, sep = ",", into = c("LineName", "locationRemarks")) %>%
