@@ -5,14 +5,25 @@
 #' @param d_obs tibble containing information on observations made along transects 
 #' (distance to transect line, numbers of birds in each age/sex class observed,
 #' etc.). Output of wrangleData_LineTrans(). 
-#' @param d_cmr list with 2 elements. Surv1 and Surv2 are matrices of individuals 
+#' @param d_cmr OPTIONAL list with 2 elements. Surv1 and Surv2 are matrices of individuals 
 #' released (column 1) and known to have survived (column 2) in each year (row)
 #' for season 1 and season 2, respectively. Output of wrangleData_CMR().
-#' @param d_rodent matrix containing the average number of transects with rodent observations per area and year.
-#' @param localities vector of strings listing localities to consider. Either localities or areas must be provided. 
-#' @param areas vector of strings listing areas to consider. Either localities or areas must be provided. 
-#' @param areaAggregation logical. If TRUE, areas are used as smallest spatial unit. If FALSE, locations (within areas) are used as smallest spatial unit.
-#' @param excl_neverObs logical. If TRUE (default), transects on which ptarmigans were never observed are excluded. If FALSE, all transects are included.
+#' @param d_rodent OPTIONAL matrix containing the average number of transects with rodent
+#' observations per area and year. Output of wrangleData_Rodent().
+#' @param localities vector of strings listing localities to consider. Either
+#' localities, areas or counties must be provided. 
+#' @param areas vector of strings listing areas to consider. Either localities,
+#' areas or counties must be provided.
+#' @param counties vector of strings listing counties to consider. Either localities,
+#' areas or counties must be provided.
+#' @param areaAggregation logical. If TRUE, areas are used as smallest spatial
+#' unit. If FALSE, and countyAggregation is FALSE, locations (within areas) are
+#' used as smallest spatial unit.
+#' @param countyAggregation logical. If TRUE, data are aggregated to regional
+#' level (counties). If FALSE, and areaAggregation is FALSE, locations (within
+#' areas) are used as the smallest spatial unit.
+#' @param excl_neverObs logical. If TRUE (default), transects on which ptarmigans
+#' were never observed are excluded. If FALSE, all transects are included.
 #' @param R_perF logical. If TRUE, treats recruitment rate as juvenile per adult female.
 #' If FALSE, treats recruitment rate as juvenile per adult (sum of both sexes).
 #' @param R_parent_drop0 logical. If TRUE, removes observations of juveniles without adults
@@ -33,46 +44,46 @@
 #'
 #' @examples
 
-
-
-prepareInputData <- function(d_trans, d_obs, d_cmr, d_rodent, localities = NULL, areas = NULL, areaAggregation, excl_neverObs = TRUE, R_perF, R_parent_drop0, sumR.Level = "group", dataVSconstants = TRUE, save = TRUE){
-  
+prepareInputData <- function(d_trans, d_obs, d_cmr, d_rodent, localities = NULL, areas = NULL, counties = NULL, areaAggregation, countyAggregation, excl_neverObs = TRUE, R_perF, R_parent_drop0, sumR.Level = "group", dataVSconstants = TRUE, save = TRUE){
   
   # Multi-area setup #
   #------------------#
   
   ## Assignment of spatial units
-  if(areaAggregation){
+  if(countyAggregation) {
+    sUnits <- counties
+  } else if(areaAggregation) {
     sUnits <- areas
-  }else{
+  } else {
     sUnits <- localities
   }
   N_sUnits <- length(sUnits)
   
   ## Rename appropriate column in line transect data to reflect level of spatial aggregation
-  if(areaAggregation){
+  if(countyAggregation) {
+    colnames(d_trans)[which(colnames(d_trans) == "county")] <- "spatialUnit"
+    colnames(d_obs)[which(colnames(d_obs) == "county")] <- "spatialUnit"
+  } else if(areaAggregation){
     colnames(d_trans)[which(colnames(d_trans) == "verbatimLocality")] <- "spatialUnit"
     colnames(d_obs)[which(colnames(d_obs) == "verbatimLocality")] <- "spatialUnit"
-  }else{
+  } else {
     colnames(d_trans)[which(colnames(d_trans) == "locality")] <- "spatialUnit"
     colnames(d_obs)[which(colnames(d_obs) == "locality")] <- "spatialUnit"
   }
   
-  ## If desired: remove all transects on which willow ptarmigans were never encountered
-  #if(excl_neverObs){
-  #  d_trans <- d_trans %>%
-  #    dplyr::filter(locationID %in% d_obs$locationID)
-  #}
+  ## If desired: remove all transects on which willow ptarmigans were never encountered --> of all time, or per year?
   if(excl_neverObs){
-    d_trans <- dplyr::semi_join(d_trans, d_obs, by = c("locationID", "Year"))
+    #d_trans <- dplyr::semi_join(d_trans, d_obs, by = c("locationID", "Year")) #This removes transects without observations in a given year, not only transects where Willow ptarmigan was never encountered
+    d_trans <- dplyr::semi_join(d_trans, d_obs, by = c("locationID")) #By removing the 'Year' parameter, only transects without any observations of Willow ptarmigan across all years are removed
   }
+
   ## Variables shared across areas
   # Number of age classes
   N_ageC <- 2
   
   # (Number of) years
-  range_yearsTot <- min(d_trans$Year):max(d_trans$Year)     
-  idx_yearsTot <- range_yearsTot - min(d_trans$Year) + 1  
+  range_yearsTot <- min(d_trans$Year):max(d_trans$Year)
+  idx_yearsTot <- range_yearsTot - min(d_trans$Year) + 1
   N_yearsTot <- length(range_yearsTot)
   
   # Truncation distance
@@ -87,13 +98,13 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, d_rodent, localities = NULL,
     stop("One or more specified areas contain no willow ptarmigan observations")
   }
   
-  ## Count observations per area
+  ## Count observations per spatial unit
   obs_count <- d_obs %>% 
     dplyr::filter(between(DistanceToTransectLine, -0.1, W)) %>% 
     dplyr::group_by(spatialUnit) %>%
     dplyr::summarise(count = n())
     
-  ## Set up arrays for area-specific data
+  ## Set up arrays for spatial unit specific data
   N_sites <- N_years <- min_years <- max_years <- N_obs <- N_sumR_obs <- rep(NA, N_sUnits)
   
   A <- matrix(NA, nrow = N_sUnits, ncol = N_yearsTot)
@@ -311,15 +322,19 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, d_rodent, localities = NULL,
   # Data assembly #
   #---------------#
   
-  ## Set spatial index for CMR data
-  if(areaAggregation){
-    SurvAreaIdx <- which(sUnits == d_cmr$area_names)
-  }else{
-    SurvAreaIdx <- which(sUnits == d_cmr$locality_names)
-  }
-  
-  if(length(SurvAreaIdx) == 0){
-    stop("No overlap in areas for line transect and survival data. The present implementation of the model requires including line transect data from Lierne.")
+  ## If including survival estimates, set spatial index for CMR data
+  if(!is.null(d_cmr)) {
+    if(countyAggregation) {
+      SurvAreaIdx <- which(sUnits == d_cmr$county_names)
+    } else if(areaAggregation) {
+      SurvAreaIdx <- which(sUnits == d_cmr$area_names)
+    } else {
+      SurvAreaIdx <- which(sUnits == d_cmr$locality_names)
+    }
+    
+    if(length(SurvAreaIdx) == 0){
+      stop("No overlap in areas for line transect and survival data. The present implementation of the model requires including line transect data from Lierne.")
+    }
   }
   
   ## Add dummy dimensions if running for only one spatial unit
@@ -328,64 +343,126 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, d_rodent, localities = NULL,
   }
   
   ## Assembling all data in a list
-  input.data <- list(
-    sumR_obs = sumR_obs, # Observed numbers of recruits
-    sumAd_obs = sumAd_obs, # Observed numbers of adults/adult females
-    sumR_obs_year = sumR_obs_year, # Year of observed numbers of recruits
-    N_sumR_obs = N_sumR_obs, # Total number of observations of numbers of recruits
-    
-    y = y, # Distance to transect line for each individual observation
-    zeros_dist = zeros_dist, # Vector of 0's of same length as y
-    Year_obs = Year_obs, # Year of each observation
-    N_obs = N_obs, # Total number of observations
-    
-    N_line_year = N_line_year, # Number of birds observed per site per year
-    N_a_line_year = N_a_line_year, # Number of birds observed per ageclass per site per year
-    L = L, # Transect length per site and year
-    
-    N_years = N_yearsTot, # Max number of years with data
-    min_years = min_years, # Earliest year (index) of monitoring per area
-    max_years = max_years, # Last year (index) of monitoring per area
-    N_sites = N_sites, # Total number of monitored sites per area
-    
-    A = A, # Total covered area per year
-    W = W, # Truncation distance
-    N_ageC = N_ageC, # Number of age classes
-    
-    Survs1 = d_cmr$Survs1, # Season 1 releases & survivors (area 1)
-    Survs2 = d_cmr$Survs2, # Season 2 releases & survivors (area 1)
-    SurvAreaIdx = SurvAreaIdx,
-    year_Survs = d_cmr$year_Survs, # Years (indices) of telemetry data
-    N_years_RT = length(d_cmr$year_Survs),
-    
-    RodentOcc = d_rodent,
-    
-    N_areas = N_sUnits,
-    area_names = sUnits
-  )
+  # Including survival and rodent covariate
+  if(!is.null(d_cmr) & !is.null(d_rodent)) {
+    input.data <- list(
+      sumR_obs = sumR_obs, # Observed numbers of recruits
+      sumAd_obs = sumAd_obs, # Observed numbers of adults/adult females
+      sumR_obs_year = sumR_obs_year, # Year of observed numbers of recruits
+      N_sumR_obs = N_sumR_obs, # Total number of observations of numbers of recruits
+      
+      y = y, # Distance to transect line for each individual observation
+      zeros_dist = zeros_dist, # Vector of 0's of same length as y
+      Year_obs = Year_obs, # Year of each observation
+      N_obs = N_obs, # Total number of observations
+      
+      N_line_year = N_line_year, # Number of birds observed per site per year
+      N_a_line_year = N_a_line_year, # Number of birds observed per ageclass per site per year
+      L = L, # Transect length per site and year
+      
+      N_years = N_yearsTot, # Max number of years with data
+      min_years = min_years, # Earliest year (index) of monitoring per area
+      max_years = max_years, # Last year (index) of monitoring per area
+      N_sites = N_sites, # Total number of monitored sites per area
+      
+      A = A, # Total covered area per year
+      W = W, # Truncation distance
+      N_ageC = N_ageC, # Number of age classes
+      
+      Survs1 = d_cmr$Survs1, # Season 1 releases & survivors (area 1)
+      Survs2 = d_cmr$Survs2, # Season 2 releases & survivors (area 1)
+      SurvAreaIdx = SurvAreaIdx,
+      year_Survs = d_cmr$year_Survs, # Years (indices) of telemetry data
+      N_years_RT = length(d_cmr$year_Survs),
+      
+      RodentOcc = d_rodent,
+      
+      N_areas = N_sUnits,
+      area_names = sUnits
+    )
+  }
+  # Excluding survival and rodent covariate
+  if(is.null(d_cmr) & is.null(d_rodent)) {
+    input.data <- list(
+      sumR_obs = sumR_obs, # Observed numbers of recruits
+      sumAd_obs = sumAd_obs, # Observed numbers of adults/adult females
+      sumR_obs_year = sumR_obs_year, # Year of observed numbers of recruits
+      N_sumR_obs = N_sumR_obs, # Total number of observations of numbers of recruits
+      
+      y = y, # Distance to transect line for each individual observation
+      zeros_dist = zeros_dist, # Vector of 0's of same length as y
+      Year_obs = Year_obs, # Year of each observation
+      N_obs = N_obs, # Total number of observations
+      
+      N_line_year = N_line_year, # Number of birds observed per site per year
+      N_a_line_year = N_a_line_year, # Number of birds observed per ageclass per site per year
+      L = L, # Transect length per site and year
+      
+      N_years = N_yearsTot, # Max number of years with data
+      min_years = min_years, # Earliest year (index) of monitoring per area
+      max_years = max_years, # Last year (index) of monitoring per area
+      N_sites = N_sites, # Total number of monitored sites per area
+      
+      A = A, # Total covered area per year
+      W = W, # Truncation distance
+      N_ageC = N_ageC, # Number of age classes
+      
+      N_areas = N_sUnits,
+      area_names = sUnits
+    )
+  }
+  
   
   ## Assembling Nimble data
-  nim.data <- list(sumR_obs = input.data$sumR_obs, sumAd_obs = sumAd_obs,
-                   y = input.data$y, 
-                   zeros.dist = input.data$zeros_dist, L = input.data$L, 
-                   N_line_year = input.data$N_line_year, 
-                   N_a_line_year = input.data$N_a_line_year, 
-                   A = input.data$A,
-                   Survs1 = input.data$Survs1, Survs2 = input.data$Survs2,
-                   RodentOcc = input.data$RodentOcc)
+  # Including survival and rodent covariate
+  if(!is.null(d_cmr) & !is.null(d_rodent)) {
+    nim.data <- list(sumR_obs = input.data$sumR_obs, sumAd_obs = sumAd_obs,
+                     y = input.data$y, 
+                     zeros.dist = input.data$zeros_dist, L = input.data$L, 
+                     N_line_year = input.data$N_line_year, 
+                     N_a_line_year = input.data$N_a_line_year, 
+                     A = input.data$A,
+                     Survs1 = input.data$Survs1, Survs2 = input.data$Survs2,
+                     RodentOcc = input.data$RodentOcc)
+  }
+  # Excluding survival and rodent covariate
+  if(is.null(d_cmr) & is.null(d_rodent)) {
+    nim.data <- list(sumR_obs = input.data$sumR_obs, sumAd_obs = sumAd_obs,
+                     y = input.data$y, 
+                     zeros.dist = input.data$zeros_dist, L = input.data$L, 
+                     N_line_year = input.data$N_line_year, 
+                     N_a_line_year = input.data$N_a_line_year, 
+                     A = input.data$A)
+  }
   
   ## Assembling Nimble constants
-  nim.constants <- list(N_years = input.data$N_years, min_years = input.data$min_years, max_years = input.data$max_years,
-                        W = input.data$W,
-                        N_obs = input.data$N_obs, Year_obs = input.data$Year_obs,
-                        N_sites = input.data$N_sites, 
-                        R_obs_year = input.data$R_obs_year, N_R_obs = input.data$N_R_obs,
-                        N_ageC = N_ageC,
-                        N_areas = input.data$N_areas, area_names = input.data$area_names,
-                        SurvAreaIdx = input.data$SurvAreaIdx,
-                        year_Survs = input.data$year_Survs, N_years_RT = input.data$N_years_RT,
-                        sumR_obs_year = input.data$sumR_obs_year, N_sumR_obs = input.data$N_sumR_obs,
-                        N_ageC = N_ageC)
+  # Including survival and rodent covariate
+  if(!is.null(d_cmr) & !is.null(d_rodent)) {
+    nim.constants <- list(N_years = input.data$N_years, min_years = input.data$min_years, max_years = input.data$max_years,
+                          W = input.data$W,
+                          N_obs = input.data$N_obs, Year_obs = input.data$Year_obs,
+                          N_sites = input.data$N_sites, 
+                          R_obs_year = input.data$R_obs_year, N_R_obs = input.data$N_R_obs,
+                          N_ageC = N_ageC,
+                          N_areas = input.data$N_areas, area_names = input.data$area_names,
+                          SurvAreaIdx = input.data$SurvAreaIdx,
+                          year_Survs = input.data$year_Survs, N_years_RT = input.data$N_years_RT,
+                          sumR_obs_year = input.data$sumR_obs_year, N_sumR_obs = input.data$N_sumR_obs,
+                          N_ageC = N_ageC)
+  }
+  if(is.null(d_cmr) & is.null(d_rodent)) {
+    nim.constants <- list(N_years = input.data$N_years, min_years = input.data$min_years, max_years = input.data$max_years,
+                          W = input.data$W,
+                          N_obs = input.data$N_obs, Year_obs = input.data$Year_obs,
+                          N_sites = input.data$N_sites, 
+                          #R_obs_year = input.data$R_obs_year, N_R_obs = input.data$N_R_obs,
+                          N_ageC = N_ageC,
+                          N_areas = input.data$N_areas, area_names = input.data$area_names,
+                          #SurvAreaIdx = input.data$SurvAreaIdx,
+                          #year_Survs = input.data$year_Survs, N_years_RT = input.data$N_years_RT,
+                          sumR_obs_year = input.data$sumR_obs_year, N_sumR_obs = input.data$N_sumR_obs,
+                          N_ageC = N_ageC)
+  }
   
   ## Make final data list to return
   if(dataVSconstants){
