@@ -123,6 +123,10 @@ wrangleData_LineTrans <- function(DwC_archive_list, duplTransects, localities = 
   d_obs <- d_obs %>%
     dplyr::filter(!(parentEventID %in% bad_transects))
   
+  ## Remove observations with negative or suspiciously long distances from the transect line
+  d_obs <- d_obs %>%
+    dplyr::filter(!DistanceToTransectLine < 0 & !DistanceToTransectLine > 1000)
+  
   ## Collate and return data
   LT_data <- list(d_trans = d_trans, d_obs = d_obs)
 }
