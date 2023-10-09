@@ -8,7 +8,7 @@
 #'
 #' @examples
 
-assignCounty <- function(df = LT_data) {
+assignCounty <- function(df = LT_data, counties = NULL) {
   #load required libraries
   if(!require(sf)) { print("Package 'sf' not installed"); break; }
   if(!require(dplyr)) { print("Package 'dplyr' not installed"); break; }
@@ -41,5 +41,11 @@ assignCounty <- function(df = LT_data) {
   tmp.trans <- df_trans %>% dplyr::select(eventID, county)
   df_obs <- left_join(df_obs, tmp.trans, by = c("parentEventID" = "eventID"))
   
-  return(list(df_trans, df_obs))
+  #filter selected counties
+  if(!is.null(counties)) {
+    df_trans <- df_trans %>% dplyr::filter(county %in% counties)
+    df_obs <- df_obs %>% dplyr::filter(county %in% counties)
+  }
+  
+  return(list(d_trans = df_trans, d_obs = df_obs))
 }
