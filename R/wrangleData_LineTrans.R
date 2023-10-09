@@ -28,10 +28,9 @@ wrangleData_LineTrans <- function(DwC_archive_list, duplTransects, localities = 
   ## Extract relevant parts from DwC_archive
   
   # Set up lists for storing data
-  Eve_all <- Occ <- list()
+  Eve_all <- Occ <- Meas <- list()
   
-  for(i in 1:length(DwC_archive_list)){
-    
+  for(i in 1:length(DwC_archive_list)) {
     # Core table
     Core <- DwC_archive_list[[i]]$getCoreTable()
     
@@ -40,15 +39,18 @@ wrangleData_LineTrans <- function(DwC_archive_list, duplTransects, localities = 
       dplyr::mutate(sampleSizeValue = as.numeric(sampleSizeValue))
     
     # Complete occurrence table
-    Occ[[i]] <- tibble::as_tibble(DwC_archive_list[[i]]$getExtensionTables()[[2]]$exportAsDataFrame())
-
+    Occ[[i]] <- tibble::as_tibble(DwC_archive_list[[i]]$getExtensionTables("occurrence")[[1]]$exportAsDataFrame())
+    
+    # Complete measurements table
+    Meas[[i]] <- tibble::as_tibble(DwC_archive_list[[i]]$getExtensionTables()[[1]]$exportAsDataFrame())
   }
 
   # Bind datasets together
   Eve_all <- dplyr::bind_rows(Eve_all, .id = "column_label")
   Occ <- dplyr::bind_rows(Occ, .id = "column_label")
+  Meas <- dplyr::bind_rows(Meas, .id = "column_label")
   
-  ## Filter event data by either locality and year or area and year
+  ## Filter event data by area and year
   if(areaAggregation){
     Eve <- Eve_all %>% 
       dplyr::mutate(eventDate = as.Date(eventDate)) %>%
@@ -72,7 +74,7 @@ wrangleData_LineTrans <- function(DwC_archive_list, duplTransects, localities = 
     dplyr::filter(eventRemarks == "Line transect") %>%
     dplyr::mutate(locationRemarks = gsub("In the original data this is known as lineID ", '', locationRemarks)) %>%
     tidyr::separate(., col = locationRemarks, sep = ",", into = c("LineName", "locationRemarks")) %>%
-    dplyr::select(-locationRemarks) 
+    dplyr::select(-locationRemarks)
   
   ## Identify and remove transects with suspiciously short length (< 200 m) and duplicate transects
   bad_transects <- c(d_trans$eventID[which(d_trans$sampleSizeValue < 200)], duplTransects)
@@ -87,22 +89,23 @@ wrangleData_LineTrans <- function(DwC_archive_list, duplTransects, localities = 
     dplyr::filter(transectCount > 1)
   
   if(nrow(transect_duplicates) > 0){
-    stop("There are duplicate transects (> 1 transect in same location per year).")
+    stop("There are duplicate transects (> 1 transect in same location per year). Identify the duplicate transects and update R/listDuplTransects.R accordingly.")
   }
   
   ## Assemble observation level info
-  
   # Observations: distance to transect lines
   d_obsTemp <- Eve %>% 
-    dplyr::select(locationID, locality, verbatimLocality, parentEventID, eventID, eventRemarks, 
-                  dynamicProperties, eventDate) %>%
+    dplyr::select(locationID, locality, verbatimLocality, parentEventID, eventID,
+                  eventRemarks, dynamicProperties, eventDate) %>%
     dplyr::filter(eventRemarks == "Human observation" & !is.na(dynamicProperties)) %>%
-    dplyr::mutate(dynamicProperties = purrr::map(dynamicProperties, ~ jsonlite::fromJSON(.) %>% as.data.frame())) %>%
-    tidyr::unnest(dynamicProperties) %>% 
-    dplyr::rename(DistanceToTransectLine = "perpendicular.distance.in.meters.from.transect.line.as.reported.by.the.field.worker") %>%
-    dplyr::mutate(DistanceToTransectLine = as.numeric(DistanceToTransectLine), 
-                  Year = lubridate::year(eventDate)) %>%
-    dplyr::select(locationID, locality, verbatimLocality, parentEventID, eventID, DistanceToTransectLine, Year)
+    #dplyr::mutate(dynamicProperties = purrr::map(dynamicProperties, ~ jsonlite::fromJSON(.) %>% as.data.frame())) %>%
+    #tidyr::unnest(dynamicProperties) %>% 
+    #dplyr::rename(DistanceToTransectLine = "perpendicular.distance.in.meters.from.transect.line.as.reported.by.the.field.worker") %>%
+    #dplyr::mutate(DistanceToTransectLine = as.numeric(DistanceToTransectLine), 
+    dplyr::mutate(Year = lubridate::year(eventDate)) %>%
+    dplyr::left_join(., Meas, by = c("eventID" = "id")) %>%
+    dplyr::select(locationID, locality, verbatimLocality, parentEventID, eventID, measurementValue, Year)
+  colnames(d_obsTemp)[6] <- "DistanceToTransectLine"
   
   # Observations: remaining information (willow ptarmigan only)
   d_obs <- Occ %>% 
