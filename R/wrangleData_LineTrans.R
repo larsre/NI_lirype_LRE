@@ -35,13 +35,15 @@ wrangleData_LineTrans <- function(DwC_archive_list, duplTransects, localities = 
     Core <- DwC_archive_list[[i]]$getCoreTable()
     
     # Complete event table
-    Eve_all[[i]] <- tibble::as_tibble(Core$exportAsDataFrame()) %>%
-      dplyr::mutate(sampleSizeValue = as.numeric(sampleSizeValue))
+    # NOTE: added 'suppressWarnings' on warning message 'NAs introduced by coercion' for
+    #  'as.numeric(sampleSizeValue)' (regarding missing values for transect line length)
+    Eve_all[[i]] <- suppressWarnings(tibble::as_tibble(Core$exportAsDataFrame()) %>%
+      dplyr::mutate(sampleSizeValue = as.numeric(sampleSizeValue)), )
     
     # Complete occurrence table
     Occ[[i]] <- tibble::as_tibble(DwC_archive_list[[i]]$getExtensionTables("occurrence")[[1]]$exportAsDataFrame())
     
-    # Complete measurements table
+    # Complete measurements and facts table
     Meas[[i]] <- tibble::as_tibble(DwC_archive_list[[i]]$getExtensionTables()[[1]]$exportAsDataFrame())
   }
 
