@@ -343,137 +343,102 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, d_rodent, localities = NULL,
   }
   
   ## Assembling all data in a list
-  # Including survival and rodent covariate
-  if(!is.null(d_cmr) & !is.null(d_rodent)) {
-    input.data <- list(
-      sumR_obs = sumR_obs, # Observed numbers of recruits
-      sumAd_obs = sumAd_obs, # Observed numbers of adults/adult females
-      sumR_obs_year = sumR_obs_year, # Year of observed numbers of recruits
-      N_sumR_obs = N_sumR_obs, # Total number of observations of numbers of recruits
-      
-      y = y, # Distance to transect line for each individual observation
-      zeros_dist = zeros_dist, # Vector of 0's of same length as y
-      Year_obs = Year_obs, # Year of each observation
-      N_obs = N_obs, # Total number of observations
-      
-      N_line_year = N_line_year, # Number of birds observed per site per year
-      N_a_line_year = N_a_line_year, # Number of birds observed per ageclass per site per year
-      L = L, # Transect length per site and year
-      
-      N_years = N_yearsTot, # Max number of years with data
-      min_years = min_years, # Earliest year (index) of monitoring per area
-      max_years = max_years, # Last year (index) of monitoring per area
-      N_sites = N_sites, # Total number of monitored sites per area
-      
-      A = A, # Total covered area per year
-      W = W, # Truncation distance
-      N_ageC = N_ageC, # Number of age classes
-      
-      Survs1 = d_cmr$Survs1, # Season 1 releases & survivors (area 1)
-      Survs2 = d_cmr$Survs2, # Season 2 releases & survivors (area 1)
-      SurvAreaIdx = SurvAreaIdx,
-      year_Survs = d_cmr$year_Survs, # Years (indices) of telemetry data
-      N_years_RT = length(d_cmr$year_Survs),
-      
-      RodentOcc = d_rodent,
-      
-      N_areas = N_sUnits,
-      area_names = sUnits
-    )
-  }
-  # Excluding survival and rodent covariate
-  if(is.null(d_cmr) & is.null(d_rodent)) {
-    input.data <- list(
-      sumR_obs = sumR_obs, # Observed numbers of recruits
-      sumAd_obs = sumAd_obs, # Observed numbers of adults/adult females
-      sumR_obs_year = sumR_obs_year, # Year of observed numbers of recruits
-      N_sumR_obs = N_sumR_obs, # Total number of observations of numbers of recruits
-      
-      y = y, # Distance to transect line for each individual observation
-      zeros_dist = zeros_dist, # Vector of 0's of same length as y
-      Year_obs = Year_obs, # Year of each observation
-      N_obs = N_obs, # Total number of observations
-      
-      N_line_year = N_line_year, # Number of birds observed per site per year
-      N_a_line_year = N_a_line_year, # Number of birds observed per ageclass per site per year
-      L = L, # Transect length per site and year
-      
-      N_years = N_yearsTot, # Max number of years with data
-      min_years = min_years, # Earliest year (index) of monitoring per area
-      max_years = max_years, # Last year (index) of monitoring per area
-      N_sites = N_sites, # Total number of monitored sites per area
-      
-      A = A, # Total covered area per year
-      W = W, # Truncation distance
-      N_ageC = N_ageC, # Number of age classes
-      
-      N_areas = N_sUnits,
-      area_names = sUnits
-    )
+  input.data <- list(
+    sumR_obs = sumR_obs, # Observed numbers of recruits
+    sumAd_obs = sumAd_obs, # Observed numbers of adults/adult females
+    sumR_obs_year = sumR_obs_year, # Year of observed numbers of recruits
+    N_sumR_obs = N_sumR_obs, # Total number of observations of numbers of recruits
+    
+    y = y, # Distance to transect line for each individual observation
+    zeros_dist = zeros_dist, # Vector of 0's of same length as y
+    Year_obs = Year_obs, # Year of each observation
+    N_obs = N_obs, # Total number of observations
+    
+    N_line_year = N_line_year, # Number of birds observed per site per year
+    N_a_line_year = N_a_line_year, # Number of birds observed per ageclass per site per year
+    L = L, # Transect length per site and year
+    
+    N_years = N_yearsTot, # Max number of years with data
+    min_years = min_years, # Earliest year (index) of monitoring per area
+    max_years = max_years, # Last year (index) of monitoring per area
+    N_sites = N_sites, # Total number of monitored sites per area
+    
+    A = A, # Total covered area per year
+    W = W, # Truncation distance
+    N_ageC = N_ageC, # Number of age classes
+    
+    N_areas = N_sUnits, # Number of areas (integer)
+    area_names = sUnits # Area names (character vector)
+  )
+  
+  if (!is.null(d_cmr)) {
+    input.data$Survs1 <- d_cmr$Survs1 # Season 1 releases & survivors (area 1)
+    input.data$Survs2 <- d_cmr$Survs2 # Season 2 releases & survivors (area 1)
+    input.data$SurvAreaIdx <- SurvAreaIdx
+    input.data$year_Survs <- d_cmr$year_Survs # Years (indices) of telemetry data
+    input.data$N_years_RT <- length(d_cmr$year_Survs)
   }
   
+  if (!is.null(d_rodent)) {
+    input.data$RodentOcc <- d_rodent # Rodent covariate (matrix)
+  }
   
   ## Assembling Nimble data
-  # Including survival and rodent covariate
-  if(!is.null(d_cmr) & !is.null(d_rodent)) {
-    nim.data <- list(sumR_obs = input.data$sumR_obs, sumAd_obs = sumAd_obs,
-                     y = input.data$y, 
-                     zeros.dist = input.data$zeros_dist, L = input.data$L, 
-                     N_line_year = input.data$N_line_year, 
-                     N_a_line_year = input.data$N_a_line_year, 
-                     A = input.data$A,
-                     Survs1 = input.data$Survs1, Survs2 = input.data$Survs2,
-                     RodentOcc = input.data$RodentOcc)
+  nim.data <-
+    list(
+      sumR_obs = input.data$sumR_obs,
+      sumAd_obs = sumAd_obs,
+      y = input.data$y,
+      zeros.dist = input.data$zeros_dist,
+      L = input.data$L,
+      N_line_year = input.data$N_line_year,
+      N_a_line_year = input.data$N_a_line_year,
+      A = input.data$A
+    )
+  
+  if (!is.null(d_cmr)) {
+    nim.data$Survs1 <- input.data$Survs1
+    nim.data$Survs2 <- input.data$Survs2
   }
-  # Excluding survival and rodent covariate
-  if(is.null(d_cmr) & is.null(d_rodent)) {
-    nim.data <- list(sumR_obs = input.data$sumR_obs, sumAd_obs = sumAd_obs,
-                     y = input.data$y, 
-                     zeros.dist = input.data$zeros_dist, L = input.data$L, 
-                     N_line_year = input.data$N_line_year, 
-                     N_a_line_year = input.data$N_a_line_year, 
-                     A = input.data$A)
+  
+  if (!is.null(d_rodent)) {
+    nim.data$RodentOcc <- input.data$RodentOcc
   }
+  
   
   ## Assembling Nimble constants
-  # Including survival and rodent covariate
-  if(!is.null(d_cmr) & !is.null(d_rodent)) {
-    nim.constants <- list(N_years = input.data$N_years, min_years = input.data$min_years, max_years = input.data$max_years,
-                          W = input.data$W,
-                          N_obs = input.data$N_obs, Year_obs = input.data$Year_obs,
-                          N_sites = input.data$N_sites, 
-                          R_obs_year = input.data$R_obs_year, N_R_obs = input.data$N_R_obs,
-                          N_ageC = N_ageC,
-                          N_areas = input.data$N_areas, area_names = input.data$area_names,
-                          SurvAreaIdx = input.data$SurvAreaIdx,
-                          year_Survs = input.data$year_Survs, N_years_RT = input.data$N_years_RT,
-                          sumR_obs_year = input.data$sumR_obs_year, N_sumR_obs = input.data$N_sumR_obs,
-                          N_ageC = N_ageC)
-  }
-  if(is.null(d_cmr) & is.null(d_rodent)) {
-    nim.constants <- list(N_years = input.data$N_years, min_years = input.data$min_years, max_years = input.data$max_years,
-                          W = input.data$W,
-                          N_obs = input.data$N_obs, Year_obs = input.data$Year_obs,
-                          N_sites = input.data$N_sites, 
-                          #R_obs_year = input.data$R_obs_year, N_R_obs = input.data$N_R_obs,
-                          N_ageC = N_ageC,
-                          N_areas = input.data$N_areas, area_names = input.data$area_names,
-                          #SurvAreaIdx = input.data$SurvAreaIdx,
-                          #year_Survs = input.data$year_Survs, N_years_RT = input.data$N_years_RT,
-                          sumR_obs_year = input.data$sumR_obs_year, N_sumR_obs = input.data$N_sumR_obs,
-                          N_ageC = N_ageC)
-  }
+  nim.constants <-
+    list(
+      N_years = input.data$N_years,
+      min_years = input.data$min_years,
+      max_years = input.data$max_years,
+      W = input.data$W,
+      N_obs = input.data$N_obs,
+      Year_obs = input.data$Year_obs,
+      N_sites = input.data$N_sites,
+      N_ageC = N_ageC,
+      N_areas = input.data$N_areas,
+      area_names = input.data$area_names,
+      sumR_obs_year = input.data$sumR_obs_year,
+      N_sumR_obs = input.data$N_sumR_obs
+    )
   
+  if (!is.null(d_cmr)) {
+    nim.constants$SurvAreaIdx <- input.data$SurvAreaIdx
+    nim.constants$year_Survs <- input.data$year_Survs
+    nim.constants$N_years_RT <- input.data$N_years_RT
+  }
+
   ## Make final data list to return
-  if(dataVSconstants){
+  if (dataVSconstants) {
     rype.data <- list(nim.data = nim.data,
                       nim.constants = nim.constants)
-  }else{
+  } else {
     rype.data <- input.data
   }
   
   ## Optional: save data as .rds
-  if(save){
+  if (save) {
     saveRDS(rype.data, file = "RypeData_forIM.rds")
   }
   
