@@ -8,31 +8,38 @@
 #'
 #' @examples
 
-assignCounty <- function(df = LT_data, counties = NULL) {
+assignCounty <- function(df = LT_data, counties = NULL, counties2020) {
   #load required libraries
   if(!require(sf)) { print("Package 'sf' not installed"); break; }
   if(!require(dplyr)) { print("Package 'dplyr' not installed"); break; }
   
-  df_trans <- LT_data$d_trans
-  df_obs <- LT_data$d_obs
+  df_trans <- df$d_trans
+  df_obs <- df$d_obs
   
   #convert WKT to sf objects
   wgs4326 <- st_as_sfc(df_trans$footprintWKT, crs = 4326)
 
   #import county map
-  countyMap <- st_read("maps/counties2020.shp", quiet = T)
+  if (!counties2020) {
+    countyMap <- st_read("maps/counties.shp", quiet = T)
+  } else {
+    countyMap <- st_read("maps/counties2020.shp", quiet = T)
+  }
   Encoding(countyMap$name) <- "latin1"
+  countyMap <- countyMap[order(countyMap$OBJECTID),]
+  rownames(countyMap) <- NULL
   
   #convert map attributes to data frame
   county.names <- as.data.frame(countyMap)
   county.names <- county.names %>% dplyr::select(OBJECTID, name)
+  county.names$cname <- as.integer(rownames(county.names))
 
   #extract the county for each line transect
   countyIntersect <- st_intersects(wgs4326, countyMap, sparse = T)
   countyIntersect <- sapply(countyIntersect, "[[", 1) #retain only one county per transect line
   countyIntersect <- as.data.frame(countyIntersect)
-  countyIntersect <- dplyr::left_join(countyIntersect, county.names, by = c("countyIntersect" = "OBJECTID"))
-  colnames(countyIntersect)[2] <- "county"
+  countyIntersect <- dplyr::left_join(countyIntersect, county.names, by = c("countyIntersect" = "cname"))
+  colnames(countyIntersect)[3] <- "county"
   
   #assign county to transect lines
   df_trans$county <- countyIntersect$county
