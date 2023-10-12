@@ -1,8 +1,5 @@
-#' List counties to be included in the analysis
+#' List counties to be included in the analysis - pre-2020 county borders (corresponding to NI database)
 #' 
-#' The current list contains counties with an adequate number of transect lines
-#' and observations.
-#'
 #' @return a character vector with UTF-8 encoding. 
 #' @export
 #'
@@ -11,16 +8,25 @@
 listCounties <- function(){
   
   counties <- c(
-    #"Agder",
-    #"Rogaland",
-    #"Vestland",
-    #"Viken",
-    #"Møre og Romsdal",
-    #"Vestfold og Telemark",
-    "Innlandet",
+    #"Østfold", #No ptarmigan
+    #"Akershus", #No ptarmigan
+    #"Oslo", #No ptarmigan
+    "Hedmark",
+    "Oppland",
+    "Buskerud", #Only 1 area GBIF
+    #"Vestfold", #No data GBIF
+    #"Telemark", #No data GBIF
+    #"Aust-Agder", #No data GBIF
+    "Vest-Agder", #Only 1 area GBIF
+    "Rogaland", #Only 1 area GBIF
+    "Hordaland", #Only 1 area GBIF
+    #"Sogn og Fjordane", #No data GBIF
+    #"Møre og Romsdal", #No data GBIF
+    "Sør-Trøndelag",
+    "Nord-Trøndelag",
     "Nordland",
-    "Troms og Finnmark",
-    "Trøndelag"
+    "Troms",
+    "Finnmark"
   )
   
   Encoding(counties) <- "UTF-8"
