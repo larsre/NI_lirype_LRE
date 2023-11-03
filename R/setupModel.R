@@ -18,18 +18,27 @@
 #' no thinning, and no burn-in (default = FALSE)
 #' @param initVals.seed integer. Seed to use for initial value simulation.
 #'
-#' @return list of list containing all components necessary for running model 
+#' @return list of lists containing all components necessary for running models 
 #' with `nimble::nimbleMCMC()`
 #' @export
 #'
 #' @examples
 
-setupModel <- function(modelCode.path, customDist,
-                       nim.data, nim.constants,
-                       R_perF, shareRE, survVarT, fitRodentCov, addDummyDim = TRUE,
-                       niter = 25000, nthin = 5, nburn = 5000, nchains = 3,
-                       testRun = FALSE, initVals.seed){
-
+setupModel <- function(modelCode.path,
+                       customDist,
+                       nim.data,
+                       nim.constants,
+                       R_perF,
+                       shareRE,
+                       survVarT,
+                       fitRodentCov,
+                       addDummyDim = TRUE,
+                       niter = 25000,
+                       nthin = 5,
+                       nburn = 5000,
+                       nchains = 3,
+                       testRun = FALSE,
+                       initVals.seed) {
   
   ## Catch mismatches between model code name and distribution settings
   if((customDist & (!(grepl('dHN', modelCode.path, fixed = TRUE)) & !(grepl('dHR', modelCode.path, fixed = TRUE)))) |
