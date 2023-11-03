@@ -1,4 +1,3 @@
-
 #' Extract and filter transect and observation data from DwC archive
 #'
 #' @param DwC_archive_list list of DwCArchives. Darwin Core archives containing
@@ -22,9 +21,21 @@
 #' @export
 #'
 #' @examples
+#'    wrangleData_LineTrans(DwC_archive_list = Rype_arkiv,
+#'                          duplTransects = duplTransects,
+#'                          areas = areas,
+#'                          areaAggregation = TRUE,
+#'                          minYear = minYear,
+#'                          maxYear = maxYear)
 
-wrangleData_LineTrans <- function(DwC_archive_list, duplTransects, localities = NULL, areas = NULL, areaAggregation, minYear, maxYear){
-  
+wrangleData_LineTrans <- function(DwC_archive_list,
+                                  duplTransects,
+                                  localities = NULL,
+                                  areas = NULL,
+                                  areaAggregation,
+                                  minYear,
+                                  maxYear) {
+    
   ## Extract relevant parts from DwC_archive
   
   # Set up lists for storing data
@@ -100,10 +111,6 @@ wrangleData_LineTrans <- function(DwC_archive_list, duplTransects, localities = 
     dplyr::select(locationID, locality, verbatimLocality, parentEventID, eventID,
                   eventRemarks, dynamicProperties, eventDate) %>%
     dplyr::filter(eventRemarks == "Human observation" & !is.na(dynamicProperties)) %>%
-    #dplyr::mutate(dynamicProperties = purrr::map(dynamicProperties, ~ jsonlite::fromJSON(.) %>% as.data.frame())) %>%
-    #tidyr::unnest(dynamicProperties) %>% 
-    #dplyr::rename(DistanceToTransectLine = "perpendicular.distance.in.meters.from.transect.line.as.reported.by.the.field.worker") %>%
-    #dplyr::mutate(DistanceToTransectLine = as.numeric(DistanceToTransectLine), 
     dplyr::mutate(Year = lubridate::year(eventDate)) %>%
     dplyr::left_join(., Meas, by = c("eventID" = "id")) %>%
     dplyr::select(locationID, locality, verbatimLocality, parentEventID, eventID, measurementValue, Year)
