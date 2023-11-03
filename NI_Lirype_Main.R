@@ -33,7 +33,7 @@ R_parent_drop0 <- TRUE
 sumR.Level <- "line" # Summing at the line level
 
 # Random effects shared across areas (default TRUE)
-shareRE <- TRUE
+shareRE <- FALSE
 
 # Estimate time variation in survival (default FALSE)
 survVarT <- FALSE
@@ -191,7 +191,7 @@ IDSM.out <- nimbleMCMC(code = model_setup$modelCode,
                        setSeed = 0)
 Sys.time() - t.start
 
-saveRDS(IDSM.out, file = 'rypeIDSM_dHN_multiArea_realData_testRun.rds')
+saveRDS(IDSM.out, file = 'rypeIDSM_dHN_multiArea_sepRE_testRun.rds')
 
 
 # TIDY UP POSTERIOR SAMPLES #
