@@ -1,9 +1,11 @@
-#' List counties to be included in the analysis - pre-2020 county borders (corresponding to NI database)
+#' List counties to be included in the analysis - pre-2020 county borders
+#' (corresponding to NI database)
 #' 
 #' @return a character vector with UTF-8 encoding. 
 #' @export
 #'
 #' @examples
+#'     listCounties()
 
 listCounties <- function(){
   
