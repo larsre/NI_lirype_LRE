@@ -1,12 +1,17 @@
 #' Assign each transect line and observation to county by using the geographical
 #' data available (WKT) for each transect line
 #'
-#' @param df a list of 2 tibbles with the wrangled line transect and observation data
+#' @param df a list of 2 tibbles with the wrangled line transect and observation
+#' data
 #'
-#' @return a data frame with the assigned county name for transects and observations
+#' @return a list of 2 tibbles with the assigned county name for transects and
+#' observations
 #' @export
 #'
 #' @examples
+#'      assignCounty(LT_data,
+#'                   counties = counties,
+#'                   counties2020 = counties2020)
 
 assignCounty <- function(df = LT_data, counties = NULL, counties2020) {
   #load required libraries
