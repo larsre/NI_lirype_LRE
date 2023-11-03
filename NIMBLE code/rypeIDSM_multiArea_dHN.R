@@ -185,7 +185,7 @@ rypeIDSM <- nimbleCode({
   ### Model for year 2 - n.years; 
   ### post-breeding census
   
-  for(x in 1:N_areas) {
+  for (x in 1:N_areas) {
     for (j in 1:N_sites[x]) {
       for (t in 2:N_years) {
         ## Process model
@@ -221,8 +221,7 @@ rypeIDSM <- nimbleCode({
   ### Derived parameters; Nt and Dt
   for (x in 1:N_areas) {
     for (t in 1:N_years) {
-      N_tot_exp[x, t] <-
-        sum(N_exp[x, 1, 1:N_sites[x], t] + N_exp[x, 2, 1:N_sites[x], t])    ## Summing up expected number of birds in covered area;
+      N_tot_exp[x, t] <- sum(N_exp[x, 1, 1:N_sites[x], t] + N_exp[x, 2, 1:N_sites[x], t])    ## Summing up expected number of birds in covered area;
       #D[x, t] <- N_tot_exp[x, t] / A[x, t]       ## Deriving density as N/A
     }
   }
