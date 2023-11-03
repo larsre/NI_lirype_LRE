@@ -4,6 +4,7 @@
 #' @export
 #'
 #' @examples
+#'     listCounties2020()
 
 listCounties2020 <- function(){
   
