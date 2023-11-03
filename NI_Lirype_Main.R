@@ -96,7 +96,7 @@ duplTransects <- listDuplTransects()
 ## Extract transect and observational data from DwC archive
 # NOTE: for county aggregation, the data must first be wrangled using area
 # aggregation/filtering
-LT_data <- wrangleData_LineTrans(DwC_archive_list = Rype_arkiv, 
+LT_data_orig <- wrangleData_LineTrans(DwC_archive_list = Rype_arkiv, 
                                  duplTransects = duplTransects,
                                  #localities = localities,
                                  areas = areas,
@@ -106,7 +106,7 @@ LT_data <- wrangleData_LineTrans(DwC_archive_list = Rype_arkiv,
 
 ## Assign transect lines and observations to counties by geographical coordinates
 # NOTE: Set 'counties = NULL' to avoid filtering on listCounties()/listCounties2020()
-LT_data <- assignCounty(LT_data,
+LT_data <- assignCounty(LT_data_orig,
                         counties = counties,
                         counties2020 = counties2020)
 
