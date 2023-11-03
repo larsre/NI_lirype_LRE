@@ -17,7 +17,7 @@ sourceDir('R')
 ## Set switches 
 
 # (Re-)download data (TRUE) or use existing data in 'data' folder (FALSE)
-downloadData <- FALSE
+downloadData <- TRUE
 
 # NI: estimate parameters by pre-2020 counties (FALSE; default NI) or by post-2020 counties (TRUE)
 counties2020 <- FALSE
@@ -79,7 +79,6 @@ if(downloadData) {
 #----------------------------#
 
 ## Set localities/areas/counties and time period of interest
-#localities <- listLocations() #not relevant for NI analysis
 areas <- listAreas()
 
 if(counties2020) {
@@ -137,7 +136,8 @@ if(fitRodentCov) {
 #-----------------------------------------#
 
 ## Reformat data into vector/array list for analysis with Nimble
-# NOTE: set 'd_cmr' and/or 'd_rodent' to NULL if excluding survival and covariates
+# NOTE: set 'd_cmr' and/or 'd_rodent' to NULL if excluding covariates
+#       and time variation in survival
 input_data <- prepareInputData(d_trans = LT_data$d_trans, 
                                d_obs = LT_data$d_obs,
                                d_cmr = NULL, #d_cmr
@@ -196,52 +196,51 @@ saveRDS(IDSM.out, file = 'rypeIDSM_dHN_multiArea_realData_testRun.rds')
 
 # TIDY UP POSTERIOR SAMPLES #
 #---------------------------#
-
 IDSM.out.tidy <- tidySamples(IDSM.out = IDSM.out, save = TRUE)
 
 
 # PREPARE OUTPUT DATA FOR NI #
 #----------------------------#
-output.data <- prepareOutputNI(mcmc.out = IDSM.out.tidy,
-                               N_areas = input_data$nim.constant$N_areas, 
-                               area_names = input_data$nim.constant$area_names, 
-                               N_sites = input_data$nim.constant$N_sites, 
-                               min_years = input_data$nim.constant$min_years, 
-                               max_years = input_data$nim.constant$max_years, 
-                               minYear = minYear,
-                               maxYear = maxYear)
-#list of data frames with (all values with lower/upper credible intervals)
-#1) total density and recruitment
-#2) total density and recruitment per year
-#3) density and recruitment per area
-#4) density and recruitment per area per year
-#NB! values in database are in 1000 individuals per area (counties < 2020) - need to multiply density/km2 with available ptarmigan habitat
-#
-# Values extracted from the ptarmigan habitat model by Kvasnes et al. 2018:
-# - Østfold (2010-2019 = 0); No data GBIF
-# - Akershus (2010-2019 = 0); No data GBIF
-# - Oslo (2010-2019 = 0); No data GBIF
-# - Hedmark (2019 = 95)
-# - Oppland (2019 = 67)
-# - Buskerud (2019 = 57); Only 1 area (Øvre Numedal fjellstyre) in GBIF
-# - Vestfold (2010-2019 = 0); No data GBIF
-# - Telemark (2019 = 22); No data GBIF
-# - Aust-Agder (2019 = 15); Only 1 area (Njardarheim) in GBIF
-# - Vest-Agder (2019 = 18); No data GBIF
-# - Rogaland (2019 = 4); No data GBIF
-# - Hordaland (2019 = 19); Only 1 area (Eidfjord fjellstyre) in GBIF
-# - Sogn og Fjordane (2019 = 10); No data GBIF
-# - Møre og Romsdal (2019 = 14); No data GBIF
-# - Sør-Trøndelag (2019 = 117)
-# - Nord-Trøndelag (2019 = 129)
-# - Nordland (2019 = 82)
-# - Troms (2019 = 83)
-# - Finnmark (2019 = 89)
+# Format population densities from posterior samples
+prepared.output <- prepareOutputNI(
+  mcmc.out = IDSM.out.tidy,
+  N_areas = input_data$nim.constant$N_areas,
+  area_names = input_data$nim.constant$area_names,
+  N_sites = input_data$nim.constant$N_sites,
+  min_years = input_data$nim.constant$min_years,
+  max_years = input_data$nim.constant$max_years,
+  minYear = minYear,
+  maxYear = maxYear
+)
 
-# EXPORT OUTPUT DATA TO NI DATABASE? #
-#------------------------------------#
-#export.output(output.data)
-# interact with the database via R?
+# Calculate abundance (in 1000 ind.) based on estimated densities and habitat information
+# NOTE: This part depends on "ptarmigan_habitat.rds", which is the output from the
+#       ptarmigan habitat model by Kvasnes et al. 2018 BMC Ecology (with updated data).
+#       If the rds file is absent, the below function will utilize the provided data table
+#       (data/county_habitat_data.csv) with values from the last run of the model.
+output.data <- estimatePtarmiganAbundance(output = prepared.output)
+
+
+# WRANGLE OUTPUT DATA TO FIT NI DATABASE #
+#----------------------------------------#
+#devtools::install_github("NINAnor/NIcalc", build_vignettes = T)
+
+# retrieve the currently stored values for Ptarmigan from the Nature Index (NI) database
+species <- c("Lagopus lagopus")
+indicators <- c("Lirype")
+currentPtarmTable <- downloadData_NIdb(species, indicators, save = T, save_path = "data")
+
+# update the values with the results from the population density model for Ptarmigan
+# time interval to update can be specified using the 'min_year' and 'max_year' arguments
+newPtarmTable <- updateNItable(model.est = output.data,
+                               cur.table = currentPtarmTable,
+                               save = T,
+                               save_path = "data",
+                               min_year = NULL,
+                               max_year = NULL)
+
+# upload the updated table and overwrite existing data -- NB! Not tested yet!
+#uploadData_NIdb(species, data_path = "data")
 
 
 # OPTIONAL: MCMC TRACE PLOTS #
@@ -262,8 +261,12 @@ plotTimeSeries(mcmc.out = IDSM.out.tidy,
                N_sites = input_data$nim.constant$N_sites, 
                min_years = input_data$nim.constant$min_years, 
                max_years = input_data$nim.constant$max_years, 
-               minYear = minYear, maxYear = maxYear,
-               VitalRates = TRUE, DetectParams = TRUE, Densities = TRUE, survVarT = survVarT)
+               minYear = minYear,
+               maxYear = maxYear,
+               VitalRates = TRUE,
+               DetectParams = TRUE,
+               Densities = TRUE,
+               survVarT = survVarT)
 
 
 # OPTIONAL: PLOT VITAL RATE POSTERIORS #
