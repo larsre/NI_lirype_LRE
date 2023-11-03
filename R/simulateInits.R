@@ -108,8 +108,8 @@ simulateInits <- function(nim.data, nim.constants, R_perF, shareRE, survVarT, fi
   R_year <- matrix(NA, nrow = N_areas, ncol = N_years)
   
   if(shareRE){
-    epsT.R <- rep(0, N_years)
-    #epsT.R <- rnorm(N_years, 0, sigmaT.R)
+    #epsT.R <- rep(0, N_years)
+    epsT.R <- rnorm(N_years, 0, sigmaT.R)
     
     for(x in 1:N_areas){
       if(fitRodentCov) {
@@ -119,8 +119,8 @@ simulateInits <- function(nim.data, nim.constants, R_perF, shareRE, survVarT, fi
       }
     }
   }else{
-    epsT.R <- matrix(0, nrow = N_areas, ncol = N_years)
-    #epsT.R <- matrix(rnorm(N_areas*N_years, 0, sigmaT.R), nrow = N_areas, ncol = N_years)
+    #epsT.R <- matrix(0, nrow = N_areas, ncol = N_years)
+    epsT.R <- matrix(rnorm(N_areas*N_years, 0, sigmaT.R), nrow = N_areas, ncol = N_years)
     
     for(x in 1:N_areas){
       if(fitRodentCov) {
