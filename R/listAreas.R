@@ -1,4 +1,4 @@
-#' List the areas that should be used in the analysis
+#' List the areas that should be used in the analysis.
 #' Areas are defined from 'Reporting levels', i.e. the spatial extent of the
 #' area used for local density estimation
 #' 
@@ -9,6 +9,7 @@
 #' @export
 #'
 #' @examples
+#'     listAreas()
 
 listAreas <- function(){
   
