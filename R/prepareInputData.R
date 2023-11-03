@@ -1,42 +1,45 @@
-#' Prepare line transect, known fate CMR, and rodent covariate data for integrated analysis
+#' Prepare line transect, known fate CMR, and rodent covariate data for
+#' integrated analysis
 #'
 #' @param d_trans tibble containing information on transects (events). Output of
 #' wrangleData_LineTrans(). 
-#' @param d_obs tibble containing information on observations made along transects 
-#' (distance to transect line, numbers of birds in each age/sex class observed,
-#' etc.). Output of wrangleData_LineTrans(). 
-#' @param d_cmr OPTIONAL list with 2 elements. Surv1 and Surv2 are matrices of individuals 
-#' released (column 1) and known to have survived (column 2) in each year (row)
-#' for season 1 and season 2, respectively. Output of wrangleData_CMR().
-#' @param d_rodent OPTIONAL matrix containing the average number of transects with rodent
-#' observations per area and year. Output of wrangleData_Rodent().
+#' @param d_obs tibble containing information on observations made along
+#' transects. Output of wrangleData_LineTrans().
+#' @param d_cmr OPTIONAL list with 2 elements. Surv1 and Surv2 are matrices of
+#' individuals released (column 1) and known to have survived (column 2) in each
+#' year (row) for season 1 and 2, respectively. Output of wrangleData_CMR().
+#' Set to 'NULL' to exclude time variation in survival.
+#' @param d_rodent OPTIONAL matrix containing the average number of transects
+#' with rodent observations per area and year. Output of wrangleData_Rodent().
+#' Set to 'NULL' to exclude this covariate.
 #' @param localities vector of strings listing localities to consider. Either
 #' localities, areas or counties must be provided. 
 #' @param areas vector of strings listing areas to consider. Either localities,
 #' areas or counties must be provided.
-#' @param counties vector of strings listing counties to consider. Either localities,
-#' areas or counties must be provided.
+#' @param counties vector of strings listing counties to consider. Either
+#' localities, areas or counties must be provided.
 #' @param areaAggregation logical. If TRUE, areas are used as smallest spatial
 #' unit. If FALSE, and countyAggregation is FALSE, locations (within areas) are
 #' used as smallest spatial unit.
 #' @param countyAggregation logical. If TRUE, data are aggregated to regional
 #' level (counties). If FALSE, and areaAggregation is FALSE, locations (within
 #' areas) are used as the smallest spatial unit.
-#' @param excl_neverObs logical. If TRUE (default), transects on which ptarmigans
+#' @param excl_neverObs logical. If TRUE (default), transects where ptarmigans
 #' were never observed are excluded. If FALSE, all transects are included.
-#' @param R_perF logical. If TRUE, treats recruitment rate as juvenile per adult female.
-#' If FALSE, treats recruitment rate as juvenile per adult (sum of both sexes).
-#' @param R_parent_drop0 logical. If TRUE, removes observations of juveniles without adults
-#' from recruitment data. If FALSE, sets 1 as the number of adults/adults females when none
-#' are observed. 
-#' @param sumR.Level character string. Default ("group") summarises reproduction/recruitment
-#' data at the group/observation level. Setting to "line" summarises data at the 
-#' transect line level instead. 
+#' @param R_perF logical. If TRUE, treats recruitment rate as juvenile per adult
+#' female. If FALSE, treats recruitment rate as juvenile per adult (sum of both
+#' sexes).
+#' @param R_parent_drop0 logical. If TRUE (default), removes observations of
+#' juveniles without adults from the recruitment data. If FALSE, sets 1 as the
+#' number of adults/adult females when none are observed.
+#' @param sumR.Level character string. Default ("group") summarises
+#' reproduction/recruitment data at the group/observation level. Setting to
+#' "line" summarises data at the transect line level instead.
 #' @param dataVSconstants logical. If TRUE (default) returns a list of 2 lists
 #' containing data and constants for analysis with Nimble. If FALSE, returns a
 #' list containing all data and constants. 
-#' @param save logical. If TRUE (default) saves prepared data in working 
-#' directory as .rds file.
+#' @param save logical. If TRUE (default) saves the prepared data in the working 
+#' directory as a .rds file.
 #'
 #' @return A list or list of lists, depending on argument `dataVSconstants` 
 #' (see above).
@@ -44,7 +47,21 @@
 #'
 #' @examples
 
-prepareInputData <- function(d_trans, d_obs, d_cmr, d_rodent, localities = NULL, areas = NULL, counties = NULL, areaAggregation, countyAggregation, excl_neverObs = TRUE, R_perF, R_parent_drop0, sumR.Level = "group", dataVSconstants = TRUE, save = TRUE){
+prepareInputData <- function(d_trans,
+                             d_obs,
+                             d_cmr,
+                             d_rodent,
+                             localities = NULL,
+                             areas = NULL,
+                             counties = NULL,
+                             areaAggregation,
+                             countyAggregation,
+                             excl_neverObs = TRUE,
+                             R_perF,
+                             R_parent_drop0,
+                             sumR.Level = "group",
+                             dataVSconstants = TRUE,
+                             save = TRUE) {
   
   # Multi-area setup #
   #------------------#
@@ -73,8 +90,14 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, d_rodent, localities = NULL,
   
   ## If desired: remove all transects on which willow ptarmigans were never encountered --> of all time, or per year?
   if(excl_neverObs){
-    #d_trans <- dplyr::semi_join(d_trans, d_obs, by = c("locationID", "Year")) #This removes transects without observations in a given year, not only transects where Willow ptarmigan was never encountered
-    d_trans <- dplyr::semi_join(d_trans, d_obs, by = c("locationID")) #By removing the 'Year' parameter, only transects without any observations of Willow ptarmigan across all years are removed
+    
+    #This removes transects without observations in a given year, not only
+    #transects where Willow ptarmigan was never encountered
+    #d_trans <- dplyr::semi_join(d_trans, d_obs, by = c("locationID", "Year"))
+    
+    #By removing the 'Year' parameter, only transects without any observations
+    #of Willow ptarmigan across all years are removed
+    d_trans <- dplyr::semi_join(d_trans, d_obs, by = c("locationID"))
   }
 
   ## Variables shared across areas
@@ -206,7 +229,10 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, d_rodent, localities = NULL,
     TaksObs_mat <- TaksObs %>% dplyr::select(-locationID) %>% as.matrix() 
     colnames(TaksObs_mat) <- as.numeric(colnames(TaksObs_mat)) - min(range_yearsTot) + 1
     
-    years_mon <- as.numeric(colnames(TaksObs_mat)) # filtering observations on DistanceToTransectLine will in some cases remove all observations for a transect line within 1 year. This recalculates number of years with samples
+    # filtering observations on DistanceToTransectLine will in some cases remove
+    # all observations for a transect line within 1 year. This recalculates the
+    # number of years with samples
+    years_mon <- as.numeric(colnames(TaksObs_mat))
     
     for(t in 1:N_yearsTot){
       
@@ -333,7 +359,9 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, d_rodent, localities = NULL,
     }
     
     if(length(SurvAreaIdx) == 0){
-      stop("No overlap in areas for line transect and survival data. The present implementation of the model requires including line transect data from Lierne.")
+      stop("No overlap in areas for line transect and survival data.\n
+           The present implementation of the model requires including\n
+           line transect data from Lierne.")
     }
   }
   
@@ -384,17 +412,16 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, d_rodent, localities = NULL,
   }
   
   ## Assembling Nimble data
-  nim.data <-
-    list(
-      sumR_obs = input.data$sumR_obs,
-      sumAd_obs = sumAd_obs,
-      y = input.data$y,
-      zeros.dist = input.data$zeros_dist,
-      L = input.data$L,
-      N_line_year = input.data$N_line_year,
-      N_a_line_year = input.data$N_a_line_year,
-      A = input.data$A
-    )
+  nim.data <- list(
+    sumR_obs = input.data$sumR_obs,
+    sumAd_obs = sumAd_obs,
+    y = input.data$y,
+    zeros.dist = input.data$zeros_dist,
+    L = input.data$L,
+    N_line_year = input.data$N_line_year,
+    N_a_line_year = input.data$N_a_line_year,
+    A = input.data$A
+  )
   
   if (!is.null(d_cmr)) {
     nim.data$Survs1 <- input.data$Survs1
@@ -405,23 +432,21 @@ prepareInputData <- function(d_trans, d_obs, d_cmr, d_rodent, localities = NULL,
     nim.data$RodentOcc <- input.data$RodentOcc
   }
   
-  
   ## Assembling Nimble constants
-  nim.constants <-
-    list(
-      N_years = input.data$N_years,
-      min_years = input.data$min_years,
-      max_years = input.data$max_years,
-      W = input.data$W,
-      N_obs = input.data$N_obs,
-      Year_obs = input.data$Year_obs,
-      N_sites = input.data$N_sites,
-      N_ageC = N_ageC,
-      N_areas = input.data$N_areas,
-      area_names = input.data$area_names,
-      sumR_obs_year = input.data$sumR_obs_year,
-      N_sumR_obs = input.data$N_sumR_obs
-    )
+  nim.constants <- list(
+    N_years = input.data$N_years,
+    min_years = input.data$min_years,
+    max_years = input.data$max_years,
+    W = input.data$W,
+    N_obs = input.data$N_obs,
+    Year_obs = input.data$Year_obs,
+    N_sites = input.data$N_sites,
+    N_ageC = N_ageC,
+    N_areas = input.data$N_areas,
+    area_names = input.data$area_names,
+    sumR_obs_year = input.data$sumR_obs_year,
+    N_sumR_obs = input.data$N_sumR_obs
+  )
   
   if (!is.null(d_cmr)) {
     nim.constants$SurvAreaIdx <- input.data$SurvAreaIdx
