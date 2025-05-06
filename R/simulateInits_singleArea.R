@@ -7,6 +7,7 @@
 #' @param survVarT logical. If TRUE, survival is simulated including annual variation.
 #' @param fitRodentCov logical. If TRUE, initial values are generated for rodent 
 #' covariate (effect) and covariate is included in data simulation.
+#' @initVals.seed set seed for simulation of current chain
 #' 
 #' @return A list containing one complete set of initial values for the model.
 #' @export
@@ -77,9 +78,8 @@ simulateInits_singleArea <- function(nim.data, nim.constants, R_perF, survVarT, 
   sigmaT.R <- runif(1, 0, 2)
   
   epsT.R <- rep(0, N_years)
-  #epsT.R <- rnorm(N_year, 0, sigmaT.R)
-    
-  R_year <- exp(log(Mu.R) + betaR.R*RodentOcc[1:N_years] + epsT.R)
+
+  R_year <- exp(log(Mu.R) + betaR.R*RodentOcc[1:N_years] + epsT.R[1:N_years])
 
   
   # Detection parameters #
@@ -90,13 +90,12 @@ simulateInits_singleArea <- function(nim.data, nim.constants, R_perF, survVarT, 
   sigmaT.dd <- runif(1, 1, 10)
   
   epsT.dd <- rep(0, N_years)
-  #epsT.dd <- rnorm(N_years, 0, sd = sigmaT.dd)
-    
-  sigma <- exp(mu.dd + epsT.dd)
+
+  sigma <- exp(mu.dd + epsT.dd[1:N_years])
   esw <- sqrt(pi * sigma^2 / 2) 
   
-  p <- rep(NA, Tmax)
-  for(t in 1:Tmax){
+  p <- rep(NA, N_years)
+  for(t in 1:N_years){
     p[t] <- min(esw[t], W) / W
   }
 
@@ -158,22 +157,31 @@ simulateInits_singleArea <- function(nim.data, nim.constants, R_perF, survVarT, 
     
     Mu.R = Mu.R,
     sigmaT.R = sigmaT.R,
+    sigmaR.R = 0,
     epsT.R = epsT.R, 
+    epsR.R = rep(0, max(N_sites)),
     R_year = R_year,
     
     mu.dd = mu.dd,
     sigmaT.dd = sigmaT.dd,
+    sigmaR.dd = 0,
     epsT.dd = epsT.dd,
-    sigma = sigma, sigma2 = sigma^2,
+    epsR.dd = rep(0, max(N_sites)),
+    sigma = sigma,
+    sigma2 = sigma^2,
     esw = esw,
     p = p,
     
     Mu.S = Mu.S, 
     sigmaT.S = sigmaT.S,
+    sigmaR.S = 0,
     epsT.S = epsT.S,
+    epsR.S = rep(0, max(N_sites)),
     Mu.S1 = Mu.S1,
     epsT.S1.prop = epsT.S1.prop,
-    S1 = S1, S2 = S2, S = S,
+    S1 = S1,
+    S2 = S2,
+    S = S,
     
     Density = Density,
     N_exp = N_exp,
