@@ -41,6 +41,7 @@ plotTimeSeries <- function(mcmc.out,
   }
   pDetect <- data.frame()
   popDens <- data.frame()
+  ageStr <- data.frame()
   
   for(i in 1:N_areas) {
     # Prepare matrices for temporary storage of results
@@ -50,11 +51,12 @@ plotTimeSeries <- function(mcmc.out,
     }
     pDetect.sum <- data.frame()
     popDens.sum <-  data.frame()
+    ageStr.sum <- data.frame()
     
     # Determine area-specific year range
     #area_yearIdxs <- (min_years[i]:max_years[i])
-    area_yearIdxs <- (1:(maxYear - minYear + 1))
-    area_years <- area_yearIdxs + (minYear - 1)
+    area_yearIdxs <- (1:(maxYear - minYear + 1)) #+1
+    area_years <- area_yearIdxs + (minYear - 1) #-1
     
     for (t in 1:length(area_years)) {
       # Summarize annual reproductive rates
@@ -93,15 +95,14 @@ plotTimeSeries <- function(mcmc.out,
       pDetect.sum <- rbind(pDetect.sum, pDetect_add)
       
       # Summarize annual average population densities
-      popDens_juv <- out.mat[, paste0("Density[",  i, ", 1, ", 1:N_sites[i], ", ", area_yearIdxs[t], "]")]
-      popDens_ad <- out.mat[, paste0("Density[",  i, ", 2, ", 1:N_sites[i], ", ", area_yearIdxs[t], "]")]
-      #popDens_mean <- rowMeans(popDens_juv + popDens_ad) This gives error if number of transects within area is 1
-      
-      if (N_sites[i] > 1) {
-        popDens_mean <- rowMeans(popDens_juv + popDens_ad)
-      } else{
+      popDens_juv <- out.mat[, paste0("meanDens[",  i, ", 1, ", area_yearIdxs[t], "]")]
+      popDens_ad <- out.mat[, paste0("meanDens[",  i, ", 2, ", area_yearIdxs[t], "]")]
+
+      # if (N_sites[i] > 1) {
+      #   popDens_mean <- rowMeans(popDens_juv + popDens_ad)
+      # } else{
         popDens_mean <- popDens_juv + popDens_ad
-      }
+      # }
       
       popDens_add <- data.frame(
         Area = area_names[i],
@@ -111,6 +112,16 @@ plotTimeSeries <- function(mcmc.out,
         uCI = unname(quantile(popDens_mean, probs = 0.975))
       )
       popDens.sum <- rbind(popDens.sum, popDens_add)
+      
+      # Summarize annual population age structure (proportion juveniles)
+      ageStr_mean <- popDens_juv/(popDens_juv + popDens_ad)
+      
+      ageStr_add <- data.frame(Area = area_names[i],
+                               Year = area_years[t], 
+                               Median = median(ageStr_mean),
+                               lCI = unname(quantile(ageStr_mean, probs = 0.025)),
+                               uCI = unname(quantile(ageStr_mean, probs = 0.975)))
+      ageStr.sum <- rbind(ageStr.sum, ageStr_add)
     }
     
     rRep <- rbind(rRep, rRep.sum)
@@ -119,6 +130,7 @@ plotTimeSeries <- function(mcmc.out,
     }
     pDetect <- rbind(pDetect, pDetect.sum)
     popDens <- rbind(popDens, popDens.sum)
+    ageStr <- rbind(ageStr, ageStr.sum)
   }
   
 
@@ -135,6 +147,7 @@ plotTimeSeries <- function(mcmc.out,
     pdf("Plots/TimeSeries/TimeSeries_rRep.pdf",
         width = 8,
         height = 5)
+    
     for (i in 1:N_areas) {
       p_rRep <-
         ggplot(subset(rRep, Area == area_names[i]), aes(x = Year)) +
@@ -145,7 +158,7 @@ plotTimeSeries <- function(mcmc.out,
         scale_x_continuous(breaks = c(minYear:maxYear),
                            limits = c(minYear, maxYear)) +
         ylim(min(rRep$lCI), max(rRep$uCI)) +
-        ylab("Reproductive rate") +
+        ylab("Recruitment rate") +
         ggtitle(area_names[i]) +
         theme_bw() +
         theme(panel.grid.minor = element_blank(),
@@ -306,7 +319,7 @@ plotTimeSeries <- function(mcmc.out,
           breaks = c(minYear:maxYear),
           limits = c(minYear, maxYear)) +
         ylim(min(popDens$lCI), max(popDens$uCI)) +
-        ylab(bquote("Average population density " (birds / km ^ 2))) +
+        ylab(bquote("Proportion juveniles ")) +
         ggtitle(area_names[i]) +
         theme_bw() +
         theme(panel.grid.minor = element_blank(),
@@ -334,6 +347,67 @@ plotTimeSeries <- function(mcmc.out,
         "Plots/TimeSeries/TimeSeries_popDens1.pdf",
         "Plots/TimeSeries/TimeSeries_popDens2.pdf"
       )
+  }
+  
+  # Average population age ratios
+  if(Densities){
+    
+    pdf("Plots/TimeSeries/TimeSeries_ageStr1.pdf", width = 8, height = 5)
+    for(i in 1:N_areas){
+      
+      p_ageStr1 <- ggplot(subset(ageStr, Area == area_names[i]), aes(x = Year))  + 
+        geom_line(aes(y = Median), color = "#C2B391") + 
+        geom_ribbon(aes(ymin = lCI, ymax = uCI), alpha = 0.5, fill = "#C2B391") + 
+        scale_x_continuous(#breaks = c(min_years[i]:max_years[i]) + minYear - 1,
+          breaks = c(minYear:maxYear),
+          limits = c(minYear, maxYear)) + 
+        ylab(bquote("Proportion juveniles")) + 
+        ggtitle(area_names[i]) + 
+        theme_bw() + 
+        theme(panel.grid.minor = element_blank(), 
+              axis.text.x = element_text(angle = 45, vjust = 0.75))
+      
+      if(showDataWindow){
+        p_ageStr1 <- p_ageStr1 + 
+          geom_rect(xmin = min_years[i] + minYear - 1, xmax = max_years[i] + minYear - 1,
+                    ymin = min(subset(ageStr, Area == area_names[i])$lCI), ymax = max(subset(ageStr, Area == area_names[i])$uCI), 
+                    alpha = 0.01, fill = "cornflowerblue")
+      }
+      
+      print(p_ageStr1)
+      
+    }
+    dev.off()
+    
+    pdf("Plots/TimeSeries/TimeSeries_ageStr2.pdf", width = 8, height = 5)
+    for(i in 1:N_areas){
+      
+      p_ageStr2 <- ggplot(subset(ageStr, Area == area_names[i]), aes(x = Year))  + 
+        geom_line(aes(y = Median), color = "#C2B391") + 
+        geom_ribbon(aes(ymin = lCI, ymax = uCI), alpha = 0.5, fill = "#C2B391") + 
+        scale_x_continuous(#breaks = c(min_years[i]:max_years[i]) + minYear - 1,
+          breaks = c(minYear:maxYear),
+          limits = c(minYear, maxYear)) + 
+        ylim(min(ageStr$lCI), max(ageStr$uCI)) + 
+        ylab(bquote("Average population density " (birds/km^2))) + 
+        ggtitle(area_names[i]) + 
+        theme_bw() + 
+        theme(panel.grid.minor = element_blank(), 
+              axis.text.x = element_text(angle = 45, vjust = 0.75))
+      
+      if(showDataWindow){
+        p_ageStr2 <- p_ageStr2 + 
+          geom_rect(xmin = min_years[i] + minYear - 1, xmax = max_years[i] + minYear - 1,
+                    ymin = min(ageStr$lCI), ymax = max(ageStr$uCI), 
+                    alpha = 0.01, fill = "cornflowerblue")
+      }
+      
+      print(p_ageStr2)
+      
+    }
+    dev.off()
+    
+    plot.paths <- c(plot.paths, "Plots/TimeSeries/TimeSeries_ageStr1.pdf", "Plots/TimeSeries/TimeSeries_ageStr2.pdf")
   }
   
   return(plot.paths)
