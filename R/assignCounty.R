@@ -1,11 +1,11 @@
 #' Assign each transect line and observation to county by using the geographical
 #' data available (WKT) for each transect line
 #'
-#' @param df a list of 2 tibbles with the wrangled line transect and observation
+#' @param df a list of 2 tibbles with the wrangled line transect and occurrence
 #' data
 #'
 #' @return a list of 2 tibbles with the assigned county name for transects and
-#' observations
+#' occurrences
 #' @export
 #'
 #' @examples
