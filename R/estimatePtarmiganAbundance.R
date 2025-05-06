@@ -3,8 +3,10 @@
 #' classified as medium suitability or above (classes 4-6).
 #'
 #' @param output a list of model outputs (see 'prepareOutputNI.R')
-#' @param rds path to ptarmigan_habitat.rds, if available
-#' @param csv path to county_habitat_data.csv, if available
+#' @param rds path to ptarmigan_habitat.rds, if available. Either this or 'csv'
+#' must be present.
+#' @param csv path to county_habitat_data.csv, if available. Either this or 'rds'
+#' must be present.
 #'
 #' @return a data frame with the estimated number of individuals (in 1000's) per
 #' spatial unit per year
@@ -39,10 +41,10 @@ estimatePtarmiganAbundance <- function(output = prepared.output,
   annualArea <- annualArea %>% dplyr::select("Area", "Year", "estimate", "lower25", "upper75")
 
   # OPTIONAL: plot time series of no. of individuals per spatial unit  
-  # ggplot(data = annualArea, aes(x = Year, y = estimate, group = Area)) +
-  #   geom_line(aes(col = Area)) +
-  #   labs(x="year", y = "No. individuals (1000)") +
-  #   scale_x_continuous(breaks=seq(2007, 2021, 1))
+  ggplot(data = annualArea, aes(x = Year, y = estimate, group = Area)) +
+    geom_line(aes(col = Area)) +
+    labs(x="year", y = "No. individuals (1000)") +
+    scale_x_continuous(breaks=seq(min(annualArea$Year), max(annualArea$Year), 1))
 
   return(annualArea)  
 }
