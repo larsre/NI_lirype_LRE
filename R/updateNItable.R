@@ -17,15 +17,16 @@
 #' @param save_path character string indicating the directory into which to save
 #' the updated indicator data.
 #' @param min_year numeric, sets the starting year for updates to the indicator
-#' values. If `max_year` is not set, all values from and including `min_year`
+#' values. If `max_year` is not set (NULL), all values from and including `min_year`
 #' will be updated.
 #' @param max_year numeric, sets the end year for updates to the indicator
-#' values. If `min_year` is not set, all the values up to and including
+#' values. If `min_year` is not set (NULL), all the values up to and including
 #' `max_year` will be updated.
 #'
 #' @return A list containing 1) a data frame of the values of the indicator
 #' and 2) a list of distribution objects quantifying the uncertainty of each
-#' indicator value estimate. Only 1) is updated here, whereas 2) is attached
+#' indicator value estimate. Only 1) is updated here, as the uncertainty is
+#' specified in lower 25% and upper 75% quartiles, whereas 2) is attached
 #' from the original download for compatibility.
 #' @export
 #'
@@ -35,7 +36,7 @@ updateNItable <- function(
     model.est = output.data,
     cur.table = currentPtarmTable,
     save = FALSE,
-    save_path,
+    save_path = "data",
     min_year = NULL,
     max_year = NULL) {
   
@@ -92,7 +93,9 @@ updateNItable <- function(
   ind.values$indicatorName[is.na(ind.values$indicatorName)] <- "Lirype"
   ind.values$unitOfMeasurement[is.na(ind.values$unitOfMeasurement)] <- "thousand ind"
   
-  # yet to deal with: datatypeId and datatypeName !!
+  # add missing datatypeId and datatypeName
+  ind.values$datatypeId[is.na(ind.values$datatypeId) & !is.na(ind.values$verdi)] <- 3
+  ind.values$datatypeName[is.na(ind.values$datatypeName) & !is.na(ind.values$verdi)] <- "Beregnet fra modeller"
   
   # sort and rename columns
   ind.values <- ind.values %>% dplyr::select("indicatorId", "indicatorName", "areaId.y",
@@ -105,12 +108,16 @@ updateNItable <- function(
   # fix column names
   colnames(ind.values)[3] <- "areaId"
   
+  # fix data types
+  ind.values$indicatorId <- as.integer(ind.values$indicatorId)
+  ind.values$datatypeId <- as.integer(ind.values$datatypeId)
+  
   # add updated indicator values to the original list structure
   cur.table$Lirype$indicatorValues <- ind.values
   
   # save the updated indicator data
   if(save){
-    saveRDS(cur.table, file = paste0(save_path, "/updatedIndicatorData.rds"))
+    saveRDS(cur.table, file = paste0(save_path, "/updatedIndicatorData_",Sys.Date(),".rds"))
   }
   
   # return
