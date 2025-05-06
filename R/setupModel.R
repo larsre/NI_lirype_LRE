@@ -1,18 +1,19 @@
 #' Set up model, data, and initial values for running MCMC
 #'
-#' @param modelCode.path string. Relative path to the model file to be used
-#' @param customDist logical. If TRUE, uses custom half-normal distribution from
-#' nimbleDistance package.  
+#' @param modelCode an R call object specifying the model structure for integrated 
+#' distance sampling model
 #' @param nim.data list of input objects representing data
 #' @param nim.constants list of input objects representing constants
 #' @param R_perF logical. If TRUE, treats recruitment rate as juvenile per adult female.
 #' If FALSE, treats recruitment rate as juvenile per adult (sum of both sexes).
-#' @param shareRE logical. If TRUE, temporal random effects are shared across locations.
 #' @param survVarT logical. If TRUE, annual variation in survival is simulated.
 #' @param fitRodentCov logical. If TRUE, rodent covariate on reproduction is included.
-#' @param niter integer. Number of MCMC iterations (default = 25000) #100000
-#' @param nthin integer. Thinning factor (default = 5) #20
-#' @param nburn integer. Number of iterations to discard as burn-in (default = 5000) #40000
+#' @param addDummyDim logical. If TRUE (default) adds a dummy "area" dimension when 
+#' simulating initial values for a single area implementation. This is necessary 
+#' for the multi-area setup/model to run with data from only one area. 
+#' @param niter integer. Number of MCMC iterations (default = 25000)
+#' @param nthin integer. Thinning factor (default = 5)
+#' @param nburn integer. Number of iterations to discard as burn-in (default = 5000)
 #' @param nchains integer. Number of chains to run.
 #' @param testRun logical. If TRUE, sets up for a test run with 10 iterations,
 #' no thinning, and no burn-in (default = FALSE)
@@ -24,12 +25,10 @@
 #'
 #' @examples
 
-setupModel <- function(modelCode.path,
-                       customDist,
+setupModel <- function(modelCode,
                        nim.data,
                        nim.constants,
                        R_perF,
-                       shareRE,
                        survVarT,
                        fitRodentCov,
                        addDummyDim = TRUE,
@@ -40,33 +39,20 @@ setupModel <- function(modelCode.path,
                        testRun = FALSE,
                        initVals.seed) {
   
-  ## Catch mismatches between model code name and distribution settings
-  if((customDist & (!(grepl('dHN', modelCode.path, fixed = TRUE)) & !(grepl('dHR', modelCode.path, fixed = TRUE)))) |
-     (!customDist & (grepl('dHN', modelCode.path, fixed = TRUE) & grepl('dHR', modelCode.path, fixed = TRUE)))){
-    stop('Mismatch between model code name and distribution settings. Check inputs for modelCode.path and customDist.')
-  }
-  
-  ## Load model code
   require('nimble')
-  if(customDist){require('nimbleDistance')}
-  #devtools::install_github("scrogster/nimbleDistance", build_vignettes = TRUE, INSTALL_opts = "--no-multiarch")
-  source(modelCode.path)
-  
+  require('nimbleDistance')
+
   ## Set parameters to monitor
-  params <- c("esw", "p", #"D",
-              "R_year", "Mu.R", "h.Mu.R", "h.sigma.R", "sigmaT.R",
-              "sigma", "mu.dd", "sigmaT.dd",
-              "Density", "N_exp", "N_tot_exp",
-              "S", "Mu.S", "h.Mu.S", "h.sigma.S", "Mu.S1",
+  params <- c("esw", "p",
+              "R_year", "Mu.R", "h.Mu.R", "h.sigma.R", "sigmaT.R", "sigmaR.R",
+              "sigma", "mu.dd", "h.mu.dd", "h.sigma.dd", "sigmaT.dd", "sigmaR.dd",
+              "meanDens", 
               "Mu.D1", "sigma.D",
-              "ratio.JA1")
-  
-  if(grepl('dHR', modelCode.path, fixed = TRUE)){
-    params <- c(params, "b")
-  }
+              "S", "Mu.S", "h.Mu.S", "h.sigma.S",
+              "Mu.S1")
   
   if(survVarT){
-    params <- c(params, "sigmaT.S", "epsT.S1.prop")
+    params <- c(params, "sigmaT.S", "sigmaR.S", "eps.S1.prop")
   }
   
   if(fitRodentCov){
@@ -74,12 +60,13 @@ setupModel <- function(modelCode.path,
   }
   
   if(nim.constants$N_areas == 1 & !addDummyDim){
-    hyperparam.idx <- which(params %in% c("h.Mu.R", "h.sigma.R", "h.Mu.S", "h.sigma.S", "h.Mu.betaR.R", "h.sigma.betaR.R"))
-    params <- params[-hyperparam.idx]
+    hyperparam.idx <- which(params %in% c("h.Mu.R", "h.sigma.R", "h.Mu.S", "h.sigma.S", "h.Mu.betaR.R", "h.sigma.betaR.R", "h.mu.dd", "h.sigma.dd"))
+    resvar.idx <- which(params %in% c("sigmaR.R", "sigmaR.S", "sigmaR.dd"))
+    params <- params[-c(hyperparam.idx, resvar.idx)]
   }
   
   ## Simulate initial values
-  set.seed(initVals.seed)
+  #set.seed(initVals.seed)
   initVals <- list()
   for(c in 1:nchains){
     
@@ -89,17 +76,18 @@ setupModel <- function(modelCode.path,
                                                 nim.constants = nim.constants, 
                                                 R_perF = R_perF,
                                                 survVarT = survVarT,
-                                                fitRodentCov = fitRodentCov)
+                                                fitRodentCov = fitRodentCov,
+                                                initVals.seed = initVals.seed[c])
     }else{
       
       initVals[[c]] <- simulateInits(nim.data = nim.data, 
                                      nim.constants = nim.constants, 
-                                     R_perF = R_perF,
-                                     shareRE = shareRE, 
+                                     R_perF = R_perF, 
                                      survVarT = survVarT,
-                                     fitRodentCov = fitRodentCov)
+                                     fitRodentCov = fitRodentCov,
+                                     initVals.seed = initVals.seed[c])
     }
-
+    
   }
   
   ## Adjust MCMC parameters if doing a test run
@@ -111,12 +99,14 @@ setupModel <- function(modelCode.path,
   
   ## Collate model setup variables in a list
   setup <- list(
-    modelCode = rypeIDSM,
+    modelCode = modelCode,
     modelParams = params,
     initVals = initVals,
-    mcmcParams = list(niter = niter, nthin = nthin, 
-                      nburn = nburn, nchains = nchains)
+    mcmcParams = list(niter = niter,
+                      nthin = nthin, 
+                      nburn = nburn,
+                      nchains = nchains)
   )
-   
+  
   return(setup) 
 }
