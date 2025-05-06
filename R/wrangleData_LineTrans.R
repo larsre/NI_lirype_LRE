@@ -55,7 +55,7 @@ wrangleData_LineTrans <- function(DwC_archive_list,
     Occ[[i]] <- tibble::as_tibble(DwC_archive_list[[i]]$getExtensionTables("occurrence")[[1]]$exportAsDataFrame())
     
     # Complete measurements and facts table
-    Meas[[i]] <- tibble::as_tibble(DwC_archive_list[[i]]$getExtensionTables()[[1]]$exportAsDataFrame())
+    Meas[[i]] <- tibble::as_tibble(DwC_archive_list[[i]]$getExtensionTables("measurementorfacts")[[1]]$exportAsDataFrame())
   }
 
   # Bind datasets together
