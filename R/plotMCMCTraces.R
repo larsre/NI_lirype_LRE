@@ -12,7 +12,7 @@
 #'
 #' @examples
 #' 
-plotMCMCTraces <- function(mcmc.out, fitRodentCov, VitalRates = TRUE, DetectParams = TRUE, PopSizes = TRUE, Densities = TRUE){
+plotMCMCTraces <- function(mcmc.out, fitRodentCov, survVarT, VitalRates = TRUE, DetectParams = TRUE, PopSizes = TRUE, Densities = TRUE){
   
   ## Make parameter lists
   mVR_params <- c(
@@ -20,23 +20,27 @@ plotMCMCTraces <- function(mcmc.out, fitRodentCov, VitalRates = TRUE, DetectPara
     "h.Mu.R",
     "h.sigma.R",
     "sigmaT.R",
+    "sigmaR.R",
     "Mu.D1",
     "sigma.D",
-    "ratio.JA1",
+    #"ratio.JA1",
     "Mu.S",
     "Mu.S1",
     "h.Mu.S",
     "h.sigma.S"
   )
   
+  if (survVarT) {
+    mVR_params <- c(mVR_params, c("sigmaT.S","sigmaR.R"))
+  }
+  
   if (fitRodentCov) {
-    mVR_params <-
-      c(mVR_params, "betaR.R", "h.Mu.betaR.R", "h.sigma.betaR.R")
+    mVR_params <- c(mVR_params, "betaR.R", "h.Mu.betaR.R", "h.sigma.betaR.R")
   }
   
   tVR_params <- c("R_year", "S")
   
-  mDet_params <- c("mu.dd", "sigmaT.dd")
+  mDet_params <- c("mu.dd", "sigmaT.dd", "sigmaR.dd", "h.mu.dd", "h.sigma.dd")
   
   tDet_params <- c("esw", "p", "sigma")
   
@@ -44,7 +48,7 @@ plotMCMCTraces <- function(mcmc.out, fitRodentCov, VitalRates = TRUE, DetectPara
   
   Ntot_params <- c("N_tot_exp")
   
-  Dens_params <- c("Density")
+  Dens_params <- c("meanDens")
   
   
   ## Make plots and print to pdf
@@ -108,33 +112,33 @@ plotMCMCTraces <- function(mcmc.out, fitRodentCov, VitalRates = TRUE, DetectPara
       )
   }
   
-  # Population sizes
-  if(PopSizes) {
-    pdf("Plots/MCMCTraces/MCMCtrace_Ntot.pdf",
-        width = 8,
-        height = 6)
-    MCMCvis::MCMCtrace(mcmc.out,
-                       params = Ntot_params,
-                       ind = TRUE,
-                       pdf = FALSE)
-    dev.off()
-    
-    pdf("Plots/MCMCTraces/MCMCtrace_N.pdf",
-        width = 8,
-        height = 6)
-    MCMCvis::MCMCtrace(mcmc.out,
-                       params = N_params,
-                       ind = TRUE,
-                       pdf = FALSE)
-    dev.off()
-    
-    plot.paths <-
-      c(
-        plot.paths,
-        "Plots/MCMCTraces/MCMCtrace_Ntot.pdf",
-        "Plots/MCMCTraces/MCMCtrace_N.pdf"
-      )
-  }
+  # # Population sizes
+  # if(PopSizes) {
+  #   pdf("Plots/MCMCTraces/MCMCtrace_Ntot.pdf",
+  #       width = 8,
+  #       height = 6)
+  #   MCMCvis::MCMCtrace(mcmc.out,
+  #                      params = Ntot_params,
+  #                      ind = TRUE,
+  #                      pdf = FALSE)
+  #   dev.off()
+  #   
+  #   pdf("Plots/MCMCTraces/MCMCtrace_N.pdf",
+  #       width = 8,
+  #       height = 6)
+  #   MCMCvis::MCMCtrace(mcmc.out,
+  #                      params = N_params,
+  #                      ind = TRUE,
+  #                      pdf = FALSE)
+  #   dev.off()
+  #   
+  #   plot.paths <-
+  #     c(
+  #       plot.paths,
+  #       "Plots/MCMCTraces/MCMCtrace_Ntot.pdf",
+  #       "Plots/MCMCTraces/MCMCtrace_N.pdf"
+  #     )
+  # }
   
   # Population densities
   if(Densities) {
