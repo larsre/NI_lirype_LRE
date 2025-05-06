@@ -5,11 +5,11 @@
 #' wrangleData_LineTrans(). 
 #' @param d_obs tibble containing information on observations made along
 #' transects. Output of wrangleData_LineTrans().
-#' @param d_cmr OPTIONAL list with 2 elements. Surv1 and Surv2 are matrices of
+#' @param d_cmr list with 2 elements. Surv1 and Surv2 are matrices of
 #' individuals released (column 1) and known to have survived (column 2) in each
 #' year (row) for season 1 and 2, respectively. Output of wrangleData_CMR().
 #' Set to 'NULL' to exclude time variation in survival.
-#' @param d_rodent OPTIONAL matrix containing the average number of transects
+#' @param d_rodent matrix containing the average number of transects
 #' with rodent observations per area and year. Output of wrangleData_Rodent().
 #' Set to 'NULL' to exclude this covariate.
 #' @param localities vector of strings listing localities to consider. Either
@@ -61,6 +61,7 @@ prepareInputData <- function(d_trans,
                              R_parent_drop0,
                              sumR.Level = "group",
                              dataVSconstants = TRUE,
+                             addDummyDim = TRUE,
                              save = TRUE) {
   
   # Multi-area setup #
@@ -97,7 +98,8 @@ prepareInputData <- function(d_trans,
     
     #By removing the 'Year' parameter, only transects without any observations
     #of Willow ptarmigan across all years are removed
-    d_trans <- dplyr::semi_join(d_trans, d_obs, by = c("locationID"))
+    #d_trans <- dplyr::semi_join(d_trans, d_obs, by = c("locationID"))
+    d_trans <- d_trans %>% dplyr::filter(locationID %in% d_obs$locationID)
   }
 
   ## Variables shared across areas
@@ -349,20 +351,18 @@ prepareInputData <- function(d_trans,
   #---------------#
   
   ## If including survival estimates, set spatial index for CMR data
-  if(!is.null(d_cmr)) {
-    if(countyAggregation) {
-      SurvAreaIdx <- which(sUnits == d_cmr$county_names)
-    } else if(areaAggregation) {
-      SurvAreaIdx <- which(sUnits == d_cmr$area_names)
-    } else {
-      SurvAreaIdx <- which(sUnits == d_cmr$locality_names)
-    }
-    
-    if(length(SurvAreaIdx) == 0){
-      stop("No overlap in areas for line transect and survival data.\n
-           The present implementation of the model requires including\n
-           line transect data from Lierne.")
-    }
+  if(countyAggregation) {
+    SurvAreaIdx <- which(sUnits == d_cmr$county_names)
+  } else if(areaAggregation) {
+    SurvAreaIdx <- which(sUnits == d_cmr$area_names)
+  } else {
+    SurvAreaIdx <- which(sUnits == d_cmr$locality_names)
+  }
+  
+  if(length(SurvAreaIdx) == 0){
+    stop("No overlap in areas for line transect and survival data.\n
+         The present implementation of the model requires including\n
+         line transect data from Lierne.")
   }
   
   ## Add dummy dimensions if running for only one spatial unit
@@ -395,20 +395,25 @@ prepareInputData <- function(d_trans,
     W = W, # Truncation distance
     N_ageC = N_ageC, # Number of age classes
     
+    Survs1 = d_cmr$Survs1, # Season 1 releases & survivors (area 1)
+    Survs2 = d_cmr$Survs2, # Season 2 releases & survivors (area 1)
+    SurvAreaIdx = SurvAreaIdx,
+    year_Survs = d_cmr$year_Survs, # Years (indices) of telemetry data
+    N_years_RT = length(d_cmr$year_Survs),
+    
+    RodentOcc = d_rodent$rodentAvg,
+    RodentOcc_meanCov = d_rodent$meanCov,
+    RodentOcc_sdCov = d_rodent$sdCov,
+    
     N_areas = N_sUnits, # Number of areas (integer)
     area_names = sUnits # Area names (character vector)
   )
   
-  if (!is.null(d_cmr)) {
-    input.data$Survs1 <- d_cmr$Survs1 # Season 1 releases & survivors (area 1)
-    input.data$Survs2 <- d_cmr$Survs2 # Season 2 releases & survivors (area 1)
-    input.data$SurvAreaIdx <- SurvAreaIdx
-    input.data$year_Survs <- d_cmr$year_Survs # Years (indices) of telemetry data
-    input.data$N_years_RT <- length(d_cmr$year_Survs)
-  }
-  
-  if (!is.null(d_rodent)) {
-    input.data$RodentOcc <- d_rodent # Rodent covariate (matrix)
+  ## Drop dummy dimension when only one area is included
+  if(N_sUnits == 1 & !addDummyDim){
+    for(i in 1:length(input.data)){
+      input.data[[i]] <- drop(input.data[[i]])
+    }
   }
   
   ## Assembling Nimble data
@@ -420,17 +425,11 @@ prepareInputData <- function(d_trans,
     L = input.data$L,
     N_line_year = input.data$N_line_year,
     N_a_line_year = input.data$N_a_line_year,
-    A = input.data$A
+    A = input.data$A,
+    Survs1 = input.data$Survs1,
+    Survs2 = input.data$Survs2,
+    RodentOcc = input.data$RodentOcc
   )
-  
-  if (!is.null(d_cmr)) {
-    nim.data$Survs1 <- input.data$Survs1
-    nim.data$Survs2 <- input.data$Survs2
-  }
-  
-  if (!is.null(d_rodent)) {
-    nim.data$RodentOcc <- input.data$RodentOcc
-  }
   
   ## Assembling Nimble constants
   nim.constants <- list(
@@ -444,17 +443,18 @@ prepareInputData <- function(d_trans,
     N_ageC = N_ageC,
     N_areas = input.data$N_areas,
     area_names = input.data$area_names,
+    SurvAreaIdx = input.data$SurvAreaIdx,
+    year_Survs = input.data$year_Survs,
+    N_years_RT = input.data$N_years_RT,
     sumR_obs_year = input.data$sumR_obs_year,
-    N_sumR_obs = input.data$N_sumR_obs
+    N_sumR_obs = input.data$N_sumR_obs,
+    N_ageC = N_ageC,
+    telemetryData = telemetryData,
+    RodentOcc_meanCov = input.data$RodentOcc_meanCov,
+    RodentOcc_sdCov = input.data$RodentOcc_sdCov
   )
   
-  if (!is.null(d_cmr)) {
-    nim.constants$SurvAreaIdx <- input.data$SurvAreaIdx
-    nim.constants$year_Survs <- input.data$year_Survs
-    nim.constants$N_years_RT <- input.data$N_years_RT
-  }
-
-  ## Make final data list to return
+    ## Make final data list to return
   if (dataVSconstants) {
     rype.data <- list(nim.data = nim.data,
                       nim.constants = nim.constants)
