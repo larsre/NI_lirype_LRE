@@ -39,6 +39,11 @@ wrangleData_Rodent <- function(duplTransects,
   rodent_data_raw <- readRDS("data/Rodent_data.rds")
   
   ## Filter event data by either locality and year or area and year
+  # Change name of two areas
+  rodent_data_raw$verbatimLocality[rodent_data_raw$verbatimLocality=="Statskog og Klinga utm."] <- "Statskog Bangdalen/Klinga utmarkslag Rype"
+  rodent_data_raw$verbatimLocality[rodent_data_raw$verbatimLocality=="Troms Ytre"] <- "Troms Ytre Nord"
+  
+  # filter
   if(areaAggregation){
     rodent_data <- rodent_data_raw %>% 
       dplyr::mutate(date = as.Date(date)) %>%
@@ -112,6 +117,12 @@ wrangleData_Rodent <- function(duplTransects,
     }
   }
  
+  meanCov <- mean(rodentAvg, na.rm = TRUE)
+  sdCov <- sd(rodentAvg, na.rm = TRUE)
+  rodentAvg <- (rodentAvg - meanCov) / sdCov
+  
   ## Return data
-  return(rodentAvg)
+  return(list(rodentAvg = rodentAvg,
+              meanCov = meanCov, 
+              sdCov = sdCov))
 }
