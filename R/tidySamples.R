@@ -10,6 +10,8 @@
 #' @param IDSM.out an MCMC list containing posterior samples for one or more
 #' chains from a fitted multi-area model.
 #' @param save logical. If TRUE (default), saves the output in an .RDS file.
+#' @param fileName character string specifying the name of the .RDS file to save
+#' tidied samples in. Required if 'save' = TRUE.
 #'
 #' @return a condensed version of the MCMC list `IDSM.out` without redundant nodes.
 #' @export
@@ -17,13 +19,16 @@
 #' @examples
 #' 
 tidySamples <- function(IDSM.out,
-                        save = TRUE) {
+                        save = TRUE,
+                        fileName = NULL) {
+  
+  if(!require(stringr)) { print("Package 'stringr' not installed"); break; }
   
   ## Extract number of chains
   n_chains <- length(IDSM.out)
   
   ## Identify density nodes
-  Dnode_idx <- which(stringr::str_detect(colnames(IDSM.out[[1]]), pattern = "Density"))
+  Dnode_idx <- which(stringr::str_detect(colnames(IDSM.out[[1]]), pattern = "meanDens"))
   
   ## Identify unnecessary NA nodes
   NAnode_idx <- unname(which(is.na(colSums(IDSM.out[[1]]))))
@@ -47,7 +52,7 @@ tidySamples <- function(IDSM.out,
   
   ## Optional: save tidied samples
   if(save){
-    saveRDS(IDSM.out, file = "rypeIDSM_dHN_multiArea_realData_allAreas_tidy.rds")
+    saveRDS(IDSM.out, file = fileName)
   }
   
   ## Return tidied samples
