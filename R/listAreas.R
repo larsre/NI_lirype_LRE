@@ -28,7 +28,7 @@ listAreas <- function(){
     "Indre Finnmark",
     "Indre Salten",
     "Kongsvoll",
-    "Kvikne Fjellstyre",
+    #"Kvikne Fjellstyre", #Now part of region Nord-Østerdal
     "Lesja Fjellstyre",
     "Lierne Fjellstyre",
     "Midtre Salten",
@@ -36,11 +36,8 @@ listAreas <- function(){
     "Namskogan Fjellstyre",
     "Njardarheim",
     "Nordre Salten",
-    "Os Fjellstyre",
+    #"Os Fjellstyre", #Now part of region Nord-Østerdal
     "Osen Fjellstyre",
-    "Øst Finnmark",
-    "Øvre Numedal Fjellstyre",
-    "Øystre Slidre Fjellstyre",
     #"Regionfelt Østlandet", #exclude from analysis - very few observations/sporadic counting last years
     "Ringebu Fjellstyre",
     "Røyrvik Fjellstyre",
@@ -48,22 +45,25 @@ listAreas <- function(){
     "Snåsa Fjellstyre",
     "Soknedal Fjellstyre",
     "Sollia Fjellstyre",
-    "Statskog og Klinga utm.",
+    "Statskog Bangdalen/Klinga utmarkslag Rype", #Formerly 'Statskog og Klinga utm.'
     "Statskog Røros",
     "Steinkjer Lirype",
     "Stjørdal Fjellstyre",
+    "Troms Ytre Nord",
     "Vest Finnmark kyst",
     "Vestre Slidre Fjellstyre",
     "Ytre Salten",
-    "Troms Ytre",
-    "Troms Midt",
-    "Troms Nord",
-    "Troms Sør",
+    #"Troms Midt",
+    #"Troms Nord",
+    #"Troms Sør",
+    "Øst Finnmark",
+    "Øvre Numedal Fjellstyre",
+    "Øystre Slidre Fjellstyre"
     #added 2021:
-    "Høylandet Fjellstyre",
-    "Øyer Fjellstyre",
+    #"Høylandet Fjellstyre",
+    #"Øyer Fjellstyre",
     #added 2022:
-    "Folldal Fjellstyre"
+    #"Folldal Fjellstyre" #Now part of region Nord-Østerdal
     #added 2023:
     #"Sunndal Fjellstyre",
     #"Rendalen",
