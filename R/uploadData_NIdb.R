@@ -22,15 +22,7 @@
 #' @export
 #'
 #' @examples
-uploadData_NIdb <- function(species, data_path){
-  
-  ## Load saved data if not present
-  
-  # Updated indicator data
-  if(!exists("updatedIndicatorData")){
-    updatedIndicatorData <- readRDS(paste0(data_path, "/updatedIndicatorData.rds"))
-    message('Updated indicator data loaded from file.')
-  }
+uploadData_NIdb <- function(indicatorData){
   
   ## Provide user credentials for NI database and request token
   myUserName_NIdb <- rstudioapi::askForPassword("NI database username") # = NINA email address
@@ -38,8 +30,8 @@ uploadData_NIdb <- function(species, data_path){
   
   NIcalc::getToken(username = myUserName_NIdb,  
                    password = myPassword_NIdb,
-                   url = "https://www8.nina.no/NaturindeksAPITest"
-                   #url = "https://www8.nina.no/NaturindeksNiCalc"
+                   #url = "https://www8.nina.no/NaturindeksAPITest"
+                   url = "https://www8.nina.no/NaturindeksNiCalc"
   )
   
   # Ask the user for confirmation to write to database
@@ -50,12 +42,10 @@ uploadData_NIdb <- function(species, data_path){
     
     message("Uploading new indicator data to NI database:")
     
-    for(j in 1:length(species)){
-      message(species[j])
-      NIcalc::writeIndicatorValues(updatedIndicatorData[[j]])
-      #writeIndicatorValues(updatedIndicatorData[[j]])
-      
-    }  
+    for(i in 1:length(indicatorData)){
+      message(names(indicatorData)[i])
+      NIcalc::writeIndicatorValues(indicatorData[[i]])
+    }
   }else{
     message("Function halted.")
   }
