@@ -1,7 +1,23 @@
+#install.packages("remotes","nimble","EnvStats","extraDistr","reshape2")
+#remotes::install_github("LivingNorway/LivingNorwayR")
+#remotes::install_github("scrogster/nimbleDistance")
+#devtools::install_github("NINAnor/NIcalc", build_vignettes = T)
 library(tidyverse)
+library(nimble)
+library(nimbleDistance)
+library(LivingNorwayR)
+library(reshape2)
+
 
 # SETUP #
 #-------#
+
+## Set seed
+mySeed <- 32
+set.seed(mySeed)
+
+## Set number of chains
+nchains <- 3
 
 ## Source all functions in "R" folder
 sourceDir <- function(path, trace = TRUE, ...) {
@@ -19,6 +35,9 @@ sourceDir('R')
 # (Re-)download data (TRUE) or use existing data in 'data' folder (FALSE)
 downloadData <- TRUE
 
+# Aggregation to area level
+areaAggregation <- TRUE
+
 # NI: estimate parameters by pre-2020 counties (FALSE; default NI) or by post-2020 counties (TRUE)
 counties2020 <- FALSE
 
@@ -32,14 +51,17 @@ R_parent_drop0 <- TRUE
 # NOTE: if this is not defined, will default to group level
 sumR.Level <- "line" # Summing at the line level
 
-# Random effects shared across areas (default TRUE)
-shareRE <- FALSE
-
 # Estimate time variation in survival (default FALSE)
 survVarT <- FALSE
 
 # Include rodent covariate on reproduction (default FALSE)
 fitRodentCov <- FALSE
+
+# Use of telemetry data from Lierne (default FALSE)
+telemetryData <- FALSE
+
+# Test run or not
+testRun <- TRUE
 
 
 # DOWNLOAD/FETCH DATA #
@@ -47,10 +69,12 @@ fitRodentCov <- FALSE
 
 if(downloadData) {
   # (Re-)download data from GBIF
-  Rype_arkiv <- downloadLN(datasets = c("Fjellstyrene", "Statskog", "FeFo"), versions = c(1.7, 1.8, 1.12), save = FALSE)
+  Rype_arkiv <- downloadLN(datasets = c("Fjellstyrene", "Statskog", "FeFo"), versions = c(1.9, 1.9, 1.14), save = TRUE)
 } else {
   # Use existing data sets if available
-  # NOTE: Warnings about existing temporary downloads in AppData have been suppressed
+  # NOTE: Importing existing data sets doesn't work properly with the newest
+  #       versions of the data due to JSON parsing issues with 'purrr'.
+  #       Use switch 'downloadData <- TRUE' for now.
   Rype_arkiv <- list()
   data.exists <- 0
   
@@ -78,7 +102,10 @@ if(downloadData) {
 # WRANGLE LINE TRANSECT DATA #
 #----------------------------#
 
-## Set localities/areas/counties and time period of interest
+## Set areas/counties of interest
+# NOTE: listAreas is required to extract the specific ptarmigan sampling areas.
+#       The list is conformed to areas that are present in the required small
+#       rodent table.
 areas <- listAreas()
 
 if(counties2020) {
@@ -87,8 +114,9 @@ if(counties2020) {
   counties <- listCounties()
 }
 
+## Set time period of interest
 minYear <- 2007
-maxYear <- 2021
+maxYear <- 2024
 
 ## List duplicate transects to remove
 duplTransects <- listDuplTransects()
@@ -100,13 +128,22 @@ LT_data_orig <- wrangleData_LineTrans(DwC_archive_list = Rype_arkiv,
                                  duplTransects = duplTransects,
                                  #localities = localities,
                                  areas = areas,
-                                 areaAggregation = TRUE,
+                                 areaAggregation = areaAggregation,
                                  minYear = minYear,
                                  maxYear = maxYear)
 
+## Add last year of data (not available from GBIF due to quarantine period)
+# NOTE: this data is not (and should not be) publicly available, and is a direct
+#       export from the Hønsefuglportalen (HFP) database. Ask the administrator
+#       of HFP for an export of data if there are any missing in the download
+#       from GBIF. The data export is in a different format, but conformed here.
+#       Note that this requires 'data/countData2024.rds' to be present.
+LT_data_add <- addLastCount(LT_data_orig)
+
+
 ## Assign transect lines and observations to counties by geographical coordinates
 # NOTE: Set 'counties = NULL' to avoid filtering on listCounties()/listCounties2020()
-LT_data <- assignCounty(LT_data_orig,
+LT_data <- assignCounty(LT_data_add,
                         counties = counties,
                         counties2020 = counties2020)
 
@@ -114,66 +151,69 @@ LT_data <- assignCounty(LT_data_orig,
 # WRANGLE KNOWN FATE CMR DATA #
 #-----------------------------#
 
-if(survVarT) {
-  ## Read in and reformat CMR data
-  d_cmr <- wrangleData_CMR(minYear = minYear)
-}
+## Read in and reformat CMR data
+# NOTE: Even with 'survVarT' and 'telemetryData' set to FALSE, CMR-data must be
+#       included for the model to work properly. Note that this requires
+#       'data/CMR_Data.csv' to be present.
+d_cmr <- wrangleData_CMR(minYear = minYear)
+d_cmr$county_names <- c("Nord-Trøndelag")
 
 
 # WRANGLE RODENT DATA #
 #---------------------#
 
-if(fitRodentCov) {
-  ## Load and reformat rodent data
-  d_rodent <- wrangleData_Rodent(duplTransects = duplTransects,
-                                 #localities = localities,
-                                 areas = areas,
-                                 areaAggregation = TRUE,
-                                 minYear = minYear, maxYear = maxYear)
-}
+## Load and reformat rodent data
+# NOTE: Even with 'fitRodentCov' set to FALSE, the rodent data must be included
+#       for all the other functions to work properly. Note that this requires
+#       'data/Rodent_data.rds' to be present, and that areas included in the
+#       main data set conforms to the areas present in the rodent data.
+d_rodent <- wrangleData_Rodent(duplTransects = duplTransects,
+                               areas = areas,
+                               areaAggregation = areaAggregation,
+                               minYear = minYear,
+                               maxYear = maxYear)
+
 
 # PREPARE INPUT DATA FOR INTEGRATED MODEL #
 #-----------------------------------------#
 
 ## Reformat data into vector/array list for analysis with Nimble
-# NOTE: set 'd_cmr' and/or 'd_rodent' to NULL if excluding covariates
-#       and time variation in survival
 input_data <- prepareInputData(d_trans = LT_data$d_trans, 
                                d_obs = LT_data$d_obs,
-                               d_cmr = NULL, #d_cmr
-                               d_rodent = NULL, #d_rodent
-                               #localities = localities, 
-                               #areas = areas,
+                               d_cmr = d_cmr,
+                               d_rodent = d_rodent,
                                counties = counties,
-                               areaAggregation = FALSE,
+                               areaAggregation = areaAggregation,
                                countyAggregation = TRUE,
                                excl_neverObs = TRUE,
                                R_perF = R_perF,
                                R_parent_drop0 = R_parent_drop0,
                                sumR.Level = sumR.Level,
                                dataVSconstants = TRUE,
-                               save = TRUE)
+                               save = FALSE)
 
 
 # MODEL SETUP #
 #-------------#
 
-## Determine correct code path
-code.path <- selectCodePath(shareRE = shareRE,
-                            survVarT = survVarT)
+## Write model code
+modelCode <- writeModelCode(survVarT = survVarT,
+                            telemetryData = telemetryData)
+
+## Expand seeds for simulating initial values
+MCMC.seeds <- expandSeed_MCMC(seed = mySeed, 
+                              nchains = nchains)
 
 ## Setup for model using nimbleDistance::dHN
-model_setup <- setupModel(modelCode.path = code.path,
-                          customDist = TRUE,
-                          nim.data = input_data$nim.data,
-                          nim.constants = input_data$nim.constants,
+model_setup <- setupModel(modelCode = modelCode,
                           R_perF = R_perF,
-                          shareRE = shareRE,
                           survVarT = survVarT,
                           fitRodentCov = fitRodentCov,
-                          testRun = TRUE,
-                          nchains = 3,
-                          initVals.seed = 0)
+                          nim.data = input_data$nim.data,
+                          nim.constants = input_data$nim.constants,
+                          testRun = testRun,
+                          nchains = nchains,
+                          initVals.seed = MCMC.seeds)
 
 # MODEL (TEST) RUN #
 #------------------#
@@ -188,16 +228,20 @@ IDSM.out <- nimbleMCMC(code = model_setup$modelCode,
                        nburnin = model_setup$mcmcParams$nburn, 
                        thin = model_setup$mcmcParams$nthin, 
                        samplesAsCodaMCMC = TRUE, 
-                       setSeed = 0)
+                       setSeed = MCMC.seeds)
 Sys.time() - t.start
 
-saveRDS(IDSM.out, file = 'rypeIDSM_dHN_multiArea_sepRE_testRun.rds')
+saveRDS(IDSM.out, file = 'rypeIDSM_dHN_multiArea_sepRE_test_2025-04-02.rds')
 
 
 # TIDY UP POSTERIOR SAMPLES #
 #---------------------------#
-IDSM.out.tidy <- tidySamples(IDSM.out = IDSM.out, save = TRUE)
+IDSM.out.tidy <- tidySamples(IDSM.out = IDSM.out,
+                             save = TRUE,
+                             fileName = "rypeIDSM_dHN_multiArea_sepRE_test_2025-04-02_tidy.rds")
 
+# load from previous run
+#IDSM.out.tidy <- readRDS("rypeIDSM_dHN_multiArea_sepRE_test_2025-04-02_tidy.rds")
 
 # PREPARE OUTPUT DATA FOR NI #
 #----------------------------#
@@ -210,27 +254,33 @@ prepared.output <- prepareOutputNI(
   min_years = input_data$nim.constant$min_years,
   max_years = input_data$nim.constant$max_years,
   minYear = minYear,
-  maxYear = maxYear
+  maxYear = maxYear,
+  fitRodentCov = fitRodentCov,
+  save = FALSE
 )
 
 # Calculate abundance (in 1000 ind.) based on estimated densities and habitat information
-# NOTE: This part depends on "ptarmigan_habitat.rds", which is the output from the
+# NOTE: This part depends on 'data/ptarmigan_habitat.rds', which is the output from the
 #       ptarmigan habitat model by Kvasnes et al. 2018 BMC Ecology (with updated data).
-#       If the rds file is absent, the below function will utilize the provided data table
-#       (data/county_habitat_data.csv) with values from the last run of the model.
+#       If the rds file is absent, the function will utilize the provided data table
+#       ('data/county_habitat_data.csv') with values from the last run of the model.
 output.data <- estimatePtarmiganAbundance(output = prepared.output)
 
 
 # WRANGLE OUTPUT DATA TO FIT NI DATABASE #
 #----------------------------------------#
-#devtools::install_github("NINAnor/NIcalc", build_vignettes = T)
-
 # retrieve the currently stored values for Ptarmigan from the Nature Index (NI) database
 species <- c("Lagopus lagopus")
 indicators <- c("Lirype")
-currentPtarmTable <- downloadData_NIdb(species, indicators, save = T, save_path = "data")
+currentPtarmTable <- downloadData_NIdb(species = species, indicators = indicators, save = T, save_path = "data")
 
-# update the values with the results from the population density model for Ptarmigan
+# create a backup copy of the current indicator value table
+#saveRDS(currentPtarmTable, "data/oldIndicatorValues_2025.rds")
+
+# check county nomenclature consistency
+all(unique(output.data$Area) %in% unique(currentPtarmTable$Lirype$indicatorValues$areaName)) #should be TRUE
+
+# update the values with the results from the population density model for Ptarmigan.
 # time interval to update can be specified using the 'min_year' and 'max_year' arguments
 newPtarmTable <- updateNItable(model.est = output.data,
                                cur.table = currentPtarmTable,
@@ -239,16 +289,21 @@ newPtarmTable <- updateNItable(model.est = output.data,
                                min_year = NULL,
                                max_year = NULL)
 
-# upload the updated table and overwrite existing data -- NB! Not tested yet!
-#uploadData_NIdb(species, data_path = "data")
+
+# UPLOAD NEW DATA NI DATABASE #
+#-----------------------------#
+
+# upload the updated table and overwrite existing data
+uploadData_NIdb(indicatorData = newPtarmTable)
 
 
 # OPTIONAL: MCMC TRACE PLOTS #
 #----------------------------#
-# NOTE: Takes about 30+ minutes to generate PDF's
 
+library(MCMCvis)
 plotMCMCTraces(mcmc.out = IDSM.out.tidy,
-               fitRodentCov = fitRodentCov)
+               fitRodentCov = fitRodentCov,
+               survVarT = survVarT)
 
 
 # OPTIONAL: TIME SERIES PLOTS #
@@ -267,63 +322,3 @@ plotTimeSeries(mcmc.out = IDSM.out.tidy,
                DetectParams = TRUE,
                Densities = TRUE,
                survVarT = survVarT)
-
-
-# OPTIONAL: PLOT VITAL RATE POSTERIORS #
-#--------------------------------------#
-
-# plotPosteriorDens_VR(mcmc.out = IDSM.out.tidy,
-#                      N_areas = input_data$nim.constant$N_areas, 
-#                      area_names = input_data$nim.constant$area_names, 
-#                      N_years = input_data$nim.constant$N_years,
-#                      minYear = minYear,
-#                      survAreaIdx = input_data$nim.constants$SurvAreaIdx,
-#                      survVarT = survVarT,
-#                      fitRodentCov = fitRodentCov) 
-
-
-# OPTIONAL: PLOT COVARIATE PREDICTIONS #
-#--------------------------------------#
-
-# if(fitRodentCov){
-#   plotCovPrediction(mcmc.out = IDSM.out.tidy,
-#                     effectParam = "betaR.R",
-#                     covName = "Rodent occupancy",
-#                     minCov = 0, 
-#                     maxCov = 1,
-#                     N_areas = input_data$nim.constant$N_areas, 
-#                     area_names = input_data$nim.constant$area_names,
-#                     fitRodentCov = fitRodentCov)
-# }
-
-
-# OPTIONAL: MAP PLOTS #
-#---------------------#
-
-## Make map of Norwegian municipalities ("fylke")
-# NorwayMunic.map <- setupMap_NorwayMunic(shp.path = "data/Kommuner_2018_WGS84/Kommuner_2018_WGS84.shp",
-#                                         d_trans = LT_data$d_trans,
-#                                         areas = areas, areaAggregation = TRUE)
-
-## Plot population growth rate, density, and vital rates on map
-# plotMaps(mcmc.out = IDSM.out.tidy, 
-#          mapNM = NorwayMunic.map,
-#          N_areas = input_data$nim.constant$N_areas, 
-#          area_names = input_data$nim.constant$area_names, 
-#          N_sites = input_data$nim.constant$N_sites, 
-#          min_years = input_data$nim.constant$min_years, 
-#          max_years = input_data$nim.constant$max_years, 
-#          minYear = minYear, maxYear = maxYear,
-#          fitRodentCov = fitRodentCov)
-
-
-# OPTIONAL: MODEL COMPARISON (PLOTS) #
-#------------------------------------#
-
-# modelComp <- plotModelComparison(modelPaths = c("rypeIDSM_realData_Lierne.rds", 
-#                                                 "rypeIDSM_dHN_realData_Lierne.rds"), 
-#                                  modelChars = c("Zeroes trick", "dHN"), 
-#                                  N_sites = 58, N_years = 6,
-#                                  plotPath = "Plots/ModelCompTest",
-#                                  returnData = FALSE)
-
